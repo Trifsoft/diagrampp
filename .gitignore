@@ -1,0 +1,60 @@
+# Qt Creator specific files
+*.pro.user
+*.pro.user.*
+
+# Build artifacts (adjust directory names as needed for your setup)
+debug/
+release/
+build/
+*.[oa]
+*.moc
+*.obj
+*.o
+*.a
+*.lib
+*.so
+*.dll
+*.exe
+*.bin
+*.out
+
+# Compiler/OS-specific temporary files
+# Windows
+*.ilk
+*.pdb
+*.exp
+*.lib
+
+# macOS
+*.dSYM
+
+# Linux
+*.gch
+
+# Other temporary or configuration files
+*~
+*.swp
+.#*
+*#
+*.bak
+*.orig
+*.rej
+.qmake.stash
+
+# CMake build files (if using CMake instead of qmake)
+CMakeLists.txt.user
+CMakeFiles/
+CMakeCache.txt
+install/
+CTestTestfile.cmake
+Makefile
+cmake_install.cmake
+
+# User Interface and Resource compile files
+ui_*.h
+qrc_*.cpp
+moc_*.cpp
+
+# Translation files
+# *.ts # Uncomment to ignore translation source files, but usually they are tracked
+*.qm
