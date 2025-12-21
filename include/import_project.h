@@ -8,6 +8,7 @@ class ImportProject: public QWidget
     Q_OBJECT
 public:
     explicit ImportProject(QWidget *parent = nullptr);
+    ~ImportProject() = default;
 };
 
 #endif // IMPORTPROJECT_H

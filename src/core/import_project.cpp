@@ -1,11 +1,11 @@
-#include "newproject.h"
+#include "import_project.h"
 #include <QLabel>
 #include <QVBoxLayout>
 
-NewProject::NewProject(QWidget *parent)
+ImportProject::ImportProject(QWidget *parent)
     : QWidget(parent)
 {
-    setWindowTitle("New Project");
+    setWindowTitle("Import Project");
 
     QVBoxLayout *layout = new QVBoxLayout(this);
     setLayout(layout);

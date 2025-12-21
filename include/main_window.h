@@ -1,7 +1,8 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#ifndef MAIN_WINDOW_H
+#define MAIN_WINDOW_H
 
 #include <QWidget>
+#include <ui_main_window.h>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {

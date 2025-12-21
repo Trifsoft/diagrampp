@@ -1,15 +1,15 @@
 # Qt Creator specific files
 *.pro.user
 *.pro.user.*
+*.qbs.user*
+CMakeLists.txt.user*
 
-# Build artifacts (adjust directory names as needed for your setup)
+# Build directories and artifacts
+build/
 debug/
 release/
-build/
-*.[oa]
-*.moc
-*.obj
 *.o
+*.obj
 *.a
 *.lib
 *.so
@@ -18,43 +18,52 @@ build/
 *.bin
 *.out
 
+# Auto-generated Qt files
+moc_*.cpp
+ui_*.h
+qrc_*.cpp
+
 # Compiler/OS-specific temporary files
 # Windows
 *.ilk
 *.pdb
 *.exp
-*.lib
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
 
 # macOS
+.DS_Store
 *.dSYM
+.AppleDouble
+.LSOverride
 
 # Linux
 *.gch
 
-# Other temporary or configuration files
+# Editor temporary files
 *~
 *.swp
 .#*
-*#
 *.bak
 *.orig
 *.rej
-.qmake.stash
+*.autosave
 
-# CMake build files (if using CMake instead of qmake)
-CMakeLists.txt.user
+# CMake build files
 CMakeFiles/
 CMakeCache.txt
-install/
+cmake_install.cmake
 CTestTestfile.cmake
 Makefile
-cmake_install.cmake
+install/
 
-# User Interface and Resource compile files
-ui_*.h
-qrc_*.cpp
-moc_*.cpp
+# Other temporary or intermediate files
+*_pch.h.cpp
+*_resource.rc
+*.res
+/.qmake.cache
+/.qmake.stash
 
-# Translation files
-# *.ts # Uncomment to ignore translation source files, but usually they are tracked
-*.qm
+# Python byte code
+*.pyc

@@ -14,7 +14,7 @@ public:
     };
 
     CppClassItem(const QString& name, ItemType type, QGraphicsItem* parent = nullptr);
-    ~CppClassItem();
+    ~CppClassItem() = default;
 
     QRectF boundingRect() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;

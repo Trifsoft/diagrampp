@@ -8,6 +8,7 @@ class NewProject: public QWidget
     Q_OBJECT
 public:
     explicit NewProject(QWidget *parent = nullptr);
+    ~NewProject() = default;
 };
 
 #endif // NEWPROJECT_H

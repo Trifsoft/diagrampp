@@ -1,7 +1,7 @@
 #include "project.h"
-#include "ui_project.h"
-
+#include "cpp_class_item.h"
 #include <QGraphicsView>
+#include "src/ui/ui_project.h"
 
 Project::Project(QWidget *parent)
     : QWidget(parent)
