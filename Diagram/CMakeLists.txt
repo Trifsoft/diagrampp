@@ -23,6 +23,11 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(Diagram
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
+        newproject.h newproject.cpp
+        importproject.h importproject.cpp
+        history.h history.cpp
+        help.h help.cpp
+
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET Diagram APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR

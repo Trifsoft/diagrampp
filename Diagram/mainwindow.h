@@ -17,6 +17,12 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+private slots:
+    void onNewProjectClicked();
+    void onImportProjectClicked();
+    void onHistoryClicked();
+    void onHelpClicked();
+
 private:
     Ui::MainWindow *ui;
 };
