@@ -27,6 +27,9 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         importproject.h importproject.cpp
         history.h history.cpp
         help.h help.cpp
+        project.h project.cpp project.ui
+        cppclassitem.h cppclassitem.cpp
+
 
     )
 # Define target properties for Android with Qt 6 as:

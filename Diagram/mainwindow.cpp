@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
 #include "newproject.h"
+#include "project.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QWidget(parent)
@@ -24,6 +25,9 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(ui->pbHelp, &QPushButton::clicked,
             this, &MainWindow::onHelpClicked);
+
+    connect(ui->pbExample, &QPushButton::clicked,
+            this, &MainWindow::onExampleClicked);
 }
 
 MainWindow::~MainWindow()
@@ -60,4 +64,10 @@ void MainWindow::onHelpClicked()
     w->setWindowTitle("Help");
     w->resize(400, 200);
     w->show();
+}
+
+void MainWindow::onExampleClicked()
+{
+    Project* project = new Project();
+    project->show();
 }
