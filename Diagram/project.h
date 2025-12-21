@@ -3,7 +3,7 @@
 
 #include <QWidget>
 #include <QGraphicsScene>
-#include "CppClassItem.h"
+#include "cppclassitem.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
