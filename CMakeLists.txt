@@ -30,6 +30,7 @@ set(CORE_HEADERS
 )
 
 set(CORE_SOURCES
+    src/core/main.cpp
     src/core/cpp_class_item.cpp
     src/core/help.cpp
     src/core/history.cpp
@@ -46,7 +47,6 @@ set(UI_SOURCES
 
 # Glavni projekat izvori
 set(PROJECT_SOURCES
-    main.cpp
     ${CORE_HEADERS}
     ${CORE_SOURCES}
     ${UI_SOURCES}
