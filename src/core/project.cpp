@@ -1,6 +1,10 @@
 #include "project.h"
 #include "cpp_class_item.h"
 #include <QGraphicsView>
+#include <filesystem>
+#include <vector>
+#include <iostream>
+#include <fstream>
 #include "src/ui/ui_project.h"
 
 Project::Project(QWidget *parent)
@@ -46,6 +50,41 @@ void Project::onAddEnumClicked()
 void Project::onGenerateProjectClicked()
 {
 
+}
+
+
+void Project::generateProjectFS(std::string& file_path, std::string& project_name)
+{
+    namespace fs = std::filesystem;
+
+    const std::string dirs[] = {"include", "src/core", "src/ui"};
+    projectPath = file_path + project_name + "/";
+    try{
+        fs::create_directory(projectPath);
+        for(int i = 0; i < std::size(dirs); i++){
+            dirPaths[i] = projectPath + dirs[i];
+            fs::create_directory(dirPaths[i]);
+        }
+    }catch(const fs::filesystem_error &e){
+        std::cerr << e.what() << '\n';
+    }
+
+}
+
+
+void Project::generateProjectFiles()
+{
+    std::ofstream CMakeLists(projectPath + "CMakeLists.txt");
+    //writeCMake(CMakeLists);
+    CMakeLists.close();
+
+    // Treba da se dobije vektor objekata sa metodom getName() da bi mogli da napravimo fajlove.
+}
+
+
+void writeCMake(std::ofstream& CMakeLists)
+{
+    // Isti vektor je potreban kao gore
 }
 
 

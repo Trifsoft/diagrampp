@@ -19,6 +19,9 @@ class Project : public QWidget
 public:
     Project(QWidget *parent = nullptr);
     ~Project();
+    void generateProjectFS(std::string& file_path, std::string& project_name);
+    void generateProjectFiles();
+
 
 private slots:
     void onAddClassClicked();
@@ -27,6 +30,8 @@ private slots:
     void onGenerateProjectClicked();
 
 private:
+    std::string dirPaths[3];
+    std::string projectPath;
     Ui::Project *ui;
 };
 #endif // PROJECT_H
