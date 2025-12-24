@@ -24,6 +24,7 @@ private slots:
     void onAddClassClicked();
     void onAddInterfaceClicked();
     void onAddEnumClicked();
+    void onGenerateProjectClicked();
 
 private:
     Ui::Project *ui;

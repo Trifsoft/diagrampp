@@ -16,6 +16,7 @@ Project::Project(QWidget *parent)
     connect(ui->add_class, &QPushButton::clicked, this, &Project::onAddClassClicked);
     connect(ui->add_interface, &QPushButton::clicked, this, &Project::onAddInterfaceClicked);
     connect(ui->add_enum, &QPushButton::clicked, this, &Project::onAddEnumClicked);
+    connect(ui->generate_project, &QPushButton::clicked, this, &Project::onGenerateProjectClicked);
 }
 
 Project::~Project()
@@ -41,3 +42,17 @@ void Project::onAddEnumClicked()
     CppClassItem* item = new CppClassItem("Enum", CppClassItem::EnumType);
     scene->addItem(item);
 }
+
+void Project::onGenerateProjectClicked()
+{
+
+}
+
+
+// imeProjekta
+/*
+ * src
+ *     getnaem .cpp
+ * include
+ *      .hpp
+ */
