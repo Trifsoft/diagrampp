@@ -413,6 +413,13 @@
           </property>
          </spacer>
         </item>
+        <item>
+         <widget class="QPushButton" name="generate_project">
+          <property name="text">
+           <string>Generate</string>
+          </property>
+         </widget>
+        </item>
        </layout>
       </widget>
      </item>

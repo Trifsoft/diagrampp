@@ -26,8 +26,12 @@ Project::Project(QWidget *parent)
     connect(ui->add_class, &QPushButton::clicked, this, &Project::onAddClassClicked);
     connect(ui->add_interface, &QPushButton::clicked, this, &Project::onAddInterfaceClicked);
     connect(ui->add_enum, &QPushButton::clicked, this, &Project::onAddEnumClicked);
+<<<<<<< HEAD
 
     setup_actions();
+=======
+    connect(ui->generate_project, &QPushButton::clicked, this, &Project::onGenerateProjectClicked);
+>>>>>>> 126b8c5 (Add GenerateButton)
 }
 
 Project::~Project()
@@ -112,3 +116,17 @@ void Project::onAddEnumClicked()
         )
     );
 }
+
+void Project::onGenerateProjectClicked()
+{
+
+}
+
+
+// imeProjekta
+/*
+ * src
+ *     getnaem .cpp
+ * include
+ *      .hpp
+ */
