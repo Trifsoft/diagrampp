@@ -56,6 +56,10 @@ set(CMAKE_AUTOUIC_SEARCH_PATHS
     ${CMAKE_CURRENT_SOURCE_DIR}/src/ui
 )
 
+
+source_group("include" FILES ${CORE_HEADERS})
+source_group("src/core" FILES ${CORE_SOURCES})
+source_group("src/ui" FILES ${UI_SOURCES})
 # Qt executable
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(DiagramPP
