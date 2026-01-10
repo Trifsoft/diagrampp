@@ -27,6 +27,27 @@ set(CORE_HEADERS
     include/main_window.h
     include/new_project.h
     include/project.h
+    include/model/base/visibility.h
+    include/model/base/reference.h
+    include/model/base/class_element.h
+    include/model/base/description.h
+    include/model/elements/type/type.h
+    include/model/elements/type/regular_type.h
+    include/model/elements/type/generic_type.h
+    include/model/elements/type/namespace_type.h
+    include/model/elements/type/pointer_type.h
+    include/model/elements/field.h
+    include/model/elements/method.h
+    include/model/elements/destructor.h
+    include/model/elements/cpp_enum_value.h
+    include/model/elements/composition/cpp_enum.h
+    include/model/elements/composition/cpp_class.h
+    include/model/elements/composition/cpp_struct.h
+    include/model/elements/composition/composition.h
+    include/model/elements/constructor/constructor.h
+    include/model/elements/constructor/default_constructor.h
+    include/model/elements/constructor/copy_constructor.h
+    include/model/base/uml_class_diagram_node.h
 )
 
 set(CORE_SOURCES
@@ -38,6 +59,26 @@ set(CORE_SOURCES
     src/core/main_window.cpp
     src/core/new_project.cpp
     src/core/project.cpp
+    src/model/base/visibility.cpp
+    src/model/base/reference.cpp
+    src/model/base/class_element.cpp
+    src/model/base/description.cpp
+    src/model/elements/type/regular_type.cpp
+    src/model/elements/type/generic_type.cpp
+    src/model/elements/type/namespace_type.cpp
+    src/model/elements/type/pointer_type.cpp
+    src/model/elements/field.cpp
+    src/model/elements/method.cpp
+    src/model/elements/destructor.cpp
+    src/model/elements/cpp_enum_value.cpp
+    src/model/elements/composition/cpp_enum.cpp
+    src/model/elements/composition/cpp_class.cpp
+    src/model/elements/composition/cpp_struct.cpp
+    src/model/elements/composition/composition.cpp
+    src/model/elements/constructor/constructor.cpp
+    src/model/elements/constructor/default_constructor.cpp
+    src/model/elements/constructor/copy_constructor.cpp
+    src/model/base/uml_class_diagram_node.cpp
 )
 
 set(UI_SOURCES
