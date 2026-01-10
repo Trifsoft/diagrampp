@@ -27,6 +27,7 @@ set(CORE_HEADERS
     include/main_window.h
     include/new_project.h
     include/project.h
+    include/graph/diagram_graph.h
 )
 
 set(CORE_SOURCES
@@ -38,6 +39,7 @@ set(CORE_SOURCES
     src/core/main_window.cpp
     src/core/new_project.cpp
     src/core/project.cpp
+    src/graph/diagram_graph.cpp
 )
 
 set(UI_SOURCES
@@ -65,6 +67,11 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(DiagramPP
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
+        include/graph/diagram_graph.h
+        src/graph/diagram_graph.cpp
+        src/graph/code_generator.cpp
+        include/graph/code_generator.h
+
     )
 else()
     add_executable(DiagramPP ${PROJECT_SOURCES})
