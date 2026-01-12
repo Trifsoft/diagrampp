@@ -17,10 +17,8 @@ while true; do
 
     # Prompt for package name
     read -p "Enter package name: " PACKAGE
-    if [ -z "$PACKAGE" ]; then
-        echo -e "${RED}Error: Package name cannot be empty${NC}"
-        read -p "Press Enter to try again..."
-        continue
+    if [ -n "$PACKAGE" ] && [[ "$PACKAGE" != */ ]]; then
+        PACKAGE="$PACKAGE/"
     fi
 
     # Prompt for class name
@@ -46,9 +44,9 @@ while true; do
 
     # Define paths
     HEADER_DIR="$SCRIPT_DIR/include/$PACKAGE"
-    SOURCE_DIR="$SCRIPT_DIR/src/$PACKAGE"
-    HEADER_FILE="$HEADER_DIR/${FILE_NAME}.h"
-    SOURCE_FILE="$SOURCE_DIR/${FILE_NAME}.cpp"
+    SOURCE_DIR="$SCRIPT_DIR/src/core/$PACKAGE"
+    HEADER_FILE="$HEADER_DIR${FILE_NAME}.h"
+    SOURCE_FILE="$SOURCE_DIR${FILE_NAME}.cpp"
     CMAKE_FILE="$SCRIPT_DIR/CMakeLists.txt"
 
     # Create directories if they don't exist
@@ -88,14 +86,14 @@ EOF
     # Create source file if requested
     if [[ "$CREATE_CPP" == "Y" ]]; then
         cat > "$SOURCE_FILE" << EOF
-#include "${PACKAGE}/${FILE_NAME}.h"
+#include "${PACKAGE}${FILE_NAME}.h"
 EOF
         echo -e "${GREEN}Created source file: $SOURCE_FILE${NC}"
     fi
 
     # Update CMakeLists.txt
-    HEADER_RELATIVE="include/$PACKAGE/${FILE_NAME}.h"
-    SOURCE_RELATIVE="src/$PACKAGE/${FILE_NAME}.cpp"
+    HEADER_RELATIVE="include/$PACKAGE${FILE_NAME}.h"
+    SOURCE_RELATIVE="src/core/$PACKAGE${FILE_NAME}.cpp"
 
     # Create a temporary file for CMakeLists.txt
     TMP_FILE="${CMAKE_FILE}.tmp"

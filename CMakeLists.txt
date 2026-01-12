@@ -60,27 +60,27 @@ set(CORE_SOURCES
     src/core/main_window.cpp
     src/core/new_project.cpp
     src/core/project.cpp
-    src/graph/diagram_graph.cpp
-    src/model/base/visibility.cpp
-    src/model/base/reference.cpp
-    src/model/base/class_element.cpp
-    src/model/base/description.cpp
-    src/model/elements/type/regular_type.cpp
-    src/model/elements/type/generic_type.cpp
-    src/model/elements/type/namespace_type.cpp
-    src/model/elements/type/pointer_type.cpp
-    src/model/elements/field.cpp
-    src/model/elements/method.cpp
-    src/model/elements/destructor.cpp
-    src/model/elements/cpp_enum_value.cpp
-    src/model/elements/composition/cpp_enum.cpp
-    src/model/elements/composition/cpp_class.cpp
-    src/model/elements/composition/cpp_struct.cpp
-    src/model/elements/composition/composition.cpp
-    src/model/elements/constructor/constructor.cpp
-    src/model/elements/constructor/default_constructor.cpp
-    src/model/elements/constructor/copy_constructor.cpp
-    src/model/base/uml_class_diagram_node.cpp
+    src/core/graph/diagram_graph.cpp
+    src/core/model/base/visibility.cpp
+    src/core/model/base/reference.cpp
+    src/core/model/base/class_element.cpp
+    src/core/model/base/description.cpp
+    src/core/model/elements/type/regular_type.cpp
+    src/core/model/elements/type/generic_type.cpp
+    src/core/model/elements/type/namespace_type.cpp
+    src/core/model/elements/type/pointer_type.cpp
+    src/core/model/elements/field.cpp
+    src/core/model/elements/method.cpp
+    src/core/model/elements/destructor.cpp
+    src/core/model/elements/cpp_enum_value.cpp
+    src/core/model/elements/composition/cpp_enum.cpp
+    src/core/model/elements/composition/cpp_class.cpp
+    src/core/model/elements/composition/cpp_struct.cpp
+    src/core/model/elements/composition/composition.cpp
+    src/core/model/elements/constructor/constructor.cpp
+    src/core/model/elements/constructor/default_constructor.cpp
+    src/core/model/elements/constructor/copy_constructor.cpp
+    src/core/model/base/uml_class_diagram_node.cpp
 )
 
 set(UI_SOURCES
