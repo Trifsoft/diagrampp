@@ -18,20 +18,20 @@ class Method : public IClassElement {
 private:
     Description description;
     MethodType method_type;
-    QVector<Description> variables;
+    QList<Description> variables;
     QString definition_block;
 
     QString get_base_method_declaration() const;
 
 public:
-    Method(const Description& description, Visibility visibility, MethodType method_type, const QVector<Description>& variables);
+    Method(const Description& description, Visibility visibility, MethodType method_type, const QList<Description>& variables);
 
     QString get_declaration() const override;
     std::optional<QString> definition(const QString& class_name) const override;
 
     Description get_description() const;
     MethodType get_method_type() const;
-    QVector<Description> get_variables() const;
+    QList<Description> get_variables() const;
     QString get_definition_block() const;
     void set_definition_block(const QString& definition_block);
 };

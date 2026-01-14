@@ -12,7 +12,7 @@ protected:
     QString get_label() const override;
 
 public:
-    CPPStruct(const QString& name, Visibility visibility, std::optional<std::pair<Visibility, Composition*>> inheritance = std::nullopt);
+    CPPStruct(const QString& name, Visibility visibility = Visibility::Public, std::optional<std::pair<Visibility, Composition*>> inheritance = std::nullopt);
 };
 
 #endif // CPP_STRUCT_H

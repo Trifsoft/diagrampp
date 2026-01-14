@@ -18,9 +18,6 @@ protected:
     QString name;
     Visibility visibility;
     std::optional<std::pair<Visibility, Composition*>> inheritance;
-
-    QVector<Field> fields;
-    QVector<Method> methods;
     QVector<std::shared_ptr<Constructor>> constructors;
 
     virtual Visibility get_default_visibility() const = 0;
@@ -31,6 +28,9 @@ protected:
     QVector<const IClassElement*> get_new_code_elements() const;
 
 public:
+    QVector<Field> fields;
+    QVector<Method> methods;
+
     Composition(const QString& name, Visibility visibility, std::optional<std::pair<Visibility, Composition*>> inheritance = std::nullopt);
     virtual ~Composition() = default;
 
@@ -46,6 +46,9 @@ public:
     void add_copy_constructor(Visibility visibility);
 
     QString get_name() const;
+
+    int get_field_count();
+    int get_method_count();
 };
 
 #endif // COMPOSITION_H

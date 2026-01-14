@@ -1,7 +1,9 @@
 #include "project.h"
-#include "cpp_class_item.h"
+#include "view/cpp_class.h"
+#include "model/elements/composition/cpp_struct.h"
 #include <QGraphicsView>
 #include "src/ui/ui_project.h"
+#include "model/elements/type/regular_type.h"
 
 Project::Project(QWidget *parent)
     : QWidget(parent)
@@ -26,18 +28,46 @@ Project::~Project()
 
 void Project::onAddClassClicked()
 {
-    CppClassItem* item = new CppClassItem("Class", CppClassItem::ClassType);
+    CppClass* item = new CppClass(
+        std::make_shared<CPPStruct>(
+            CPPStruct("Class")
+        )
+    );
+    item->change_composition([](std::shared_ptr<Composition> c) {
+        c->add_field("test1", std::make_shared<RegularType>(RegularType("int")));
+        c->add_field("test2", std::make_shared<RegularType>(RegularType("bool")));
+        c->add_field("test3", std::make_shared<RegularType>(RegularType("float")));
+        c->add_field("test4", std::make_shared<RegularType>(RegularType("double")));
+
+        c->add_method("foo", std::make_shared<RegularType>("void"), Visibility::Private, MethodType::Regular, { Description("bar", std::make_shared<RegularType>("int")) });
+    });
     scene->addItem(item);
 }
 
 void Project::onAddInterfaceClicked()
 {
-    CppClassItem* item = new CppClassItem("Interface", CppClassItem::InterfaceType);
+    CppClass* item = new CppClass(
+        std::make_shared<CPPStruct>(
+            CPPStruct("Interface")
+        )
+    );
+    item->change_composition([](std::shared_ptr<Composition> c) {
+        c->add_field("test1", std::make_shared<RegularType>(RegularType("int")));
+        c->add_field("test2", std::make_shared<RegularType>(RegularType("bool")));
+        c->add_field("test3", std::make_shared<RegularType>(RegularType("float")));
+        c->add_field("test4", std::make_shared<RegularType>(RegularType("double")));
+
+        c->add_method("foo", std::make_shared<RegularType>("void"), Visibility::Private, MethodType::Regular, { Description("bar", std::make_shared<RegularType>("int")) });
+    });
     scene->addItem(item);
 }
 
 void Project::onAddEnumClicked()
 {
-    CppClassItem* item = new CppClassItem("Enum", CppClassItem::EnumType);
-    scene->addItem(item);
+
+    CppClass* item = new CppClass(
+        std::make_shared<CPPStruct>(
+            CPPStruct("Enum")
+        )
+    );
 }

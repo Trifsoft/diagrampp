@@ -50,6 +50,7 @@ set(CORE_HEADERS
     include/model/elements/constructor/default_constructor.h
     include/model/elements/constructor/copy_constructor.h
     include/model/base/uml_class_diagram_node.h
+    include/view/cpp_class.h
 )
 
 set(CORE_SOURCES
@@ -83,6 +84,7 @@ set(CORE_SOURCES
     src/core/model/elements/constructor/default_constructor.cpp
     src/core/model/elements/constructor/copy_constructor.cpp
     src/core/model/base/uml_class_diagram_node.cpp
+    src/core/view/cpp_class.cpp
 )
 
 set(UI_SOURCES

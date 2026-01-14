@@ -1,6 +1,6 @@
 #include "model/elements/method.h"
 
-Method::Method(const Description& description, Visibility visibility, MethodType method_type, const QVector<Description>& variables)
+Method::Method(const Description& description, Visibility visibility, MethodType method_type, const QList<Description>& variables)
     : IClassElement(ElementRank::Method, description.get_name(), visibility),
       description(description),
       method_type(method_type),
@@ -52,7 +52,7 @@ MethodType Method::get_method_type() const {
     return method_type;
 }
 
-QVector<Description> Method::get_variables() const {
+QList<Description> Method::get_variables() const {
     return variables;
 }
 
