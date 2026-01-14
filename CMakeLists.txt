@@ -28,6 +28,7 @@ set(CORE_HEADERS
     include/new_project.h
     include/project.h
     include/graph/diagram_graph.h
+    include/graph/code_generator.h
     include/model/base/visibility.h
     include/model/base/reference.h
     include/model/base/class_element.h
@@ -61,6 +62,7 @@ set(CORE_SOURCES
     src/core/new_project.cpp
     src/core/project.cpp
     src/core/graph/diagram_graph.cpp
+    src/core/graph/code_generator.cpp
     src/core/model/base/visibility.cpp
     src/core/model/base/reference.cpp
     src/core/model/base/class_element.cpp
