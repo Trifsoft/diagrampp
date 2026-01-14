@@ -1,24 +1,26 @@
-#ifndef PROJECT_H
-#define PROJECT_H
+#ifndef BOARD_H
+#define BOARD_H
+
+#include "graph/diagram_graph.h"
 
 #include <QWidget>
 #include <QGraphicsScene>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
-class Project;
+class Board;
 }
 QT_END_NAMESPACE
 
-class Project : public QWidget
+class Board : public QWidget
 {
     QGraphicsScene* scene;
 
     Q_OBJECT
 
 public:
-    Project(QWidget *parent = nullptr);
-    ~Project();
+    Board(QWidget *parent = nullptr);
+    ~Board();
 
 private slots:
     void onAddClassClicked();
@@ -26,6 +28,7 @@ private slots:
     void onAddEnumClicked();
 
 private:
-    Ui::Project *ui;
+    DiagramGraph* diagram;
+    Ui::Board *ui;
 };
-#endif // PROJECT_H
+#endif // BOARD_H

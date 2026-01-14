@@ -8,9 +8,14 @@ class IUMLClassDiagramNode;
 class Composition;
 
 class DiagramGraph {
+
 public:
+    DiagramGraph();
+    ~DiagramGraph();
+
     QList<IUMLClassDiagramNode*> nodes;
     QMap<Composition*, QList<Composition*>> links;
+
     void addNode(IUMLClassDiagramNode* node);
     void addLink(Composition* from, Composition* to);
 };

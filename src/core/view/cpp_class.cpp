@@ -10,6 +10,8 @@ CppClass::CppClass(std::shared_ptr<Composition> composition, QGraphicsItem* pare
 {
     setFlag(QGraphicsItem::ItemIsSelectable, true);
     setFlag(QGraphicsItem::ItemIsMovable, true);
+    setFlag(QGraphicsItem::ItemIsFocusable, true);
+    setAcceptedMouseButtons(Qt::LeftButton | Qt::RightButton);
     updateBoundingRect();
 }
 
@@ -117,4 +119,15 @@ void CppClass::add_text(const QString text, int y_offset, bool is_selectable) {
     item->setTextWidth(m_width);
     item->document()->setDefaultTextOption(QTextOption(Qt::AlignCenter));
     m_textItems.append(item);
+}
+
+void CppClass::mousePressEvent(QGraphicsSceneMouseEvent* event)
+{
+    if (event->button() == Qt::LeftButton) {
+
+    } else if (event->button() == Qt::RightButton) {
+        qDebug() << "Edit button (needs to be implemented)";
+    }
+
+    QGraphicsItem::mousePressEvent(event); // keep default behavior
 }

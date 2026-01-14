@@ -26,7 +26,7 @@ set(CORE_HEADERS
     include/import_project.h
     include/main_window.h
     include/new_project.h
-    include/project.h
+    include/Board.h
     include/graph/diagram_graph.h
     include/graph/code_generator.h
     include/model/base/visibility.h
@@ -61,7 +61,7 @@ set(CORE_SOURCES
     src/core/import_project.cpp
     src/core/main_window.cpp
     src/core/new_project.cpp
-    src/core/project.cpp
+    src/core/Board.cpp
     src/core/graph/diagram_graph.cpp
     src/core/graph/code_generator.cpp
     src/core/model/base/visibility.cpp
@@ -89,7 +89,7 @@ set(CORE_SOURCES
 
 set(UI_SOURCES
     src/ui/main_window.ui
-    src/ui/project.ui
+    src/ui/Board.ui
 )
 
 # Glavni projekat izvori
