@@ -1,10 +1,10 @@
-#include "view/cpp_class.h"
+#include "view/cpp_class_view.h"
 #include <QPainter>
 #include <QFontMetrics>
 #include <QTextOption>
 #include <QTextDocument>
 
-CppClass::CppClass(std::shared_ptr<Composition> composition, QGraphicsItem* parent)
+CppClassView::CppClassView(std::shared_ptr<Composition> composition, QGraphicsItem* parent)
     : QGraphicsItem(parent)
     , m_composition(composition)
 {
@@ -13,12 +13,12 @@ CppClass::CppClass(std::shared_ptr<Composition> composition, QGraphicsItem* pare
     updateBoundingRect();
 }
 
-QRectF CppClass::boundingRect() const
+QRectF CppClassView::boundingRect() const
 {
     return QRect(0,0,m_width,m_height);
 }
 
-void CppClass::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
+void CppClassView::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
 {
     Q_UNUSED(option);
     Q_UNUSED(widget);
@@ -39,14 +39,14 @@ void CppClass::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, 
     }
 }
 
-void CppClass::change_composition(std::function<void(std::shared_ptr<Composition>)> change)
+void CppClassView::change_composition(std::function<void(std::shared_ptr<Composition>)> change)
 {
     change(m_composition);
     updateBoundingRect();
     update();
 }
 
-void CppClass::updateBoundingRect()
+void CppClassView::updateBoundingRect()
 {
     QFont font;
     QFontMetrics metrics(font);
@@ -73,7 +73,7 @@ void CppClass::updateBoundingRect()
     updateTextItems();
 }
 
-void CppClass::updateTextItems()
+void CppClassView::updateTextItems()
 {
     // Clear old items
     qDeleteAll(m_textItems);
@@ -107,7 +107,7 @@ void CppClass::updateTextItems()
     }
 }
 
-void CppClass::add_text(const QString text, int y_offset, bool is_selectable) {
+void CppClassView::add_text(const QString text, int y_offset, bool is_selectable) {
     auto* item = new QGraphicsTextItem(text, this);
     item->setPos(0, y_offset);
     item->setDefaultTextColor(Qt::white);

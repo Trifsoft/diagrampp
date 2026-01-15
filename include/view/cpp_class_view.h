@@ -1,5 +1,5 @@
-#ifndef CPP_CLASS_H
-#define CPP_CLASS_H
+#ifndef CPP_CLASS_VIEW_H
+#define CPP_CLASS_VIEW_H
 
 #include <functional>
 #include <QGraphicsItem>
@@ -7,10 +7,10 @@
 #include <QVector>
 #include <model/elements/composition/composition.h>
 
-class CppClass: public QGraphicsItem {
+class CppClassView: public QGraphicsItem {
 public:
-    CppClass(std::shared_ptr<Composition> composition, QGraphicsItem* parent = nullptr);
-    ~CppClass() = default;
+    CppClassView(std::shared_ptr<Composition> composition, QGraphicsItem* parent = nullptr);
+    ~CppClassView() = default;
 
     QRectF boundingRect() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
@@ -31,4 +31,4 @@ private:
     void add_text(QString text, int y_offset, bool is_selectable = false);
 };
 
-#endif // CPP_CLASS_H
+#endif // CPP_CLASS_VIEW_H

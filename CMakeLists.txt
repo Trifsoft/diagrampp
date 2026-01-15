@@ -50,7 +50,8 @@ set(CORE_HEADERS
     include/model/elements/constructor/default_constructor.h
     include/model/elements/constructor/copy_constructor.h
     include/model/base/uml_class_diagram_node.h
-    include/view/cpp_class.h
+    include/view/cpp_class_view.h
+    include/nodefactory.h
 )
 
 set(CORE_SOURCES
@@ -84,12 +85,14 @@ set(CORE_SOURCES
     src/core/model/elements/constructor/default_constructor.cpp
     src/core/model/elements/constructor/copy_constructor.cpp
     src/core/model/base/uml_class_diagram_node.cpp
-    src/core/view/cpp_class.cpp
+    src/core/view/cpp_class_view.cpp
+    src/core/nodefactory.cpp
 )
 
 set(UI_SOURCES
     src/ui/main_window.ui
     src/ui/project.ui
+    src/ui/nodefactory.ui
 )
 
 # Glavni projekat izvori
@@ -108,7 +111,6 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(DiagramPP
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
-
     )
 else()
     add_executable(DiagramPP ${PROJECT_SOURCES})

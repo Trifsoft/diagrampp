@@ -1,9 +1,11 @@
 #include "project.h"
-#include "view/cpp_class.h"
+#include "view/cpp_class_view.h"
 #include "model/elements/composition/cpp_struct.h"
+#include "model/elements/composition/cpp_class.h"
+#include "model/elements/composition/cpp_enum.h"
 #include <QGraphicsView>
 #include "src/ui/ui_project.h"
-#include "model/elements/type/regular_type.h"
+#include "nodefactory.h"
 
 Project::Project(QWidget *parent)
     : QWidget(parent)
@@ -28,46 +30,34 @@ Project::~Project()
 
 void Project::onAddClassClicked()
 {
-    CppClass* item = new CppClass(
-        std::make_shared<CPPStruct>(
-            CPPStruct("Class")
-        )
-    );
-    item->change_composition([](std::shared_ptr<Composition> c) {
-        c->add_field("test1", std::make_shared<RegularType>(RegularType("int")));
-        c->add_field("test2", std::make_shared<RegularType>(RegularType("bool")));
-        c->add_field("test3", std::make_shared<RegularType>(RegularType("float")));
-        c->add_field("test4", std::make_shared<RegularType>(RegularType("double")));
-
-        c->add_method("foo", std::make_shared<RegularType>("void"), Visibility::Private, MethodType::Regular, { Description("bar", std::make_shared<RegularType>("int")) });
+    NodeFactory* node_factory = new NodeFactory(NodeType::Class, [this](const QString class_name) {
+        CppClassView* item = new CppClassView(
+            std::make_shared<CPPClass>(class_name)
+        );
+        scene->addItem(item);
     });
-    scene->addItem(item);
+    node_factory->show();
 }
 
 void Project::onAddInterfaceClicked()
 {
-    CppClass* item = new CppClass(
-        std::make_shared<CPPStruct>(
-            CPPStruct("Interface")
-        )
-    );
-    item->change_composition([](std::shared_ptr<Composition> c) {
-        c->add_field("test1", std::make_shared<RegularType>(RegularType("int")));
-        c->add_field("test2", std::make_shared<RegularType>(RegularType("bool")));
-        c->add_field("test3", std::make_shared<RegularType>(RegularType("float")));
-        c->add_field("test4", std::make_shared<RegularType>(RegularType("double")));
-
-        c->add_method("foo", std::make_shared<RegularType>("void"), Visibility::Private, MethodType::Regular, { Description("bar", std::make_shared<RegularType>("int")) });
+    NodeFactory* node_factory = new NodeFactory(NodeType::Struct, [this](const QString class_name) {
+        CppClassView* item = new CppClassView(
+            std::make_shared<CPPStruct>(class_name)
+        );
+        scene->addItem(item);
     });
-    scene->addItem(item);
+    node_factory->show();
 }
 
 void Project::onAddEnumClicked()
 {
-
-    CppClass* item = new CppClass(
-        std::make_shared<CPPStruct>(
-            CPPStruct("Enum")
-        )
-    );
+    NodeFactory* node_factory = new NodeFactory(NodeType::Enum, [this](const QString class_name) {
+        //TODO zameniti CppClassView ovde sa novim nekim tipom "CppEnumView"
+        CppClassView* item = new CppClassView(
+            std::make_shared<CPPStruct>(class_name)
+        );
+        scene->addItem(item);
+    });
+    node_factory->show();
 }
