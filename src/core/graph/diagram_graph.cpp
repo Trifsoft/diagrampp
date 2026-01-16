@@ -1,5 +1,6 @@
 #include "graph/diagram_graph.h"
 
+
 DiagramGraph::DiagramGraph(){
 }
 

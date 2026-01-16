@@ -31,3 +31,8 @@ QString CPPEnum::get_name() const {
 QVector<CPPEnumValue> CPPEnum::get_values() const {
     return values;
 }
+
+QString CPPEnum::get_label() const {
+    return "enum";
+}
+

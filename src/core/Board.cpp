@@ -1,6 +1,8 @@
 #include "Board.h"
 #include "view/cpp_class.h"
 #include "model/elements/composition/cpp_struct.h"
+#include "model/elements/composition/cpp_class.h"
+#include "model/elements/composition/cpp_enum.h"
 #include <QGraphicsView>
 #include "src/ui/ui_Board.h"
 #include "model/elements/type/regular_type.h"
@@ -31,9 +33,10 @@ Board::~Board()
 void Board::onAddClassClicked()
 {
     CppClass* item = new CppClass(
-        std::make_shared<CPPStruct>(
-            CPPStruct("Class")
-            )
+        std::make_shared<CPPClass>(
+            CPPClass("Class")
+            ),
+        diagram
         );
     item->change_composition([](std::shared_ptr<Composition> c) {
         c->add_field("test1", std::make_shared<RegularType>(RegularType("int")));
@@ -52,7 +55,8 @@ void Board::onAddInterfaceClicked()
     CppClass* item = new CppClass(
         std::make_shared<CPPStruct>(
             CPPStruct("Interface")
-        )
+        ),
+        diagram
     );
     item->change_composition([](std::shared_ptr<Composition> c) {
         c->add_field("test1", std::make_shared<RegularType>(RegularType("int")));
@@ -72,7 +76,8 @@ void Board::onAddEnumClicked()
     CppClass* item = new CppClass(
         std::make_shared<CPPStruct>(
             CPPStruct("Enum")
-        )
+        ),
+        diagram
     );
     diagram->addNode(item->getComposition().get());
 }

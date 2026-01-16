@@ -1,18 +1,24 @@
 #include "view/cpp_class.h"
+#include "model/elements/composition/composition.h"
+#include "model/elements/composition/cpp_class.h"
+#include "model/elements/composition/cpp_enum.h"
+#include "model/elements/composition/cpp_struct.h"
 #include <QPainter>
 #include <QFontMetrics>
 #include <QTextOption>
 #include <QTextDocument>
 
-CppClass::CppClass(std::shared_ptr<Composition> composition, QGraphicsItem* parent)
+CppClass::CppClass(std::shared_ptr<Composition> composition, DiagramGraph* Diagram, QGraphicsItem* parent)
     : QGraphicsItem(parent)
     , m_composition(composition)
+    , diagram(Diagram)
 {
     setFlag(QGraphicsItem::ItemIsSelectable, true);
     setFlag(QGraphicsItem::ItemIsMovable, true);
     setFlag(QGraphicsItem::ItemIsFocusable, true);
     setAcceptedMouseButtons(Qt::LeftButton | Qt::RightButton);
     updateBoundingRect();
+    umllinker = new UMLLinker();
 }
 
 QRectF CppClass::boundingRect() const
@@ -124,7 +130,9 @@ void CppClass::add_text(const QString text, int y_offset, bool is_selectable) {
 void CppClass::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
     if (event->button() == Qt::LeftButton) {
-
+        IUMLClassDiagramNode* activator = dynamic_cast<IUMLClassDiagramNode*>(m_composition.get());
+        activator->Clicked = true;
+        umllinker->checkLinkage(diagram, activator);
     } else if (event->button() == Qt::RightButton) {
         qDebug() << "Edit button (needs to be implemented)";
     }

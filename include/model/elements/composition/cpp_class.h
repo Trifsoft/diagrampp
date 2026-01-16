@@ -10,7 +10,6 @@ class CPPClass : public Composition {
 protected:
     Visibility get_default_visibility() const override;
     QString get_label() const override;
-
 public:
     CPPClass(const QString& name, Visibility visibility = Visibility::Public, std::optional<std::pair<Visibility, Composition*>> inheritance = std::nullopt);
 };
