@@ -4,6 +4,9 @@
 #include <QGraphicsView>
 #include "src/ui/ui_project.h"
 #include "model/elements/type/regular_type.h"
+#include "commandManager/command_manager.h"
+#include "commandManager/add_node_command.h"
+#include "model/elements/composition/cpp_class.h"
 
 Project::Project(QWidget *parent)
     : QWidget(parent)
@@ -13,6 +16,9 @@ Project::Project(QWidget *parent)
 
     scene = new QGraphicsScene(this);
     ui->board->setScene(scene);
+    
+    // Inicijalizacija CommandManagera sa referencom na scenu
+    commandManager = std::make_unique<CommandManager>(scene);
 
     // Connect buttons to slots
     connect(ui->add_class, &QPushButton::clicked, this, &Project::onAddClassClicked);
@@ -41,7 +47,12 @@ void Project::onAddClassClicked()
 
         c->add_method("foo", std::make_shared<RegularType>("void"), Visibility::Private, MethodType::Regular, { Description("bar", std::make_shared<RegularType>("int")) });
     });
-    scene->addItem(item);
+    
+    //  Kako treba da izgledaju komande
+    DiagramGraph* graph = new DiagramGraph();
+    IUMLClassDiagramNode* node = new CPPClass("Ime");
+    auto command = std::make_shared<AddNodeCommand>(scene, graph, node);
+    commandManager->execute(command);
 }
 
 void Project::onAddInterfaceClicked()

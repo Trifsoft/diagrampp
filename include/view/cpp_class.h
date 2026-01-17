@@ -1,5 +1,5 @@
-#ifndef CPP_CLASS_H
-#define CPP_CLASS_H
+#ifndef _CPP_CLASS_H
+#define _CPP_CLASS_H
 
 #include <functional>
 #include <QGraphicsItem>
@@ -31,4 +31,4 @@ private:
     void add_text(QString text, int y_offset, bool is_selectable = false);
 };
 
-#endif // CPP_CLASS_H
+#endif // _CPP_CLASS_H
