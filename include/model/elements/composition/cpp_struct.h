@@ -3,8 +3,12 @@
 
 #include "composition.h"
 #include <model/base/visibility.h>
+#include "view/cpp_class.h"
 #include <QString>
 #include <optional>
+
+class CppClass;
+
 
 class CPPStruct : public Composition {
 protected:
@@ -13,6 +17,7 @@ protected:
 
 public:
     CPPStruct(const QString& name, Visibility visibility = Visibility::Public, std::optional<std::pair<Visibility, Composition*>> inheritance = std::nullopt);
+    CppClass* parent = nullptr;
 };
 
 #endif // CPP_STRUCT_H

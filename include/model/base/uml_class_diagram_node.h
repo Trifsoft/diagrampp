@@ -3,7 +3,7 @@
 
 #include <QString>
 
-class IUMLClassDiagramNode {
+class IUMLClassDiagramNode : public std::enable_shared_from_this<IUMLClassDiagramNode> {
 public:
     virtual ~IUMLClassDiagramNode() = default;
 
@@ -12,6 +12,7 @@ public:
     virtual QString definition() const = 0;
 
     bool Clicked = false;
+
 };
 
 #endif // UML_CLASS_DIAGRAM_NODE_H

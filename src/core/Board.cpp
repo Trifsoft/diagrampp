@@ -16,11 +16,17 @@ Board::Board(QWidget *parent)
 
     scene = new QGraphicsScene(this);
     ui->board->setScene(scene);
+    ui->side_menu->setStyleSheet("background-color: #2c3e50;");
 
     // Connect buttons to slots
     connect(ui->add_class, &QPushButton::clicked, this, &Board::onAddClassClicked);
     connect(ui->add_interface, &QPushButton::clicked, this, &Board::onAddInterfaceClicked);
     connect(ui->add_enum, &QPushButton::clicked, this, &Board::onAddEnumClicked);
+    connect(ui->radioButton_1, &QPushButton::clicked, this, &Board::onCheckRadioButton);
+    connect(ui->radioButton_2, &QPushButton::clicked, this, &Board::onCheckRadioButton);
+    connect(ui->radioButton_3, &QPushButton::clicked, this, &Board::onCheckRadioButton);
+
+
 }
 
 Board::~Board()
@@ -28,6 +34,10 @@ Board::~Board()
     delete diagram;
     delete ui;
     delete scene;
+}
+
+void Board::onCheckRadioButton(){
+    qDebug() << ui->radioButton_1->isCheckable();
 }
 
 void Board::onAddClassClicked()
@@ -46,8 +56,11 @@ void Board::onAddClassClicked()
 
         c->add_method("foo", std::make_shared<RegularType>("void"), Visibility::Private, MethodType::Regular, { Description("bar", std::make_shared<RegularType>("int")) });
     });
+
+
     scene->addItem(item);
-    diagram->addNode(item->getComposition().get());
+    dynamic_cast<CPPClass*>(item->getClassDiagramNode().get())->parent = item;
+    diagram->addNode(item->getClassDiagramNode());
 }
 
 void Board::onAddInterfaceClicked()
@@ -67,17 +80,18 @@ void Board::onAddInterfaceClicked()
         c->add_method("foo", std::make_shared<RegularType>("void"), Visibility::Private, MethodType::Regular, { Description("bar", std::make_shared<RegularType>("int")) });
     });
     scene->addItem(item);
-    diagram->addNode(item->getComposition().get());
+    dynamic_cast<CPPStruct*>(item->getClassDiagramNode().get())->parent = item;
+    diagram->addNode(item->getClassDiagramNode());
 }
 
 void Board::onAddEnumClicked()
 {
-
     CppClass* item = new CppClass(
         std::make_shared<CPPStruct>(
             CPPStruct("Enum")
         ),
         diagram
     );
-    diagram->addNode(item->getComposition().get());
+    dynamic_cast<CPPEnum*>(item->getClassDiagramNode().get())->parent = item;
+    diagram->addNode(item->getClassDiagramNode());
 }

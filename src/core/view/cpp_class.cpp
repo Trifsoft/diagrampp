@@ -4,6 +4,7 @@
 #include "model/elements/composition/cpp_enum.h"
 #include "model/elements/composition/cpp_struct.h"
 #include <QPainter>
+#include <QGraphicsScene>
 #include <QFontMetrics>
 #include <QTextOption>
 #include <QTextDocument>
@@ -11,11 +12,13 @@
 CppClass::CppClass(std::shared_ptr<Composition> composition, DiagramGraph* Diagram, QGraphicsItem* parent)
     : QGraphicsItem(parent)
     , m_composition(composition)
+    , m_ClassDiagramNode(composition)
     , diagram(Diagram)
 {
     setFlag(QGraphicsItem::ItemIsSelectable, true);
     setFlag(QGraphicsItem::ItemIsMovable, true);
     setFlag(QGraphicsItem::ItemIsFocusable, true);
+    setFlag(QGraphicsItem::ItemSendsGeometryChanges, true);
     setAcceptedMouseButtons(Qt::LeftButton | Qt::RightButton);
     updateBoundingRect();
     umllinker = new UMLLinker();
@@ -127,15 +130,66 @@ void CppClass::add_text(const QString text, int y_offset, bool is_selectable) {
     m_textItems.append(item);
 }
 
-void CppClass::mousePressEvent(QGraphicsSceneMouseEvent* event)
-{
+void CppClass::mousePressEvent(QGraphicsSceneMouseEvent* event){
     if (event->button() == Qt::LeftButton) {
         IUMLClassDiagramNode* activator = dynamic_cast<IUMLClassDiagramNode*>(m_composition.get());
         activator->Clicked = true;
-        umllinker->checkLinkage(diagram, activator);
+        umllinker->checkLinkage(diagram, activator, BranchType::INHERITANCE);
     } else if (event->button() == Qt::RightButton) {
         qDebug() << "Edit button (needs to be implemented)";
     }
 
     QGraphicsItem::mousePressEvent(event); // keep default behavior
+}
+
+QPointF CppClass::getTopCenter() const{
+    QRectF rect = boundingRect();
+    QPointF topCenterLocal(rect.width() / 2, 0);
+    return mapToScene(topCenterLocal);
+}
+
+QPointF CppClass::getBottomCenter() const{
+    QRectF rect = boundingRect();
+    QPointF bottomCenterLocal(rect.width() / 2, rect.height());
+    return mapToScene(bottomCenterLocal);
+}
+
+// called when objects is moved in board
+QVariant CppClass::itemChange(GraphicsItemChange change, const QVariant &value){
+    if (change == ItemPositionHasChanged) {
+        updateConnections();
+    }
+    return QGraphicsItem::itemChange(change, value);
+}
+
+void CppClass::updateConnections(){
+    for (const ConnectionInfo& info : m_connections) {
+        QLineF currentLine = info.line->line();
+        if (info.isStart) {
+            QPointF newStart = getBottomCenter();
+            info.line->setLine(QLineF(newStart, currentLine.p2()));
+        } else {
+            QPointF newEnd = getTopCenter();
+            info.line->setLine(QLineF(currentLine.p1(), newEnd));
+        }
+    }
+}
+
+void CppClass::addConnection(QGraphicsLineItem* line, bool isStart){
+    ConnectionInfo info{line, isStart};
+    m_connections.append(info);
+}
+
+void CppClass::createConnection(CppClass* second){
+    QPointF parentPoint = this->getBottomCenter();
+    QPointF childPoint = second->getTopCenter();
+    QGraphicsLineItem* line = new QGraphicsLineItem(QLineF(parentPoint, childPoint));
+
+    QGraphicsScene* sc = this->scene();
+    line->setPen(QPen(Qt::blue, 2));
+    sc->addItem(line);
+
+    // saving parent and child relation
+    this->addConnection(line, true);
+    second->addConnection(line, false);
 }

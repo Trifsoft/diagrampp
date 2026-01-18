@@ -110,7 +110,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(DiagramPP
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
-        include/model/base/branchs.h
+        include/model/base/branches.h
         src/core/model/base/branchs.cpp
 
 

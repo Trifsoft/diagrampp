@@ -1,28 +1,19 @@
 #include "graph/diagram_graph.h"
 
+void DiagramGraph::addNode(std::shared_ptr<IUMLClassDiagramNode> node) {
+    if(!node) return;
 
-DiagramGraph::DiagramGraph(){
-}
-
-DiagramGraph::~DiagramGraph(){
-    qDeleteAll(nodes);
-    nodes.clear();
-
-    for(auto &list : links) {
-        qDeleteAll(list);
-        list.clear();
-    }
-    qDeleteAll(links.keys());
-
-    links.clear();
-}
-
-void DiagramGraph::addNode(IUMLClassDiagramNode* node) {
-    if(!nodes.contains(node)) {
+    if (!nodes.contains(node)) {
         nodes.append(node);
     }
 }
 
-void DiagramGraph::addLink(Composition* from, Composition* to) {
-    links[from].append(to);
+void DiagramGraph::removeNode(std::shared_ptr<IUMLClassDiagramNode> node) {
+    if(!node) return;
+
+    nodes.removeAll(node);
+}
+
+void DiagramGraph::addLink(std::shared_ptr<IUMLClassDiagramNode> from, std::weak_ptr<IUMLClassDiagramNode> to, BranchType type) {
+    links[from.get()].append({to, type});
 }

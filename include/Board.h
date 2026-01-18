@@ -26,6 +26,7 @@ private slots:
     void onAddClassClicked();
     void onAddInterfaceClicked();
     void onAddEnumClicked();
+    void onCheckRadioButton();
 
 private:
     DiagramGraph* diagram;
