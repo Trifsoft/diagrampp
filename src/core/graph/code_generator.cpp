@@ -23,7 +23,17 @@ bool CodeGenerator::visit(Composition* node, QSet<Composition*>& temporary, QSet
 
     temporary.insert(node);
 
-    for (Composition* child : m_graph->links.value(node)) {
+    for (const auto& link_pair: m_graph->links.value(node)) {
+        auto child_ptr = link_pair.first.lock();
+        if(!child_ptr){
+            continue;
+        }
+
+        Composition* child = dynamic_cast<Composition*>(child_ptr.get());
+        if(!child){
+            continue;
+        }
+
         if (!visit(child, temporary, permanent, ordered)) {
             return false;
         }
@@ -40,9 +50,11 @@ bool CodeGenerator::topologicalSort(QVector<Composition*>& ordered, QString& err
     QSet<Composition*> temporary;
     QSet<Composition*> permanent;
 
-    for (Composition* node : m_graph->links.keys()) {
-        if (!permanent.contains(node)) {
-            if (!visit(node, temporary, permanent, ordered)) {
+    for (IUMLClassDiagramNode* node: m_graph->links.keys()) {
+        Composition* node_comp = dynamic_cast<Composition*>(node);
+
+        if (node_comp && !permanent.contains(node_comp)) {
+            if (!visit(node_comp, temporary, permanent, ordered)) {
                 errorMessage = "Inheritance cycle detected in UML diagram.";
                 return false;
             }
@@ -86,8 +98,9 @@ bool CodeGenerator::generate(const QString& outputDir, QString& errorMessage) {
         generated.insert(comp);
     }
 
-    for (IUMLClassDiagramNode* node : m_graph->nodes) {
-        Composition* comp = dynamic_cast<Composition*>(node);
+    for (std::shared_ptr<IUMLClassDiagramNode> nodePtr : m_graph->nodes) {
+
+        Composition* comp = dynamic_cast<Composition*>(nodePtr.get());
         if (!comp || generated.contains(comp)) {
             continue;
         }

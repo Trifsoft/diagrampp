@@ -118,7 +118,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         src/commandManager/command_manager.cpp
 
         src/commandManager/add_node_command.cpp
-
+        include/model/base/branches.h
     )
 else()
     add_executable(DiagramPP ${PROJECT_SOURCES})
