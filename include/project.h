@@ -28,10 +28,16 @@ private slots:
     void onAddClassClicked();
     void onAddInterfaceClicked();
     void onAddEnumClicked();
-
+    void onUndo();
+    void onRedo();
 private:
+
     Ui::Project *ui;
     std::unique_ptr<CommandManager> m_command_manager;
     std::unique_ptr<DiagramGraph> m_graph;
+
+    void setup_actions();
+    QAction* m_undo_action;
+    QAction* m_redo_action;
 };
 #endif // PROJECT_H

@@ -1,4 +1,5 @@
 #include "commandManager/command_manager.h"
+#include <QDebug>
 
 void CommandManager::execute(std::shared_ptr<Command> command)
 {
@@ -14,6 +15,7 @@ void CommandManager::undo()
     if (can_undo()) {
         auto command = m_undo_stack.back();
         m_undo_stack.pop_back();
+        command->undo();  
         m_redo_stack.push_back(command);
     }
 }

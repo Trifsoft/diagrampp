@@ -26,6 +26,8 @@ Project::Project(QWidget *parent)
     connect(ui->add_class, &QPushButton::clicked, this, &Project::onAddClassClicked);
     connect(ui->add_interface, &QPushButton::clicked, this, &Project::onAddInterfaceClicked);
     connect(ui->add_enum, &QPushButton::clicked, this, &Project::onAddEnumClicked);
+
+    setup_actions();
 }
 
 Project::~Project()
@@ -33,6 +35,32 @@ Project::~Project()
     delete ui;
     delete scene;
 }
+//*******************************************************************************************************************
+
+void Project::setup_actions()
+{
+    m_undo_action = new QAction("Undo", this);
+    m_undo_action->setShortcut(QKeySequence::Undo);  // Ctrl+Z
+    connect(m_undo_action, &QAction::triggered, this, &Project::onUndo);
+    addAction(m_undo_action);
+
+    m_redo_action = new QAction("Redo", this);
+    m_redo_action->setShortcut(QKeySequence::Redo);  // Ctrl+Shift+Z
+    connect(m_redo_action, &QAction::triggered, this, &Project::onRedo);
+    addAction(m_redo_action);
+
+}
+void Project::onUndo()
+{
+    m_command_manager->undo();
+}
+
+void Project::onRedo()
+{
+    m_command_manager->redo();
+}
+
+//*******************************************************************************************************************
 
 void Project::onAddClassClicked()
 {
@@ -49,11 +77,13 @@ void Project::onAddClassClicked()
 
         c->add_method("foo", std::make_shared<RegularType>("void"), Visibility::Private, MethodType::Regular, { Description("bar", std::make_shared<RegularType>("int")) });
     });
+    scene->addItem(item);
     
-    //  Kako treba da izgledaju komande
+    /* Kako treba da izgleda kreiranje i pozivanje komande
     auto node = std::make_shared<CPPClass>("Ime");
     auto command = std::make_shared<AddNodeCommand>(m_graph.get(), node);
     m_command_manager->execute(command);
+    */
 }
 
 void Project::onAddInterfaceClicked()
@@ -72,16 +102,10 @@ void Project::onAddInterfaceClicked()
         c->add_method("foo", std::make_shared<RegularType>("void"), Visibility::Private, MethodType::Regular, { Description("bar", std::make_shared<RegularType>("int")) });
     });
     scene->addItem(item);
-
-
-    auto node = std::make_shared<CPPClass>("Test");
-    auto command = std::make_shared<RemoveNodeCommand>(m_graph.get(), node);
-    m_command_manager->execute(command);
 }
 
 void Project::onAddEnumClicked()
 {
-
     CppClass* item = new CppClass(
         std::make_shared<CPPStruct>(
             CPPStruct("Enum")
