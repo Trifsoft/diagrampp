@@ -12,6 +12,7 @@ class Project;
 QT_END_NAMESPACE
 
 class CommandManager;
+class DiagramGraph;
 
 class Project : public QWidget
 {
@@ -30,6 +31,7 @@ private slots:
 
 private:
     Ui::Project *ui;
-    std::unique_ptr<CommandManager> commandManager;
+    std::unique_ptr<CommandManager> m_command_manager;
+    std::unique_ptr<DiagramGraph> m_graph;
 };
 #endif // PROJECT_H

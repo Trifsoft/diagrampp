@@ -54,6 +54,7 @@ set(CORE_HEADERS
     include/commandManager/command_manager.h
     include/commandManager/command.h
     include/commandManager/add_node_command.h
+    include/commandManager/remove_node_command.h
 )
 
 set(CORE_SOURCES
@@ -90,6 +91,7 @@ set(CORE_SOURCES
     src/core/view/cpp_class.cpp
     src/commandManager/command_manager.cpp
     src/commandManager/add_node_command.cpp
+    src/commandManager/remove_node_command.cpp
 )
 
 set(UI_SOURCES

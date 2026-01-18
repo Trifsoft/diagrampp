@@ -3,23 +3,21 @@
 
 #include "command.h"
 #include "graph/diagram_graph.h"
-#include <QGraphicsScene>
 
 class IUMLClassDiagramNode;
 
 class AddNodeCommand : public Command
 {
 public:
-    AddNodeCommand(QGraphicsScene* scene, DiagramGraph* graph, IUMLClassDiagramNode* node);
+    AddNodeCommand(DiagramGraph* graph, std::shared_ptr<IUMLClassDiagramNode> node);
     
     void execute() override;
     void undo() override;
     
 private:
-    QGraphicsScene* scene;
-    DiagramGraph* graph;
-    IUMLClassDiagramNode* node;
-    bool nodeAdded;
+    DiagramGraph* m_graph;
+    std::shared_ptr<IUMLClassDiagramNode> m_node;
+    bool m_node_added;
 };
 
 #endif // ADD_NODE_COMMAND_H

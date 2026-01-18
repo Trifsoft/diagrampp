@@ -6,6 +6,7 @@
 #include "model/elements/type/regular_type.h"
 #include "commandManager/command_manager.h"
 #include "commandManager/add_node_command.h"
+#include "commandManager/remove_node_command.h"
 #include "model/elements/composition/cpp_class.h"
 
 Project::Project(QWidget *parent)
@@ -17,8 +18,9 @@ Project::Project(QWidget *parent)
     scene = new QGraphicsScene(this);
     ui->board->setScene(scene);
     
-    // Inicijalizacija CommandManagera sa referencom na scenu
-    commandManager = std::make_unique<CommandManager>(scene);
+    // Inicijalizacija CommandManagera
+    m_command_manager = std::make_unique<CommandManager>();
+    m_graph = std::make_unique<DiagramGraph>();
 
     // Connect buttons to slots
     connect(ui->add_class, &QPushButton::clicked, this, &Project::onAddClassClicked);
@@ -49,10 +51,9 @@ void Project::onAddClassClicked()
     });
     
     //  Kako treba da izgledaju komande
-    DiagramGraph* graph = new DiagramGraph();
-    IUMLClassDiagramNode* node = new CPPClass("Ime");
-    auto command = std::make_shared<AddNodeCommand>(scene, graph, node);
-    commandManager->execute(command);
+    auto node = std::make_shared<CPPClass>("Ime");
+    auto command = std::make_shared<AddNodeCommand>(m_graph.get(), node);
+    m_command_manager->execute(command);
 }
 
 void Project::onAddInterfaceClicked()
@@ -71,6 +72,11 @@ void Project::onAddInterfaceClicked()
         c->add_method("foo", std::make_shared<RegularType>("void"), Visibility::Private, MethodType::Regular, { Description("bar", std::make_shared<RegularType>("int")) });
     });
     scene->addItem(item);
+
+
+    auto node = std::make_shared<CPPClass>("Test");
+    auto command = std::make_shared<RemoveNodeCommand>(m_graph.get(), node);
+    m_command_manager->execute(command);
 }
 
 void Project::onAddEnumClicked()

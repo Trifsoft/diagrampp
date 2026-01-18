@@ -2,25 +2,26 @@
 #include "model/base/uml_class_diagram_node.h"
 #include <QDebug>
 
-AddNodeCommand::AddNodeCommand(QGraphicsScene* scene, DiagramGraph* graph, IUMLClassDiagramNode* node)
-    : scene(scene), graph(graph), node(node), nodeAdded(false)
+AddNodeCommand::AddNodeCommand(DiagramGraph* graph,
+                               std::shared_ptr<IUMLClassDiagramNode> node)
+    :m_graph(graph), m_node(node), m_node_added(false)
 {
 }
 
 void AddNodeCommand::execute()
 {
-    if (!nodeAdded && scene && node) {
-        // scene->addItem(node);  // Dodaj node na scenu
-        nodeAdded = true;
+    if (!m_node_added && m_node && m_graph) {
+        m_graph->addNode(m_node);
+        m_node_added = true;
         qDebug() << "Command EXECUTE: Node dodat na scenu";
     }
 }
 
 void AddNodeCommand::undo()
 {
-    if (nodeAdded && scene && node) {
-        // scene->removeItem(node);  // Ukloni node sa scene
-        nodeAdded = false;
+    if (m_node_added && m_node && m_graph) {
+        // m_graph->removeNode(m_node);
+        m_node_added = false;
         qDebug() << "Command UNDO: Node uklonjen sa scene";
     }
 }

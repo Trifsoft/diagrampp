@@ -1,45 +1,39 @@
 #include "commandManager/command_manager.h"
 
-CommandManager::CommandManager(QGraphicsScene* scene)
-    : scene(scene)
-{
-}
-
 void CommandManager::execute(std::shared_ptr<Command> command)
 {
     if (command) {
         command->execute();
-        undoStack.push_back(command);
-        redoStack.clear(); // Clear redo stack after new command
+        m_undo_stack.push_back(command);
+        m_redo_stack.clear();
     }
 }
 
 void CommandManager::undo()
 {
-    if (canUndo()) {
-        auto command = undoStack.back();
-        undoStack.pop_back();
-        redoStack.push_back(command);
-        // Trebate implementirati undo u Command klasi
+    if (can_undo()) {
+        auto command = m_undo_stack.back();
+        m_undo_stack.pop_back();
+        m_redo_stack.push_back(command);
     }
 }
 
 void CommandManager::redo()
 {
-    if (canRedo()) {
-        auto command = redoStack.back();
-        redoStack.pop_back();
-        undoStack.push_back(command);
+    if (can_redo()) {
+        auto command = m_redo_stack.back();
+        m_redo_stack.pop_back();
+        m_undo_stack.push_back(command);
         command->execute();
     }
 }
 
-bool CommandManager::canUndo() const
+bool CommandManager::can_undo() const
 {
-    return !undoStack.empty();
+    return !m_undo_stack.empty();
 }
 
-bool CommandManager::canRedo() const
+bool CommandManager::can_redo() const
 {
-    return !redoStack.empty();
+    return !m_redo_stack.empty();
 }
