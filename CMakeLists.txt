@@ -51,7 +51,7 @@ set(CORE_HEADERS
     include/model/elements/constructor/copy_constructor.h
     include/model/base/uml_class_diagram_node.h
     include/view/cpp_class.h
-    include/umllinker.h
+    include/validator.h
 )
 
 set(CORE_SOURCES
@@ -63,7 +63,7 @@ set(CORE_SOURCES
     src/core/main_window.cpp
     src/core/new_project.cpp
     src/core/Board.cpp
-    src/core/umllinker.cpp
+    src/core/validator.cpp
     src/core/graph/diagram_graph.cpp
     src/core/graph/code_generator.cpp
     src/core/model/base/visibility.cpp

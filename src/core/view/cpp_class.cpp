@@ -9,11 +9,11 @@
 #include <QTextOption>
 #include <QTextDocument>
 
-CppClass::CppClass(std::shared_ptr<Composition> composition, DiagramGraph* Diagram, QGraphicsItem* parent)
+CppClass::CppClass(Board* board,std::shared_ptr<Composition> composition, QGraphicsItem* parent)
     : QGraphicsItem(parent)
+    , m_board(board)
     , m_composition(composition)
     , m_ClassDiagramNode(composition)
-    , diagram(Diagram)
 {
     setFlag(QGraphicsItem::ItemIsSelectable, true);
     setFlag(QGraphicsItem::ItemIsMovable, true);
@@ -21,8 +21,8 @@ CppClass::CppClass(std::shared_ptr<Composition> composition, DiagramGraph* Diagr
     setFlag(QGraphicsItem::ItemSendsGeometryChanges, true);
     setAcceptedMouseButtons(Qt::LeftButton | Qt::RightButton);
     updateBoundingRect();
-    umllinker = new UMLLinker();
 }
+
 
 QRectF CppClass::boundingRect() const
 {
@@ -131,10 +131,9 @@ void CppClass::add_text(const QString text, int y_offset, bool is_selectable) {
 }
 
 void CppClass::mousePressEvent(QGraphicsSceneMouseEvent* event){
-    if (event->button() == Qt::LeftButton) {
-        IUMLClassDiagramNode* activator = dynamic_cast<IUMLClassDiagramNode*>(m_composition.get());
-        activator->Clicked = true;
-        umllinker->checkLinkage(diagram, activator, BranchType::INHERITANCE);
+    if (event->button() == Qt::LeftButton && m_board->linkageMode) {
+        m_ClassDiagramNode.get()->Clicked = true;
+        m_board->callValidator(m_ClassDiagramNode);
     } else if (event->button() == Qt::RightButton) {
         qDebug() << "Edit button (needs to be implemented)";
     }

@@ -6,18 +6,21 @@
 #include <QGraphicsItem>
 #include <QGraphicsTextItem>
 #include <QVector>
+#include "Board.h"
 #include <QGraphicsSceneMouseEvent>
 #include <model/elements/composition/composition.h>
 #include "model/base/branches.h"
 #include "graph/diagram_graph.h"
-#include "umllinker.h"
+#include "validator.h"
 
 class DiagramGraph;
-class UMLLinker;
+class Validator;
+class Board;
 
 class CppClass : public QGraphicsItem {
+
 public:
-    CppClass(std::shared_ptr<Composition> composition, DiagramGraph* Diagram, QGraphicsItem* parent = nullptr);
+    CppClass(Board *board, std::shared_ptr<Composition> composition, QGraphicsItem* parent = nullptr);
     ~CppClass() = default;
 
     QRectF boundingRect() const override;
@@ -43,6 +46,7 @@ private:
     BranchType branch;
     QVector<ConnectionInfo> m_connections;
 
+    Board* m_board;
     std::shared_ptr<Composition> m_composition;
     std::shared_ptr<IUMLClassDiagramNode> m_ClassDiagramNode;
     int m_width;
@@ -50,9 +54,6 @@ private:
     int m_line_height;
 
     QVector<QGraphicsTextItem*> m_textItems;
-    //QGraphicsScene* scene;
-    DiagramGraph* diagram;
-    UMLLinker* umllinker;
 
     void updateBoundingRect();
     void updateTextItems();

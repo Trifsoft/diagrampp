@@ -1,4 +1,4 @@
-#include "umllinker.h"
+#include "validator.h"
 
 #include <QDebug>
 #include <string>
@@ -24,39 +24,23 @@ CombinationType getCombinationType(const QString& label1, const QString& label2)
     return CombinationType::Unknown;
 }
 
-UMLLinker::UMLLinker() {}
+Validator::Validator() {}
 
-void UMLLinker::checkLinkage(DiagramGraph* diagram, IUMLClassDiagramNode* activator, BranchType branch){
-    IUMLClassDiagramNode* first = nullptr;
-    IUMLClassDiagramNode* second = activator;
 
-    // znaci ako imas enum ne moze biti prvi jebiga
-    // istrazi malo sutra sta i kako i samo znaj da cppenum ne nasledjuje nista.
-    for(std::shared_ptr<IUMLClassDiagramNode> iterator : diagram->nodes){
-        IUMLClassDiagramNode* node = iterator.get();
-        if(node->Clicked && node != activator){
-            first = node;
-            node->Clicked = false;
-        }
-    }
 
-    if(first != nullptr){
-        second->Clicked = false;
-        doLinkage(diagram, first, second);
-    }
-}
+
 // dodaj grane istrazi sutra.
 // first moze biti IUMLCLASSDIAGRAMNODE to jest (enum)
-bool UMLLinker::doLinkage(DiagramGraph* diagram, IUMLClassDiagramNode* first, IUMLClassDiagramNode* second){
-    CombinationType type = getCombinationType(first->get_label(), second->get_label());
+bool Validator::checkLinkage(std::shared_ptr<IUMLClassDiagramNode> first, std::shared_ptr<IUMLClassDiagramNode> second, BranchType branch){
+    CombinationType type = getCombinationType(first.get()->get_label(), second.get()->get_label());
     switch(type){
         case CombinationType::ClassClass:{
 
             // inherit, association, navigation
             // ako se u edit doda klasa onda dodati mada ne bih ovo radio.
 
-            auto cppclassfirst = dynamic_cast<CPPClass*>(first)->parent;
-            auto cppclasssecond = dynamic_cast<CPPClass*>(second)->parent;
+            auto cppclassfirst = dynamic_cast<CPPClass*>(first.get())->parent;
+            auto cppclasssecond = dynamic_cast<CPPClass*>(second.get())->parent;
             cppclassfirst->createConnection(cppclasssecond);
             break;
         }
@@ -74,12 +58,10 @@ bool UMLLinker::doLinkage(DiagramGraph* diagram, IUMLClassDiagramNode* first, IU
         }
         default:  // Correct spelling
             qDebug() << "Unknown combination type";
-            break;    }
-
-    if(first->get_label() != "enum" && second->get_label() != "enum"){
-        // dodaj liniju.
-        diagram->addLink(second->shared_from_this(), first->shared_from_this());
+            break;
     }
+
+
     return false;
 }
 

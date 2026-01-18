@@ -2,7 +2,7 @@
 #define BOARD_H
 
 #include "graph/diagram_graph.h"
-
+#include "validator.h"
 #include <QWidget>
 #include <QGraphicsScene>
 
@@ -11,6 +11,9 @@ namespace Ui {
 class Board;
 }
 QT_END_NAMESPACE
+
+class Validator;
+class DiagramGraph;
 
 class Board : public QWidget
 {
@@ -21,15 +24,25 @@ class Board : public QWidget
 public:
     Board(QWidget *parent = nullptr);
     ~Board();
+    Validator* validator;
+
+    void callValidator(std::shared_ptr<IUMLClassDiagramNode> activator);
+
+    bool inheritance;
+    bool association;
+    bool navigation;
+    bool linkageMode;
 
 private slots:
     void onAddClassClicked();
     void onAddInterfaceClicked();
     void onAddEnumClicked();
-    void onCheckRadioButton();
+    void onCheckRadioButtonToggled();
+    void onLinkageToggled();
 
 private:
     DiagramGraph* diagram;
     Ui::Board *ui;
+
 };
 #endif // BOARD_H
