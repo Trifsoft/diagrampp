@@ -1,7 +1,6 @@
 #ifndef _CPP_CLASS_H
 #define _CPP_CLASS_H
 
-
 #include <functional>
 #include <QGraphicsItem>
 #include <QGraphicsTextItem>

@@ -13,7 +13,6 @@ void DiagramGraph::removeNode(std::shared_ptr<IUMLClassDiagramNode> node) {
 
     nodes.removeAll(node);
 }
-
-void DiagramGraph::addLink(std::shared_ptr<IUMLClassDiagramNode> from, std::weak_ptr<IUMLClassDiagramNode> to, BranchType type) {
+void DiagramGraph::addLink(std::shared_ptr<IUMLClassDiagramNode> from, std::shared_ptr<IUMLClassDiagramNode> to, BranchType type) {
     links[from.get()].append({to, type});
 }
