@@ -51,14 +51,11 @@ set(CORE_HEADERS
     include/model/elements/constructor/copy_constructor.h
     include/model/base/uml_class_diagram_node.h
     include/view/cpp_class.h
-<<<<<<< HEAD
     include/validator.h
-=======
     include/commandManager/command_manager.h
     include/commandManager/command.h
     include/commandManager/add_node_command.h
     include/commandManager/remove_node_command.h
->>>>>>> 4504b505ccfd738deff15c66006701806aafa36c
 )
 
 set(CORE_SOURCES
@@ -120,14 +117,9 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(DiagramPP
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
-<<<<<<< HEAD
         include/model/base/branches.h
         src/core/model/base/branchs.cpp
-
-=======
         src/commandManager/command_manager.cpp
->>>>>>> 4504b505ccfd738deff15c66006701806aafa36c
-
         src/commandManager/add_node_command.cpp
         include/model/base/branches.h
     )
