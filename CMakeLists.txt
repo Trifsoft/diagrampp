@@ -116,7 +116,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
         src/commandManager/command_manager.cpp
-
+        include/project_generator.h src/core/project_generator.cpp
         src/commandManager/add_node_command.cpp
         include/model/base/branches.h
     )
@@ -150,7 +150,6 @@ install(TARGETS DiagramPP
 target_include_directories(DiagramPP PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_CURRENT_BINARY_DIR}
-
 )
 
 # Finalizacija Qt6
