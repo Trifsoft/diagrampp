@@ -8,6 +8,7 @@
 #include "validator.h"
 #include <model/base/branches.h>
 
+
 class IUMLClassDiagramNode;
 class Composition;
 
@@ -26,6 +27,7 @@ public:
 
     SharedNodePtr firstNode = nullptr;
     SharedNodePtr secondNode = nullptr;
+
 
     //obican pokazivac zato sto links ne poseduje node-ove
     QMap<IUMLClassDiagramNode*, QList<QPair<WeakNodePtr, BranchType>>> links;

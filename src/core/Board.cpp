@@ -48,7 +48,7 @@ BranchType determineBranchType(bool inheritance, bool association) {
     return BranchType::NAVIGATION;
 }
 
-void Board::callValidator(std::shared_ptr<IUMLClassDiagramNode> activator){
+void Board::ValidateAndLink(std::shared_ptr<IUMLClassDiagramNode> activator){
     if(diagram->firstNode == nullptr){
         diagram->firstNode = activator;
         return;
@@ -56,9 +56,10 @@ void Board::callValidator(std::shared_ptr<IUMLClassDiagramNode> activator){
     diagram->secondNode = activator;
 
     BranchType type = determineBranchType(this->inheritance, this->association);
+    // dodati if i raditi
     validator->checkLinkage(diagram->firstNode, diagram->secondNode, type);
     diagram->addLink(diagram->firstNode, diagram->secondNode, type);
-
+    // createConnection ?
     diagram->firstNode = nullptr;
     diagram->secondNode = nullptr;
 }

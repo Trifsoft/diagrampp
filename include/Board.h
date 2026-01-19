@@ -26,7 +26,7 @@ public:
     ~Board();
     Validator* validator;
 
-    void callValidator(std::shared_ptr<IUMLClassDiagramNode> activator);
+    void ValidateAndLink(std::shared_ptr<IUMLClassDiagramNode> activator);
 
     bool inheritance;
     bool association;

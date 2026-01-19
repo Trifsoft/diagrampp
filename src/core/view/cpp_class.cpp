@@ -133,7 +133,7 @@ void CppClass::add_text(const QString text, int y_offset, bool is_selectable) {
 void CppClass::mousePressEvent(QGraphicsSceneMouseEvent* event){
     if (event->button() == Qt::LeftButton && m_board->linkageMode) {
         m_ClassDiagramNode.get()->Clicked = true;
-        m_board->callValidator(m_ClassDiagramNode);
+        m_board->ValidateAndLink(m_ClassDiagramNode);
     } else if (event->button() == Qt::RightButton) {
         qDebug() << "Edit button (needs to be implemented)";
     }
