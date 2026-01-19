@@ -26,7 +26,7 @@ set(CORE_HEADERS
     include/import_project.h
     include/main_window.h
     include/new_project.h
-    include/project.h
+    include/Board.h
     include/graph/diagram_graph.h
     include/graph/code_generator.h
     include/model/base/visibility.h
@@ -51,6 +51,7 @@ set(CORE_HEADERS
     include/model/elements/constructor/copy_constructor.h
     include/model/base/uml_class_diagram_node.h
     include/view/cpp_class.h
+    include/validator.h
     include/commandManager/command_manager.h
     include/commandManager/command.h
     include/commandManager/add_node_command.h
@@ -65,7 +66,8 @@ set(CORE_SOURCES
     src/core/import_project.cpp
     src/core/main_window.cpp
     src/core/new_project.cpp
-    src/core/project.cpp
+    src/core/Board.cpp
+    src/core/validator.cpp
     src/core/graph/diagram_graph.cpp
     src/core/graph/code_generator.cpp
     src/core/model/base/visibility.cpp
@@ -96,7 +98,7 @@ set(CORE_SOURCES
 
 set(UI_SOURCES
     src/ui/main_window.ui
-    src/ui/project.ui
+    src/ui/Board.ui
 )
 
 # Glavni projekat izvori
@@ -117,6 +119,9 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         ${PROJECT_SOURCES}
         src/commandManager/command_manager.cpp
         include/project_generator.h src/core/project_generator.cpp
+        include/model/base/branches.h
+        src/core/model/base/branchs.cpp
+        src/commandManager/command_manager.cpp
         src/commandManager/add_node_command.cpp
         include/model/base/branches.h
     )

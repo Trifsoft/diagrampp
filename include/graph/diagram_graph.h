@@ -6,6 +6,7 @@
 #include <QPair>
 #include <memory>
 #include <model/base/branches.h>
+#include <model/base/branches.h>
 
 class IUMLClassDiagramNode;
 class Composition;
@@ -20,13 +21,13 @@ public:
 
     void addNode(SharedNodePtr node);
     void removeNode(SharedNodePtr node);
+
+    SharedNodePtr firstNode = nullptr;
+    SharedNodePtr secondNode = nullptr;
     void addLink(SharedNodePtr from, SharedNodePtr to, BranchType = BranchType::INHERITANCE);
-
-
-    //obican pokazivac zato sto links ne poseduje node-ove
     QMap<IUMLClassDiagramNode*, QList<QPair<WeakNodePtr, BranchType>>> links;
-    QList<std::shared_ptr<IUMLClassDiagramNode>> nodes;
 private:
+    QList<SharedNodePtr> nodes;
 };
 
 #endif // DIAGRAM_GRAPH_H

@@ -3,9 +3,13 @@
 
 #include <model/base/uml_class_diagram_node.h>
 #include <model/elements/cpp_enum_value.h>
+#include "view/cpp_class.h"
 #include <QString>
 #include <QVector>
 #include <optional>
+
+class CppClass;
+
 
 class CPPEnum : public IUMLClassDiagramNode {
 private:
@@ -21,6 +25,8 @@ public:
     void add_value(const QString& name, std::optional<int> value = std::nullopt);
     QString get_name() const;
     QVector<CPPEnumValue> get_values() const;
+    QString get_label() const override;
+    CppClass* parent = nullptr;
 };
 
 #endif // CPP_ENUM_H
