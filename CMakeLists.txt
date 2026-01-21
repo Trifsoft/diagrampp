@@ -21,14 +21,13 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 # Core sources and headers
 set(CORE_HEADERS
     include/cpp_class_item.h
-    include/help.h
+    include/help.h-
     include/history.h
     include/import_project.h
     include/main_window.h
     include/new_project.h
     include/Board.h
     include/graph/diagram_graph.h
-    include/graph/code_generator.h
     include/model/base/visibility.h
     include/model/base/reference.h
     include/model/base/class_element.h
@@ -69,7 +68,6 @@ set(CORE_SOURCES
     src/core/Board.cpp
     src/core/validator.cpp
     src/core/graph/diagram_graph.cpp
-    src/core/graph/code_generator.cpp
     src/core/model/base/visibility.cpp
     src/core/model/base/reference.cpp
     src/core/model/base/class_element.cpp
