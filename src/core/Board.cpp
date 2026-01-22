@@ -6,6 +6,7 @@
 #include <QGraphicsView>
 #include "src/ui/ui_Board.h"
 #include "model/elements/type/regular_type.h"
+#include "nodefactory.h"
 
 Board::Board(QWidget *parent)
     : QWidget(parent), ui(new Ui::Board), diagram(new DiagramGraph())
@@ -73,36 +74,50 @@ void Board::onLinkageToggled(){
 
 void Board::onAddClassClicked()
 {
-    auto new_node = std::make_shared<CPPClass>("Class");
-    new_node->add_field("test1", std::make_shared<RegularType>(RegularType("int")));
-    new_node->add_field("test2", std::make_shared<RegularType>(RegularType("bool")));
-    new_node->add_field("test3", std::make_shared<RegularType>(RegularType("float")));
-    new_node->add_field("test4", std::make_shared<RegularType>(RegularType("double")));
-    new_node->add_method("foo", std::make_shared<RegularType>("void"), Visibility::Private, MethodType::Regular, { Description("bar", std::make_shared<RegularType>("int")) });
+    NodeFactory* node_factory = new NodeFactory(NodeType::Class, [this](const QString class_name) {
 
-    add_item(new_node);
+        auto new_node = std::make_shared<CPPClass>(class_name);
+        new_node->add_field("test1", std::make_shared<RegularType>(RegularType("int")));
+        new_node->add_field("test2", std::make_shared<RegularType>(RegularType("bool")));
+        new_node->add_field("test3", std::make_shared<RegularType>(RegularType("float")));
+        new_node->add_field("test4", std::make_shared<RegularType>(RegularType("double")));
+        new_node->add_method("foo", std::make_shared<RegularType>("void"), Visibility::Private, MethodType::Regular, { Description("bar", std::make_shared<RegularType>("int")) });
+
+        add_item(new_node);
+    });
+    node_factory->show();
 }
 
 void Board::onAddInterfaceClicked()
 {
-    auto new_node = std::make_shared<CPPStruct>("Interface");
-    new_node->add_field("test1", std::make_shared<RegularType>(RegularType("int")));
-    new_node->add_field("test2", std::make_shared<RegularType>(RegularType("bool")));
-    new_node->add_field("test3", std::make_shared<RegularType>(RegularType("float")));
-    new_node->add_field("test4", std::make_shared<RegularType>(RegularType("double")));
-    new_node->add_method("foo", std::make_shared<RegularType>("void"), Visibility::Private, MethodType::Regular, { Description("bar", std::make_shared<RegularType>("int")) });
+    NodeFactory* node_factory = new NodeFactory(NodeType::Class, [this](const QString class_name) {
 
-    add_item(new_node);
+        auto new_node = std::make_shared<CPPStruct>(class_name);
+        new_node->add_field("test1", std::make_shared<RegularType>(RegularType("int")));
+        new_node->add_field("test2", std::make_shared<RegularType>(RegularType("bool")));
+        new_node->add_field("test3", std::make_shared<RegularType>(RegularType("float")));
+        new_node->add_field("test4", std::make_shared<RegularType>(RegularType("double")));
+        new_node->add_method("foo", std::make_shared<RegularType>("void"), Visibility::Private, MethodType::Regular, { Description("bar", std::make_shared<RegularType>("int")) });
+
+        add_item(new_node);
+    });
+    node_factory->show();
 }
 
 void Board::onAddEnumClicked()
 {
-    // CppClass* item = new CppClass(this,
-    //     std::make_shared<CPPStruct>(
-    //         CPPStruct("Enum")
-    //     )
-    // );
-    add_item(std::make_shared<CPPStruct>(CPPStruct("Enum")));
+    NodeFactory* node_factory = new NodeFactory(NodeType::Class, [this](const QString class_name) {
+
+        auto new_node = std::make_shared<CPPClass>(class_name);
+        new_node->add_field("test1", std::make_shared<RegularType>(RegularType("int")));
+        new_node->add_field("test2", std::make_shared<RegularType>(RegularType("bool")));
+        new_node->add_field("test3", std::make_shared<RegularType>(RegularType("float")));
+        new_node->add_field("test4", std::make_shared<RegularType>(RegularType("double")));
+        new_node->add_method("foo", std::make_shared<RegularType>("void"), Visibility::Private, MethodType::Regular, { Description("bar", std::make_shared<RegularType>("int")) });
+
+        add_item(new_node);
+    });
+    node_factory->show();
 }
 
 void Board::add_item(std::shared_ptr<Composition> node) {   //TODO [Nikola] - izmeniti da bude IUMLClassDiagramNode umesto Composition
