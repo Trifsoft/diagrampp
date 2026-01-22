@@ -9,10 +9,8 @@
 namespace fs = std::filesystem;
 
 namespace {
-    bool remove_existing_project(const fs::path& path){
-        uintmax_t num_of_deletions = fs::remove_all(path);
-
-        return num_of_deletions > 0 ? true : false;
+    void remove_existing_project(const fs::path& path){
+        fs::remove_all(path); // recursively delete content int path dir and path dir itself
     }
 
     ProjectGenerator::GenerationStatusCode determine_error_code(const std::error_code& ec){
@@ -24,16 +22,15 @@ namespace {
             return ProjectGenerator::GenerationStatusCode::NO_MEMORY_SPACE;
         }
 
-        return ProjectGenerator::GenerationStatusCode::OK;
+        return ProjectGenerator::GenerationStatusCode::NO_FILE_CREATED;
     }
 
-    const std::unordered_set<SharedNodePtr> retrieve_diagram_nodes(){
-        const auto& diagram = DiagramGraph::diagram_graph().get_diagram();
+    const std::unordered_set<SharedNodePtr> retrieve_diagram_nodes(const graph_type& diagram){
         std::unordered_set<SharedNodePtr> nodes = {};
 
         for(const auto& it : diagram){
             nodes.insert(it.first);
-            for(const auto [neighbour, _]: it.second){
+            for(const auto& [neighbour, _]: it.second){
                 nodes.insert(neighbour);
             }
         }
@@ -42,14 +39,7 @@ namespace {
     }
 
     bool should_generate_cpp_file(SharedNodePtr node){
-        // not done, waiting for class/interface/abstract  concretizations
-        // determine should cpp file be generated for given node
-        // should for:
-        // class, struct
-        // not for:
-        // interface, abstract class
-
-        return node.get()->definition().isEmpty(); // makes sense for now
+        return !node->definition().isEmpty();
     }
 
     fs::path& append_n_times(fs::path& base_dir, std::vector<std::string>& dirs){
@@ -59,9 +49,36 @@ namespace {
 
         return base_dir;
     }
+
+    const std::string format_file_name(const std::string& name, const ProjectGenerator::FileNameNotation notation){
+        std::string file_name = "";
+        file_name += notation == ProjectGenerator::FileNameNotation::CAMEL_NOTATION ? std::toupper(name[0]) : std::tolower(name[0]); // preamble
+
+        for (int i = 1; i < name.size(); i++){
+            if(std::isupper(name[i])){ // written in camel
+                if(notation == ProjectGenerator::FileNameNotation::CAMEL_NOTATION){
+                    file_name += name[i];
+                }else{
+                    file_name += '_';
+                    file_name += std::tolower(name[i]);
+                }
+            }else if(name[i] == '_'){ // written in snake
+                if(notation == ProjectGenerator::FileNameNotation::CAMEL_NOTATION){
+                    i++;
+                    if(i < name.size())
+                        file_name += std::toupper(name[i]);
+                }else{
+                    file_name += '_';
+                }
+            }else {
+                file_name += name[i];
+            }
+        }
+        return file_name;
+    }
 };
 
-ProjectGenerator::GenerationStatusCode ProjectGenerator::generate(const std::string& path, std::string& project_dir_name, const bool replace_existing){
+ProjectGenerator::GenerationStatusCode ProjectGenerator::generate(const graph_type& diagram, const std::string& path, std::string& project_dir_name, const ProjectGenerator::FileNameNotation notation, const bool replace_existing){
     namespace fs = std::filesystem;
 
     // ensures project_dir_name is string, NOT path
@@ -69,7 +86,7 @@ ProjectGenerator::GenerationStatusCode ProjectGenerator::generate(const std::str
     project_dir_name.erase(std::remove(project_dir_name.begin(), project_dir_name.end(), '\\'), project_dir_name.end());
     fs::path root_path = fs::path(path);
 
-    if(!fs::exists(root_path)){
+    if(!fs::exists(root_path) || !fs::is_directory(root_path)){
         return ProjectGenerator::GenerationStatusCode::NO_SUCH_DIR;
     }
 
@@ -77,7 +94,7 @@ ProjectGenerator::GenerationStatusCode ProjectGenerator::generate(const std::str
 
     if(fs::exists(root_path)){
         if(!replace_existing){
-            return ProjectGenerator::GenerationStatusCode::EXISTING_DIR_ON_PATH;
+            return ProjectGenerator::GenerationStatusCode::EXISTING_PROJECT_DIR_ON_PATH;
         }else{
             remove_existing_project(root_path);
         }
@@ -108,15 +125,15 @@ ProjectGenerator::GenerationStatusCode ProjectGenerator::generate(const std::str
         }
     }
 
-    auto &nodes = retrieve_diagram_nodes();
+    auto &nodes = retrieve_diagram_nodes(diagram);
     std::fstream file_stream;
-    for (auto node : nodes){ // smart pointers are stored in nodes, auto& omitted on purpose
-        auto name = node->get_name(); // get name of struct/enum/class
+    for (auto& node : nodes){
+        const auto& name = format_file_name(node->get_name().toStdString(), notation); // get name of struct/enum/class
 
         if(should_generate_cpp_file(node)){ // generate defnitions code for Struct/Class
             fs::path cpp_file_path = fs::path(root_path);
             cpp_file_path = append_n_times(cpp_file_path, ProjectGenerator::file_location["cpp"]);
-            file_stream.open(cpp_file_path.append(name.toStdString()).append(".cpp"), std::fstream::out);
+            file_stream.open(cpp_file_path.append(name).append(".cpp"), std::fstream::out);
 
             if(file_stream.is_open()){
                 file_stream << node->definition().toStdString();
@@ -128,7 +145,7 @@ ProjectGenerator::GenerationStatusCode ProjectGenerator::generate(const std::str
 
         fs::path hpp_file_path = fs::path(root_path);
         hpp_file_path = append_n_times(hpp_file_path, ProjectGenerator::file_location["hpp"]);
-        file_stream.open(hpp_file_path.append(name.toStdString()).append(".hpp"), std::fstream::out);
+        file_stream.open(hpp_file_path.append(name).append(".hpp"), std::fstream::out);
 
         if(file_stream.is_open()){
             file_stream << node->declaration().toStdString();

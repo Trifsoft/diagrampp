@@ -27,6 +27,7 @@ public:
     Validator* validator;
 
     void ValidateAndLink(std::shared_ptr<IUMLClassDiagramNode> activator);
+    const DiagramGraph* get_diagram() const;
 
     bool inheritance;
     bool association;

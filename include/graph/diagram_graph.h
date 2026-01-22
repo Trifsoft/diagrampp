@@ -6,7 +6,6 @@
 #include <map>
 #include <memory>
 #include <model/base/branches.h>
-#include <model/base/branches.h>
 
 class IUMLClassDiagramNode;
 class Composition;
