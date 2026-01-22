@@ -4,11 +4,13 @@
 #include <unordered_set>
 #include "model/base/uml_class_diagram_node.h"
 #include <fstream>
+#include <filesystem>
 
+namespace fs = std::filesystem;
 
 namespace {
-    bool remove_existing_project(const std::string& path){
-        uintmax_t num_of_deletions = fs::remove_all(fs::path(path));
+    bool remove_existing_project(const fs::path& path){
+        uintmax_t num_of_deletions = fs::remove_all(path);
 
         return num_of_deletions > 0 ? true : false;
     }
@@ -49,6 +51,14 @@ namespace {
 
         return node.get()->definition().isEmpty(); // makes sense for now
     }
+
+    fs::path& append_n_times(fs::path& base_dir, std::vector<std::string>& dirs){
+        for(auto& d : dirs){
+            base_dir.append(d);
+        }
+
+        return base_dir;
+    }
 };
 
 ProjectGenerator::GenerationStatusCode ProjectGenerator::generate(const std::string& path, std::string& project_dir_name, const bool replace_existing){
@@ -57,16 +67,20 @@ ProjectGenerator::GenerationStatusCode ProjectGenerator::generate(const std::str
     // ensures project_dir_name is string, NOT path
     project_dir_name.erase(std::remove(project_dir_name.begin(), project_dir_name.end(), '/'), project_dir_name.end());
     project_dir_name.erase(std::remove(project_dir_name.begin(), project_dir_name.end(), '\\'), project_dir_name.end());
-    fs::path root_path = fs::path(path).append(project_dir_name);
+    fs::path root_path = fs::path(path);
+
+    if(!fs::exists(root_path)){
+        return ProjectGenerator::GenerationStatusCode::NO_SUCH_DIR;
+    }
+
+    root_path.append(project_dir_name);
 
     if(fs::exists(root_path)){
-        if(replace_existing){
-            remove_existing_project(path);
-        }else {
+        if(!replace_existing){
             return ProjectGenerator::GenerationStatusCode::EXISTING_DIR_ON_PATH;
+        }else{
+            remove_existing_project(root_path);
         }
-    }else{
-        return ProjectGenerator::GenerationStatusCode::NO_SUCH_DIR;
     }
 
     std::error_code ec;
@@ -100,8 +114,9 @@ ProjectGenerator::GenerationStatusCode ProjectGenerator::generate(const std::str
         auto& name = node->get_name(); // get name of struct/enum/class
 
         if(should_generate_cpp_file(node)){ // generate defnitions code for Struct/Class
-
-            file_stream.open(fs::path(ProjectGenerator::file_location["cpp"].first + '/' + name + ".cpp", ProjectGenerator::file_location["cpp"].second), std::fstream::out);
+            fs::path cpp_file_path = fs::path(root_path);
+            cpp_file_path = append_n_times(cpp_file_path, ProjectGenerator::file_location["cpp"]);
+            file_stream.open(cpp_file_path.append(name + ".cpp"), std::fstream::out);
 
             if(file_stream.is_open()){
                 file_stream << node->definition().toStdString();
@@ -111,7 +126,9 @@ ProjectGenerator::GenerationStatusCode ProjectGenerator::generate(const std::str
             }
         }
 
-        file_stream.open(fs::path(ProjectGenerator::file_location["hpp"].first + '/' + name + ".hpp", ProjectGenerator::file_location["hpp"].second), std::fstream::out);
+        fs::path hpp_file_path = fs::path(root_path);
+        hpp_file_path = append_n_times(hpp_file_path, ProjectGenerator::file_location["hpp"]);
+        file_stream.open(hpp_file_path.append(name + ".hpp"), std::fstream::out);
 
         if(file_stream.is_open()){
             file_stream << node->declaration().toStdString();

@@ -4,11 +4,6 @@
 #include <string>
 #include <map>
 #include <vector>
-#include <filesystem>
-#include <utility>
-
-
-namespace fs = std::filesystem;
 
 namespace ProjectGenerator
 {
@@ -17,9 +12,9 @@ namespace ProjectGenerator
         {"src", {"core", "utils"}},
     };
 
-    std::map<std::string, std::pair<std::string, fs::path::format>> file_location = {
-        {"include", {"include", fs::path::auto_format}},
-        {"src", {"core/utils", fs::path::auto_format}},
+    std::map<std::string, std::vector<std::string>> file_location = {
+        {"include", {"include"}},
+        {"src", {"core", "utils"}},
     };
 
     enum GenerationStatusCode{

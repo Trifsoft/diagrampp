@@ -21,7 +21,7 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 # Core sources and headers
 set(CORE_HEADERS
     include/cpp_class_item.h
-    include/help.h-
+    include/help.h
     include/history.h
     include/import_project.h
     include/main_window.h
@@ -55,6 +55,9 @@ set(CORE_HEADERS
     include/commandManager/command.h
     include/commandManager/add_node_command.h
     include/commandManager/remove_node_command.h
+    include/project_generator.h
+    include/model/base/branches.h
+    include/model/base/branches.h
 )
 
 set(CORE_SOURCES
@@ -92,6 +95,11 @@ set(CORE_SOURCES
     src/commandManager/command_manager.cpp
     src/commandManager/add_node_command.cpp
     src/commandManager/remove_node_command.cpp
+    src/commandManager/command_manager.cpp
+    src/core/project_generator.cpp
+    src/core/model/base/branchs.cpp
+    src/commandManager/command_manager.cpp
+    src/commandManager/add_node_command.cpp
 )
 
 set(UI_SOURCES
@@ -115,13 +123,6 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(DiagramPP
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
-        src/commandManager/command_manager.cpp
-        include/project_generator.h src/core/project_generator.cpp
-        include/model/base/branches.h
-        src/core/model/base/branchs.cpp
-        src/commandManager/command_manager.cpp
-        src/commandManager/add_node_command.cpp
-        include/model/base/branches.h
     )
 else()
     add_executable(DiagramPP ${PROJECT_SOURCES})
