@@ -111,12 +111,12 @@ ProjectGenerator::GenerationStatusCode ProjectGenerator::generate(const std::str
     auto &nodes = retrieve_diagram_nodes();
     std::fstream file_stream;
     for (auto node : nodes){ // smart pointers are stored in nodes, auto& omitted on purpose
-        auto& name = node->get_name(); // get name of struct/enum/class
+        auto name = node->get_name(); // get name of struct/enum/class
 
         if(should_generate_cpp_file(node)){ // generate defnitions code for Struct/Class
             fs::path cpp_file_path = fs::path(root_path);
             cpp_file_path = append_n_times(cpp_file_path, ProjectGenerator::file_location["cpp"]);
-            file_stream.open(cpp_file_path.append(name + ".cpp"), std::fstream::out);
+            file_stream.open(cpp_file_path.append(name.toStdString()).append(".cpp"), std::fstream::out);
 
             if(file_stream.is_open()){
                 file_stream << node->definition().toStdString();
@@ -128,7 +128,7 @@ ProjectGenerator::GenerationStatusCode ProjectGenerator::generate(const std::str
 
         fs::path hpp_file_path = fs::path(root_path);
         hpp_file_path = append_n_times(hpp_file_path, ProjectGenerator::file_location["hpp"]);
-        file_stream.open(hpp_file_path.append(name + ".hpp"), std::fstream::out);
+        file_stream.open(hpp_file_path.append(name.toStdString()).append(".hpp"), std::fstream::out);
 
         if(file_stream.is_open()){
             file_stream << node->declaration().toStdString();

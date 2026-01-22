@@ -29,7 +29,7 @@ void DiagramGraph::remove_node(SharedNodePtr node) {
 }
 
 // prototype, until validator is implemented
-bool DiagramGraph::add_branch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type, std::string& linkage_error_message) {
+bool DiagramGraph::add_branch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type, std::string linkage_error_message) {
     // if(!LinkageValidator::valid_linkage(from, to, type, linkage_error_message)){
     //     return false;
     // }

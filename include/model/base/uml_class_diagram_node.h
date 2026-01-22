@@ -8,6 +8,7 @@ class IUMLClassDiagramNode : public std::enable_shared_from_this<IUMLClassDiagra
 public:
     virtual ~IUMLClassDiagramNode() = default;
 
+    virtual QString get_name() const = 0;
     virtual QString get_label() const = 0;
     virtual QString declaration() const = 0;
     virtual QString definition() const = 0;

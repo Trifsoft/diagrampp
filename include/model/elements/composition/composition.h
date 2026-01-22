@@ -21,7 +21,6 @@ protected:
     QVector<std::shared_ptr<Constructor>> constructors;
 
     virtual Visibility get_default_visibility() const = 0;
-    virtual QString get_label() const = 0;
 
     Destructor get_destructor() const;
     QVector<IClassElement*> get_new_code_elements();
@@ -36,6 +35,7 @@ public:
 
     QString declaration() const override;
     QString definition() const override;
+    QString get_name() const override;
 
     QVector<const IClassElement*> get_code_elements() const;
     QMap<Visibility, QVector<const IClassElement*>> get_grouped_code_elements() const;
@@ -44,8 +44,6 @@ public:
     void add_method(const QString& name, std::shared_ptr<IType> type, Visibility visibility, MethodType method_type, const QVector<Description>& variables);
     void add_constructor(Visibility visibility, const QVector<Description>& arguments);
     void add_copy_constructor(Visibility visibility);
-
-    QString get_name() const;
 
     int get_field_count();
     int get_method_count();

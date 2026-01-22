@@ -49,19 +49,19 @@ BranchType determineBranchType(bool inheritance, bool association) {
 }
 
 void Board::ValidateAndLink(std::shared_ptr<IUMLClassDiagramNode> activator){
-    if(diagram->firstNode == nullptr){
-        diagram->firstNode = activator;
+    if(diagram->first_selected_node == nullptr){
+        diagram->first_selected_node = activator;
         return;
     }
-    diagram->secondNode = activator;
+    diagram->second_selected_node = activator;
 
     BranchType type = determineBranchType(this->inheritance, this->association);
     // dodati if i raditi
-    validator->checkLinkage(diagram->firstNode, diagram->secondNode, type);
-    diagram->addLink(diagram->firstNode, diagram->secondNode, type);
+    validator->checkLinkage(diagram->first_selected_node, diagram->second_selected_node, type);
+    diagram->add_branch(diagram->first_selected_node, diagram->second_selected_node, type, "Lorem ipsum");
     // createConnection ?
-    diagram->firstNode = nullptr;
-    diagram->secondNode = nullptr;
+    diagram->first_selected_node = nullptr;
+    diagram->second_selected_node = nullptr;
 }
 
 void Board::onLinkageToggled(){
@@ -86,7 +86,7 @@ void Board::onAddClassClicked()
 
     scene->addItem(item);
     dynamic_cast<CPPClass*>(item->getClassDiagramNode().get())->parent = item;
-    diagram->addNode(item->getClassDiagramNode());
+    diagram->add_node(item->getClassDiagramNode());
 }
 
 void Board::onAddInterfaceClicked()
@@ -105,7 +105,7 @@ void Board::onAddInterfaceClicked()
     });
     scene->addItem(item);
     dynamic_cast<CPPStruct*>(item->getClassDiagramNode().get())->parent = item;
-    diagram->addNode(item->getClassDiagramNode());
+    diagram->add_node(item->getClassDiagramNode());
 }
 
 void Board::onAddEnumClicked()
@@ -115,6 +115,5 @@ void Board::onAddEnumClicked()
             CPPStruct("Enum")
         )
     );
-    dynamic_cast<CPPEnum*>(item->getClassDiagramNode().get())->parent = item;
-    diagram->addNode(item->getClassDiagramNode());
+    diagram->add_node(item->getClassDiagramNode());
 }

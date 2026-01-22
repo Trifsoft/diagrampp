@@ -28,10 +28,11 @@ public:
     void add_node(SharedNodePtr node);
     void remove_node(SharedNodePtr node);
 
-    bool add_branch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type, std::string& linkage_error_message);
+    bool add_branch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type, std::string linkage_error_message);
     void remove_branch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type);
 
     const std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& get_diagram() const;
+    DiagramGraph() : diagram() {};
 private:
     // disscussion, shared or weak
     std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>> diagram;
@@ -39,7 +40,6 @@ private:
     void remove_neighbour(SharedNodePtr from, SharedNodePtr to, BranchType branch_type);
     void add_neighbour(SharedNodePtr from, SharedNodePtr to, BranchType branch_type);
 
-    DiagramGraph() : diagram() {};
     DiagramGraph(const DiagramGraph&) = delete;
     DiagramGraph& operator=(const DiagramGraph&) = delete;
 };

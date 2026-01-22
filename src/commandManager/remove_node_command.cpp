@@ -10,7 +10,7 @@ RemoveNodeCommand::RemoveNodeCommand(DiagramGraph* graph, std::shared_ptr<IUMLCl
 void RemoveNodeCommand::execute()
 {
     if (!m_node_removed && m_node && m_graph) {
-        m_graph->removeNode(m_node);  //uklanja node
+        m_graph->remove_node(m_node);  //uklanja node
         m_node_removed = true;
         qDebug() << "Command EXECUTE: Node uklonjen sa scene";
     }
@@ -19,7 +19,7 @@ void RemoveNodeCommand::execute()
 void RemoveNodeCommand::undo()
 {
     if (m_node_removed && m_node && m_graph) {
-        m_graph->addNode(m_node);  //vraca node nazad
+        m_graph->add_node(m_node);  //vraca node nazad
         m_node_removed = false;
         qDebug() << "Command UNDO: Node vracen na scenu";
     }
