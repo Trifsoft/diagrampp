@@ -8,11 +8,9 @@
 #include "model/elements/type/regular_type.h"
 
 Board::Board(QWidget *parent)
-    : QWidget(parent)
-    , ui(new Ui::Board)
+    : QWidget(parent), ui(new Ui::Board), diagram(new DiagramGraph())
 {
     ui->setupUi(this);
-    diagram = new DiagramGraph();
 
     scene = new QGraphicsScene(this);
     ui->board->setScene(scene);
@@ -58,7 +56,13 @@ void Board::ValidateAndLink(std::shared_ptr<IUMLClassDiagramNode> activator){
     BranchType type = determineBranchType(this->inheritance, this->association);
     // dodati if i raditi
     validator->checkLinkage(diagram->first_selected_node, diagram->second_selected_node, type);
-    diagram->add_branch(diagram->first_selected_node, diagram->second_selected_node, type, "Lorem ipsum");
+    diagram->add_branch(diagram->first_selected_node, diagram->second_selected_node, type);
+    // createConnection ?
+    diagram->first_selected_node = nullptr;
+
+    validator->checkLinkage(diagram->first_selected_node, diagram->second_selected_node, type);
+
+    diagram->add_branch(diagram->first_selected_node, diagram->second_selected_node, type);
     // createConnection ?
     diagram->first_selected_node = nullptr;
     diagram->second_selected_node = nullptr;
@@ -115,5 +119,7 @@ void Board::onAddEnumClicked()
             CPPStruct("Enum")
         )
     );
+
+    dynamic_cast<CPPEnum*>(item->getClassDiagramNode().get())->parent = item;
     diagram->add_node(item->getClassDiagramNode());
 }

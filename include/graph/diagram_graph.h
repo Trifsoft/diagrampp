@@ -16,10 +16,8 @@ using WeakNodePtr = std::weak_ptr<IUMLClassDiagramNode>;
 
 class DiagramGraph {
 public:
-    static DiagramGraph& diagram_graph(){
-        static DiagramGraph dg {};
-        return dg;
-    }
+    DiagramGraph() = default;
+    ~DiagramGraph() = default;
 
     // should be removed
     SharedNodePtr first_selected_node = nullptr;
@@ -28,20 +26,16 @@ public:
     void add_node(SharedNodePtr node);
     void remove_node(SharedNodePtr node);
 
-    bool add_branch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type, std::string linkage_error_message);
+    void add_branch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type);
     void remove_branch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type);
 
     const std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& get_diagram() const;
-    DiagramGraph() : diagram() {};
 private:
     // disscussion, shared or weak
     std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>> diagram;
 
     void remove_neighbour(SharedNodePtr from, SharedNodePtr to, BranchType branch_type);
     void add_neighbour(SharedNodePtr from, SharedNodePtr to, BranchType branch_type);
-
-    DiagramGraph(const DiagramGraph&) = delete;
-    DiagramGraph& operator=(const DiagramGraph&) = delete;
 };
 
 #endif // DIAGRAM_GRAPH_H
