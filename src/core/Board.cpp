@@ -46,7 +46,7 @@ BranchType determineBranchType(bool inheritance, bool association) {
     return BranchType::NAVIGATION;
 }
 
-void Board::ValidateAndLink(std::shared_ptr<IUMLClassDiagramNode> activator){
+void Board::ValidateAndLink(SharedNodePtr activator){
     if(diagram->first_selected_node == nullptr){
         diagram->first_selected_node = activator;
         return;
@@ -58,7 +58,6 @@ void Board::ValidateAndLink(std::shared_ptr<IUMLClassDiagramNode> activator){
     validator->checkLinkage(diagram->first_selected_node, diagram->second_selected_node, type);
     diagram->add_branch(diagram->first_selected_node, diagram->second_selected_node, type);
     // createConnection ?
-    diagram->first_selected_node = nullptr;
 
     validator->checkLinkage(diagram->first_selected_node, diagram->second_selected_node, type);
 
@@ -74,52 +73,41 @@ void Board::onLinkageToggled(){
 
 void Board::onAddClassClicked()
 {
-    CppClass* item = new CppClass(this,
-        std::make_shared<CPPClass>(
-            CPPClass("Class")
-            )
-        );
-    item->change_composition([](std::shared_ptr<Composition> c) {
-        c->add_field("test1", std::make_shared<RegularType>(RegularType("int")));
-        c->add_field("test2", std::make_shared<RegularType>(RegularType("bool")));
-        c->add_field("test3", std::make_shared<RegularType>(RegularType("float")));
-        c->add_field("test4", std::make_shared<RegularType>(RegularType("double")));
+    auto new_node = std::make_shared<CPPClass>("Class");
+    new_node->add_field("test1", std::make_shared<RegularType>(RegularType("int")));
+    new_node->add_field("test2", std::make_shared<RegularType>(RegularType("bool")));
+    new_node->add_field("test3", std::make_shared<RegularType>(RegularType("float")));
+    new_node->add_field("test4", std::make_shared<RegularType>(RegularType("double")));
+    new_node->add_method("foo", std::make_shared<RegularType>("void"), Visibility::Private, MethodType::Regular, { Description("bar", std::make_shared<RegularType>("int")) });
 
-        c->add_method("foo", std::make_shared<RegularType>("void"), Visibility::Private, MethodType::Regular, { Description("bar", std::make_shared<RegularType>("int")) });
-    });
-
-    scene->addItem(item);
-    dynamic_cast<CPPClass*>(item->getClassDiagramNode().get())->parent = item;
-    diagram->add_node(item->getClassDiagramNode());
+    add_item(new_node);
 }
 
 void Board::onAddInterfaceClicked()
 {
-    CppClass* item = new CppClass(this,
-        std::make_shared<CPPStruct>(
-            CPPStruct("Interface")
-        )
-    );
-    item->change_composition([](std::shared_ptr<Composition> c) {
-        c->add_field("test1", std::make_shared<RegularType>(RegularType("int")));
-        c->add_field("test2", std::make_shared<RegularType>(RegularType("bool")));
-        c->add_field("test3", std::make_shared<RegularType>(RegularType("float")));
-        c->add_field("test4", std::make_shared<RegularType>(RegularType("double")));
-        c->add_method("foo", std::make_shared<RegularType>("void"), Visibility::Private, MethodType::Regular, { Description("bar", std::make_shared<RegularType>("int")) });
-    });
-    scene->addItem(item);
-    dynamic_cast<CPPStruct*>(item->getClassDiagramNode().get())->parent = item;
-    diagram->add_node(item->getClassDiagramNode());
+    auto new_node = std::make_shared<CPPStruct>("Interface");
+    new_node->add_field("test1", std::make_shared<RegularType>(RegularType("int")));
+    new_node->add_field("test2", std::make_shared<RegularType>(RegularType("bool")));
+    new_node->add_field("test3", std::make_shared<RegularType>(RegularType("float")));
+    new_node->add_field("test4", std::make_shared<RegularType>(RegularType("double")));
+    new_node->add_method("foo", std::make_shared<RegularType>("void"), Visibility::Private, MethodType::Regular, { Description("bar", std::make_shared<RegularType>("int")) });
+
+    add_item(new_node);
 }
 
 void Board::onAddEnumClicked()
 {
-    CppClass* item = new CppClass(this,
-        std::make_shared<CPPStruct>(
-            CPPStruct("Enum")
-        )
-    );
+    // CppClass* item = new CppClass(this,
+    //     std::make_shared<CPPStruct>(
+    //         CPPStruct("Enum")
+    //     )
+    // );
+    add_item(std::make_shared<CPPStruct>(CPPStruct("Enum")));
+}
 
-    dynamic_cast<CPPEnum*>(item->getClassDiagramNode().get())->parent = item;
-    diagram->add_node(item->getClassDiagramNode());
+void Board::add_item(std::shared_ptr<Composition> node) {   //TODO [Nikola] - izmeniti da bude IUMLClassDiagramNode umesto Composition
+    CppClass* item = new CppClass(this, node);
+    scene->addItem(item);
+    //dynamic_cast<CPPStruct*>(item->getClassDiagramNode().get())->parent = item;
+    diagram->add_node(item);
 }

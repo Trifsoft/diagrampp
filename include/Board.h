@@ -26,7 +26,7 @@ public:
     ~Board();
     Validator* validator;
 
-    void ValidateAndLink(std::shared_ptr<IUMLClassDiagramNode> activator);
+    void ValidateAndLink(SharedNodePtr activator);
     const DiagramGraph* get_diagram() const;
 
     bool inheritance;
@@ -44,6 +44,8 @@ private slots:
 private:
     DiagramGraph* diagram;
     Ui::Board *ui;
+
+    void add_item(std::shared_ptr<Composition> item);
 
 };
 #endif // BOARD_H

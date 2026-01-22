@@ -9,14 +9,14 @@ class IUMLClassDiagramNode;
 class AddNodeCommand : public Command
 {
 public:
-    AddNodeCommand(DiagramGraph* graph, std::shared_ptr<IUMLClassDiagramNode> node);
+    AddNodeCommand(DiagramGraph* graph, SharedNodePtr node);
     
     void execute() override;
     void undo() override;
     
 private:
     DiagramGraph* m_graph;
-    std::shared_ptr<IUMLClassDiagramNode> m_node;
+    SharedNodePtr m_node;
     bool m_node_added;
 };
 

@@ -6,10 +6,11 @@
 #include <vector>
 #include <memory>
 #include <model/base/branches.h>
+#include <graph/diagram_graph.h>
 
 class IUMLClassDiagramNode;
 
-using graph_type = std::map<std::shared_ptr<IUMLClassDiagramNode>, std::vector<std::pair<std::shared_ptr<IUMLClassDiagramNode>, BranchType>>>;
+using graph_type = std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>;
 
 namespace ProjectGenerator
 {

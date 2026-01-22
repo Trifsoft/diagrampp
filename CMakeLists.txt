@@ -58,6 +58,7 @@ set(CORE_HEADERS
     include/project_generator.h
     include/model/base/branches.h
     include/model/base/branches.h
+    include/view/node_view.h
 )
 
 set(CORE_SOURCES
@@ -100,6 +101,7 @@ set(CORE_SOURCES
     src/core/model/base/branchs.cpp
     src/commandManager/command_manager.cpp
     src/commandManager/add_node_command.cpp
+    src/core/view/node_view.cpp
 )
 
 set(UI_SOURCES

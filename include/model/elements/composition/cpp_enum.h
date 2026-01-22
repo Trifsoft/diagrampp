@@ -3,7 +3,6 @@
 
 #include <model/base/uml_class_diagram_node.h>
 #include <model/elements/cpp_enum_value.h>
-#include "view/cpp_class.h"
 #include <QString>
 #include <QVector>
 #include <optional>
@@ -26,7 +25,6 @@ public:
     QString get_name() const override;
     QVector<CPPEnumValue> get_values() const;
     QString get_label() const override;
-    CppClass* parent = nullptr;
 };
 
 #endif // CPP_ENUM_H

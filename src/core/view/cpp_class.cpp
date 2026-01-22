@@ -10,10 +10,9 @@
 #include <QTextDocument>
 
 CppClass::CppClass(Board* board,std::shared_ptr<Composition> composition, QGraphicsItem* parent)
-    : QGraphicsItem(parent)
+    : NodeView(parent)
     , m_board(board)
     , m_composition(composition)
-    , m_ClassDiagramNode(composition)
 {
     setFlag(QGraphicsItem::ItemIsSelectable, true);
     setFlag(QGraphicsItem::ItemIsMovable, true);
@@ -132,8 +131,8 @@ void CppClass::add_text(const QString text, int y_offset, bool is_selectable) {
 
 void CppClass::mousePressEvent(QGraphicsSceneMouseEvent* event){
     if (event->button() == Qt::LeftButton && m_board->linkageMode) {
-        m_ClassDiagramNode.get()->Clicked = true;
-        m_board->ValidateAndLink(m_ClassDiagramNode);
+        m_composition->Clicked = true;
+        m_board->ValidateAndLink(this);
     } else if (event->button() == Qt::RightButton) {
         qDebug() << "Edit button (needs to be implemented)";
     }
@@ -191,4 +190,8 @@ void CppClass::createConnection(CppClass* second){
     // saving parent and child relation
     this->addConnection(line, true);
     second->addConnection(line, false);
+}
+
+Composition* CppClass::get_uml_class_diagram_node() {
+    return m_composition.get();
 }

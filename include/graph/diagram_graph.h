@@ -6,12 +6,12 @@
 #include <map>
 #include <memory>
 #include <model/base/branches.h>
+#include <view/node_view.h>
 
 class IUMLClassDiagramNode;
 class Composition;
 
-using SharedNodePtr = std::shared_ptr<IUMLClassDiagramNode>;
-using WeakNodePtr = std::weak_ptr<IUMLClassDiagramNode>;
+using SharedNodePtr = NodeView*;
 
 class DiagramGraph {
 public:

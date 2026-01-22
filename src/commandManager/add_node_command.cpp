@@ -3,7 +3,7 @@
 #include <QDebug>
 
 AddNodeCommand::AddNodeCommand(DiagramGraph* graph,
-                               std::shared_ptr<IUMLClassDiagramNode> node)
+                               SharedNodePtr node)
     :m_graph(graph), m_node(node), m_node_added(false)
 {
 }

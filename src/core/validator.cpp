@@ -2,6 +2,9 @@
 
 #include <QDebug>
 #include <string>
+#include "model/elements/composition/cpp_class.h"
+#include "model/elements/composition/cpp_enum.h"
+#include "model/elements/composition/cpp_struct.h"
 
 enum class CombinationType {
     ClassClass,
@@ -16,7 +19,7 @@ enum class CombinationType {
     Unknown
 };
 
-CombinationType getCombinationType(const QString& label1, const QString& label2){
+CombinationType get_combination_type(const QString& label1, const QString& label2){
     QString combination = label1 + label2;
 
     if(combination == "classclass")     return CombinationType::ClassClass;
@@ -34,51 +37,91 @@ CombinationType getCombinationType(const QString& label1, const QString& label2)
 
 Validator::Validator() {}
 
-
-
-bool Validator::checkLinkage(std::shared_ptr<IUMLClassDiagramNode> first, std::shared_ptr<IUMLClassDiagramNode> second, BranchType branch){
-    CombinationType type = getCombinationType(first.get()->get_label(), second.get()->get_label());
-    auto cppclassfirst = dynamic_cast<CPPClass*>(first.get())->parent;
-    auto cppclasssecond = dynamic_cast<CPPClass*>(second.get())->parent;
+bool Validator::checkLinkage(NodeView* first, NodeView* second, BranchType branch){
+    CombinationType type = get_combination_type(first->get_uml_class_diagram_node()->get_label(), second->get_uml_class_diagram_node()->get_label());
     switch(type){
-        case CombinationType::ClassClass:{
-            auto cppclassfirst = dynamic_cast<CPPClass*>(first.get())->parent;
-            auto cppclasssecond = dynamic_cast<CPPClass*>(second.get())->parent;
-            cppclassfirst->createConnection(cppclasssecond); // dodaj branch
-            break;
-        }
-        case CombinationType::ClassStruct:{
+    case CombinationType::ClassClass:{
+        auto cppclassfirst = dynamic_cast<CppClass*>(first);
+        auto cppclasssecond = dynamic_cast<CppClass*>(second);
+        cppclassfirst->createConnection(cppclasssecond); // dodaj branch
+        break;
+    }
+    case CombinationType::ClassStruct:{
 
-        }
-        case CombinationType::EnumClass:{
-            break;
-        }
-        case CombinationType::ClassEnum:{
-            break;
-        }
-        case CombinationType::StructClass:{
-            return false;
-        }
-        case CombinationType::EnumEnum:{
-            return false;
-        }
-        case CombinationType::EnumStruct:{
+    }
+    case CombinationType::EnumClass:{
+        break;
+    }
+    case CombinationType::ClassEnum:{
+        break;
+    }
+    case CombinationType::StructClass:{
+        return false;
+    }
+    case CombinationType::EnumEnum:{
+        return false;
+    }
+    case CombinationType::EnumStruct:{
 
-        }
-        case CombinationType::StructStruct:{
+    }
+    case CombinationType::StructStruct:{
 
-        }
-        case CombinationType::StructEnum:{
+    }
+    case CombinationType::StructEnum:{
 
-        }
-        default:  // Correct spelling
-            qDebug() << "Unknown combination type";
-            break;
+    }
+    default:  // Correct spelling
+        qDebug() << "Unknown combination type";
+        break;
     }
 
 
     return false;
 }
+
+// bool Validator::checkLinkage(std::shared_ptr<IUMLClassDiagramNode> first, std::shared_ptr<IUMLClassDiagramNode> second, BranchType branch){
+//     CombinationType type = getCombinationType(first.get()->get_label(), second.get()->get_label());
+//     auto cppclassfirst = dynamic_cast<CPPClass*>(first.get())->parent;
+//     auto cppclasssecond = dynamic_cast<CPPClass*>(second.get())->parent;
+//     switch(type){
+//         case CombinationType::ClassClass:{
+//             auto cppclassfirst = dynamic_cast<CPPClass*>(first.get())->parent;
+//             auto cppclasssecond = dynamic_cast<CPPClass*>(second.get())->parent;
+//             cppclassfirst->createConnection(cppclasssecond); // dodaj branch
+//             break;
+//         }
+//         case CombinationType::ClassStruct:{
+
+//         }
+//         case CombinationType::EnumClass:{
+//             break;
+//         }
+//         case CombinationType::ClassEnum:{
+//             break;
+//         }
+//         case CombinationType::StructClass:{
+//             return false;
+//         }
+//         case CombinationType::EnumEnum:{
+//             return false;
+//         }
+//         case CombinationType::EnumStruct:{
+
+//         }
+//         case CombinationType::StructStruct:{
+
+//         }
+//         case CombinationType::StructEnum:{
+
+//         }
+//         default:  // Correct spelling
+//             qDebug() << "Unknown combination type";
+//             break;
+//     }
+
+
+//     return false;
+// }
 
 
 

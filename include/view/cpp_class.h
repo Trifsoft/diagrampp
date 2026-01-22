@@ -2,7 +2,7 @@
 #define _CPP_CLASS_H
 
 #include <functional>
-#include <QGraphicsItem>
+#include <view/node_view.h>
 #include <QGraphicsTextItem>
 #include <QVector>
 #include "Board.h"
@@ -16,7 +16,7 @@ class DiagramGraph;
 class Validator;
 class Board;
 
-class CppClass : public QGraphicsItem {
+class CppClass : public NodeView {
 
 public:
     CppClass(Board *board, std::shared_ptr<Composition> composition, QGraphicsItem* parent = nullptr);
@@ -26,7 +26,6 @@ public:
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
 
     void change_composition(std::function<void(std::shared_ptr<Composition>)> change);
-    inline std::shared_ptr<IUMLClassDiagramNode> getClassDiagramNode() { return m_ClassDiagramNode; }
 
     QPointF getTopCenter() const;
     QPointF getBottomCenter() const;
@@ -35,6 +34,8 @@ public:
     void updateConnections();
     void addConnection(QGraphicsLineItem* line, bool isStart);
     QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
+
+    virtual Composition* get_uml_class_diagram_node() override;
 
 private:
     struct ConnectionInfo {
@@ -47,7 +48,6 @@ private:
 
     Board* m_board;
     std::shared_ptr<Composition> m_composition;
-    std::shared_ptr<IUMLClassDiagramNode> m_ClassDiagramNode;
     int m_width;
     int m_height;
     int m_line_height;

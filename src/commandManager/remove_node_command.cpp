@@ -2,7 +2,7 @@
 #include "model/base/uml_class_diagram_node.h"
 #include <QDebug>
 
-RemoveNodeCommand::RemoveNodeCommand(DiagramGraph* graph, std::shared_ptr<IUMLClassDiagramNode> node)
+RemoveNodeCommand::RemoveNodeCommand(DiagramGraph* graph, SharedNodePtr node)
     :m_graph(graph), m_node(node), m_node_removed(false)
 {
 }
