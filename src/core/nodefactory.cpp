@@ -12,10 +12,10 @@ QString get_label(NodeType node_type) {
     }
 }
 
-NodeFactory::NodeFactory(NodeType node_type, std::function<void(const QString)> generate_class ,QWidget *parent)
+NodeFactory::NodeFactory(NodeType node_type, QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::NodeFactory)
-    , m_generate_class(generate_class)
+    , m_node_type(node_type)
 {
     ui->setupUi(this);
 
@@ -26,13 +26,11 @@ NodeFactory::NodeFactory(NodeType node_type, std::function<void(const QString)> 
 }
 
 void NodeFactory::onGenerateClick() {
-    m_generate_class(ui->className->toPlainText());
+    emit generateClicked(ui->className->toPlainText(), m_node_type);
     close();
 }
 
 NodeFactory::~NodeFactory()
 {
     delete ui;
-
-    qDebug() << "Deleted NodeFactory";
 }

@@ -74,10 +74,26 @@ void Board::onLinkageToggled(){
     this->linkageMode = ui->checkBox->isChecked();
 }
 
-void Board::onAddClassClicked()
-{
-    NodeFactory* node_factory = new NodeFactory(NodeType::Class, [this](const QString class_name) {
+void Board::onAddClassClicked()     { openNodeFactory(NodeType::Class);  }
+void Board::onAddInterfaceClicked() { openNodeFactory(NodeType::Struct); }
+void Board::onAddEnumClicked()      { openNodeFactory(NodeType::Enum);   }
 
+void Board::add_item(std::shared_ptr<Composition> node) {   //TODO [Nikola] - izmeniti da bude IUMLClassDiagramNode umesto Composition
+    CppClass* item = new CppClass(this, node);
+    scene->addItem(item);
+    //dynamic_cast<CPPStruct*>(item->getClassDiagramNode().get())->parent = item;
+    diagram->add_node(item);
+}
+
+void Board::openNodeFactory(NodeType node_type) {
+    NodeFactory* node_factory = new NodeFactory(node_type);
+    connect(node_factory, &NodeFactory::generateClicked, this, &Board::onGenerateClicked);
+    node_factory->show();
+}
+
+void Board::onGenerateClicked(const QString& class_name, NodeType node_type) {
+    switch(node_type) {
+    case NodeType::Class: {
         auto new_node = std::make_shared<CPPClass>(class_name);
         new_node->add_field("test1", std::make_shared<RegularType>(RegularType("int")));
         new_node->add_field("test2", std::make_shared<RegularType>(RegularType("bool")));
@@ -86,14 +102,9 @@ void Board::onAddClassClicked()
         new_node->add_method("foo", std::make_shared<RegularType>("void"), Visibility::Private, MethodType::Regular, { Description("bar", std::make_shared<RegularType>("int")) });
 
         add_item(new_node);
-    });
-    node_factory->show();
-}
-
-void Board::onAddInterfaceClicked()
-{
-    NodeFactory* node_factory = new NodeFactory(NodeType::Class, [this](const QString class_name) {
-
+        break;
+    }
+    case NodeType::Struct: {
         auto new_node = std::make_shared<CPPStruct>(class_name);
         new_node->add_field("test1", std::make_shared<RegularType>(RegularType("int")));
         new_node->add_field("test2", std::make_shared<RegularType>(RegularType("bool")));
@@ -102,14 +113,9 @@ void Board::onAddInterfaceClicked()
         new_node->add_method("foo", std::make_shared<RegularType>("void"), Visibility::Private, MethodType::Regular, { Description("bar", std::make_shared<RegularType>("int")) });
 
         add_item(new_node);
-    });
-    node_factory->show();
-}
-
-void Board::onAddEnumClicked()
-{
-    NodeFactory* node_factory = new NodeFactory(NodeType::Class, [this](const QString class_name) {
-
+        break;
+    }
+    case NodeType::Enum: {
         auto new_node = std::make_shared<CPPClass>(class_name);
         new_node->add_field("test1", std::make_shared<RegularType>(RegularType("int")));
         new_node->add_field("test2", std::make_shared<RegularType>(RegularType("bool")));
@@ -118,13 +124,8 @@ void Board::onAddEnumClicked()
         new_node->add_method("foo", std::make_shared<RegularType>("void"), Visibility::Private, MethodType::Regular, { Description("bar", std::make_shared<RegularType>("int")) });
 
         add_item(new_node);
-    });
-    node_factory->show();
-}
+        break;
+    }
+    }
 
-void Board::add_item(std::shared_ptr<Composition> node) {   //TODO [Nikola] - izmeniti da bude IUMLClassDiagramNode umesto Composition
-    CppClass* item = new CppClass(this, node);
-    scene->addItem(item);
-    //dynamic_cast<CPPStruct*>(item->getClassDiagramNode().get())->parent = item;
-    diagram->add_node(item);
 }

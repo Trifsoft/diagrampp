@@ -5,6 +5,7 @@
 #include "validator.h"
 #include <QWidget>
 #include <QGraphicsScene>
+#include <nodefactory.h>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -40,6 +41,7 @@ private slots:
     void onAddEnumClicked();
     void onCheckRadioButtonToggled();
     void onLinkageToggled();
+    void onGenerateClicked(const QString& class_name, NodeType node_type);
 
 private:
     DiagramGraph* diagram;
@@ -47,5 +49,6 @@ private:
 
     void add_item(std::shared_ptr<Composition> item);
 
+    void openNodeFactory(NodeType node_type);
 };
 #endif // BOARD_H
