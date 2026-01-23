@@ -57,7 +57,7 @@ private:
     void updateBoundingRect();
     void updateTextItems();
 
-    void add_text(QString text, int y_offset, bool is_selectable = false);
+    void add_text(const QString& text, int y_offset, std::optional<std::function<void()>> on_right_click = std::nullopt);
 };
 
 #endif // _CPP_CLASS_H

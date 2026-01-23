@@ -6,8 +6,10 @@
 #include <QPainter>
 #include <QGraphicsScene>
 #include <QFontMetrics>
-#include <QTextOption>
+#include <widget/class_element_text.h>
 #include <QTextDocument>
+#include <methodeditor.h>
+#include <memory>
 
 CppClass::CppClass(Board* board,std::shared_ptr<Composition> composition, QGraphicsItem* parent)
     : NodeView(parent)
@@ -18,7 +20,7 @@ CppClass::CppClass(Board* board,std::shared_ptr<Composition> composition, QGraph
     setFlag(QGraphicsItem::ItemIsMovable, true);
     setFlag(QGraphicsItem::ItemIsFocusable, true);
     setFlag(QGraphicsItem::ItemSendsGeometryChanges, true);
-    setAcceptedMouseButtons(Qt::LeftButton | Qt::RightButton);
+    setAcceptedMouseButtons(Qt::LeftButton);
     updateBoundingRect();
 }
 
@@ -67,13 +69,13 @@ void CppClass::updateBoundingRect()
     m_height = m_line_height * (1 + m_composition->fields.count() + m_composition->methods.count()) + fields_separator + methods_separator;
     m_width = metrics.horizontalAdvance(m_composition->get_name());
     for(auto& field : m_composition->fields) {
-        auto tmp_width = metrics.horizontalAdvance(field.get_declaration());
+        auto tmp_width = metrics.horizontalAdvance(field->get_declaration());
         if(tmp_width > m_width) {
             m_width = tmp_width;
         }
     }
     for(auto& method : m_composition->methods) {
-        auto tmp_width = metrics.horizontalAdvance(method.get_declaration());
+        auto tmp_width = metrics.horizontalAdvance(method->get_declaration());
         if(tmp_width > m_width) {
             m_width = tmp_width;
         }
@@ -90,12 +92,9 @@ void CppClass::updateTextItems()
     m_textItems.clear();
 
     // Create title
-    auto* titleItem = new QGraphicsTextItem(m_composition->get_name(), this);
-    titleItem->setPos(0, 0);
-    titleItem->setDefaultTextColor(Qt::white);
-    titleItem->setTextWidth(m_width);
-    titleItem->document()->setDefaultTextOption(QTextOption(Qt::AlignCenter));
-    m_textItems.append(titleItem);
+    add_text(m_composition->get_name(), 0, [this](){
+        qDebug() << "Edit button (needs to be implemented)";
+    });
 
     int y_offset = m_line_height;
     if(!m_composition->fields.isEmpty()) {
@@ -103,7 +102,7 @@ void CppClass::updateTextItems()
     }
 
     for(auto& field : m_composition->fields) {
-        add_text(field.get_declaration(), y_offset);
+        add_text(field->get_declaration(), y_offset);
         y_offset += m_line_height;
     }
 
@@ -112,29 +111,24 @@ void CppClass::updateTextItems()
     }
 
     for(auto& method : m_composition->methods) {
-        add_text(method.get_declaration(), y_offset, true);
+        add_text(method->get_declaration(), y_offset, [this, method](){
+            auto method_editor = new MethodEditor(method.get(), m_composition->get_name());
+            method_editor->show();
+        });
         y_offset += m_line_height;
     }
 }
 
-void CppClass::add_text(const QString text, int y_offset, bool is_selectable) {
-    auto* item = new QGraphicsTextItem(text, this);
+void CppClass::add_text(const QString& text, int y_offset, std::optional<std::function<void()>> on_right_click) {
+    auto* item = new ClassElementText(text, m_width, on_right_click, this);
     item->setPos(0, y_offset);
-    item->setDefaultTextColor(Qt::white);
-    if(is_selectable) {
-        item->setFlag(QGraphicsItem::ItemIsSelectable);
-    }
-    item->setTextWidth(m_width);
-    item->document()->setDefaultTextOption(QTextOption(Qt::AlignCenter));
     m_textItems.append(item);
 }
 
 void CppClass::mousePressEvent(QGraphicsSceneMouseEvent* event){
-    if (event->button() == Qt::LeftButton && m_board->linkageMode) {
+    if (m_board->linkageMode) {
         m_composition->Clicked = true;
         m_board->ValidateAndLink(this);
-    } else if (event->button() == Qt::RightButton) {
-        qDebug() << "Edit button (needs to be implemented)";
     }
 
     QGraphicsItem::mousePressEvent(event); // keep default behavior

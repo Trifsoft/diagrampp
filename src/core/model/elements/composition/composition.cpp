@@ -14,10 +14,10 @@ Destructor Composition::get_destructor() const {
 QVector<IClassElement*> Composition::get_new_code_elements() {
     QVector<IClassElement*> elements;
     for (auto& field : fields) {
-        elements.append(&field);
+        elements.append(field.get());
     }
     for (auto& method : methods) {
-        elements.append(&method);
+        elements.append(method.get());
     }
     for (auto& constructor : constructors) {
         elements.append(constructor.get());
@@ -27,13 +27,13 @@ QVector<IClassElement*> Composition::get_new_code_elements() {
 
 QVector<const IClassElement*> Composition::get_new_code_elements() const {
     QVector<const IClassElement*> elements;
-    for (const auto& field : fields) {
-        elements.append(&field);
+    for (auto& field : fields) {
+        elements.append(field.get());
     }
-    for (const auto& method : methods) {
-        elements.append(&method);
+    for (auto& method : methods) {
+        elements.append(method.get());
     }
-    for (const auto& constructor : constructors) {
+    for (auto& constructor : constructors) {
         elements.append(constructor.get());
     }
     Destructor* destructor = new Destructor(get_destructor());
@@ -46,7 +46,7 @@ QVector<const IClassElement*> Composition::get_code_elements() const {
 
     if (inheritance.has_value()) {
         auto inherited_elements = inheritance.value().second->get_code_elements();
-        for (const auto* elem : inherited_elements) {
+        for (auto& elem : inherited_elements) {
             const Method* method = dynamic_cast<const Method*>(elem);
             if (method && method->get_method_type() != MethodType::Regular) {
                 elements.append(elem);
@@ -65,7 +65,7 @@ QMap<Visibility, QVector<const IClassElement*>> Composition::get_grouped_code_el
     QMap<Visibility, QVector<const IClassElement*>> grouped;
     auto elements = get_code_elements();
 
-    for (const auto* elem : elements) {
+    for (auto& elem : elements) {
         Visibility vis = Visibility::Public;
         grouped[vis].append(elem);
     }
@@ -102,7 +102,7 @@ QString Composition::definition() const {
     QStringList definitions;
     auto elements = get_code_elements();
 
-    for (const auto* elem : elements) {
+    for (auto& elem : elements) {
         auto def = elem->definition(name);
         if (def.has_value()) {
             definitions.append(def.value());
@@ -114,11 +114,11 @@ QString Composition::definition() const {
 
 void Composition::add_field(const QString& name, std::shared_ptr<IType> type, std::optional<Visibility> visibility) {
     Visibility vis = visibility.value_or(get_default_visibility());
-    fields.append(Field(Description(name, type), vis));
+    fields.append(std::make_shared<Field>(Description(name, type), vis));
 }
 
 void Composition::add_method(const QString& name, std::shared_ptr<IType> type, Visibility visibility, MethodType method_type, const QList<Description>& variables) {
-    methods.append(Method(Description(name, type), visibility, method_type, variables));
+    methods.append(std::make_shared<Method>(Description(name, type), visibility, method_type, variables));
 }
 
 void Composition::add_constructor(Visibility visibility, const QVector<Description>& arguments) {
@@ -127,8 +127,8 @@ void Composition::add_constructor(Visibility visibility, const QVector<Descripti
 
 void Composition::add_copy_constructor(Visibility visibility) {
     QVector<Description> field_descriptions;
-    for (const auto& field : fields) {
-        field_descriptions.append(field.get_description());
+    for (auto& field : fields) {
+        field_descriptions.append(field->get_description());
     }
     constructors.append(std::make_shared<CopyConstructor>(name, field_descriptions, visibility));
 }

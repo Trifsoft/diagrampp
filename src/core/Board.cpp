@@ -13,6 +13,8 @@ Board::Board(QWidget *parent)
 {
     ui->setupUi(this);
 
+    setAttribute(Qt::WA_DeleteOnClose);
+
     scene = new QGraphicsScene(this);
     ui->board->setScene(scene);
     ui->side_menu->setStyleSheet("background-color: #2c3e50;");

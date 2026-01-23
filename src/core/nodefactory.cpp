@@ -19,6 +19,8 @@ NodeFactory::NodeFactory(NodeType node_type, std::function<void(const QString)> 
 {
     ui->setupUi(this);
 
+    setAttribute(Qt::WA_DeleteOnClose);
+
     setWindowTitle("Create new " + get_label(node_type));
     connect(ui->generate, &QPushButton::clicked, this, &NodeFactory::onGenerateClick);
 }
@@ -31,4 +33,6 @@ void NodeFactory::onGenerateClick() {
 NodeFactory::~NodeFactory()
 {
     delete ui;
+
+    qDebug() << "Deleted NodeFactory";
 }

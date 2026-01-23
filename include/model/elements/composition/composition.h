@@ -27,8 +27,8 @@ protected:
     QVector<const IClassElement*> get_new_code_elements() const;
 
 public:
-    QVector<Field> fields;
-    QVector<Method> methods;
+    QVector<std::shared_ptr<Field>> fields;
+    QVector<std::shared_ptr<Method>> methods;
 
     Composition(const QString& name, Visibility visibility, std::optional<std::pair<Visibility, Composition*>> inheritance = std::nullopt);
     virtual ~Composition() = default;
