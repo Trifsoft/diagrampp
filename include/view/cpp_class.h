@@ -5,6 +5,8 @@
 #include <view/node_view.h>
 #include <QGraphicsTextItem>
 #include <QVector>
+#include <QPushButton>
+#include <QGraphicsProxyWidget>
 #include "Board.h"
 #include <QGraphicsSceneMouseEvent>
 #include <model/elements/composition/composition.h>
@@ -17,6 +19,7 @@ class Validator;
 class Board;
 
 class CppClass : public NodeView {
+Q_OBJECT
 
 public:
     CppClass(Board *board, std::shared_ptr<Composition> composition, QGraphicsItem* parent = nullptr);
@@ -56,8 +59,15 @@ private:
 
     void updateBoundingRect();
     void updateTextItems();
+    void update_button();
 
     void add_text(QString text, int y_offset, bool is_selectable = false);
+
+    QPushButton* m_add_button;
+    QGraphicsProxyWidget* m_button_proxy;
+    void on_add_button_clicked();
+signals:
+    void add_element_request(IUMLClassDiagramNode* node, IClassElement* element);
 };
 
 #endif // _CPP_CLASS_H

@@ -19,9 +19,16 @@ CppClass::CppClass(Board* board,std::shared_ptr<Composition> composition, QGraph
     setFlag(QGraphicsItem::ItemIsFocusable, true);
     setFlag(QGraphicsItem::ItemSendsGeometryChanges, true);
     setAcceptedMouseButtons(Qt::LeftButton | Qt::RightButton);
+
+    //setup button
+    m_add_button = new QPushButton("+");
+    m_button_proxy = new QGraphicsProxyWidget(this);
+    m_button_proxy->setWidget(m_add_button);
+    connect(m_add_button, &QPushButton::clicked, this, &CppClass::on_add_button_clicked);
+
+
     updateBoundingRect();
 }
-
 
 QRectF CppClass::boundingRect() const
 {
@@ -46,7 +53,10 @@ void CppClass::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, 
     }
     if(!m_composition->methods.isEmpty()) {
         painter->drawRect(QRect(0, y_offset, m_width, 1));
+        y_offset += 1 + m_line_height * m_composition->methods.count();
     }
+
+    painter->drawRect(QRect(0, y_offset, m_width, 1));
 }
 
 void CppClass::change_composition(std::function<void(std::shared_ptr<Composition>)> change)
@@ -58,6 +68,8 @@ void CppClass::change_composition(std::function<void(std::shared_ptr<Composition
 
 void CppClass::updateBoundingRect()
 {
+    prepareGeometryChange();
+
     QFont font;
     QFontMetrics metrics(font);
 
@@ -80,9 +92,25 @@ void CppClass::updateBoundingRect()
     }
     m_width += 20;
 
+
+    m_height += m_add_button->height() + 4;
+
     updateTextItems();
+    update_button();
 }
 
+void CppClass::update_button()
+{
+    if (m_button_proxy && m_add_button) {
+        const int margin = 2;
+        const int button_height = 24;
+
+        m_add_button->setFixedSize(m_width-margin, button_height-margin);
+        m_button_proxy->setPos(margin, m_height - button_height);
+    }
+}
+
+//[TODO] verovatno postoji bolje resenje od iscrtavanja i brisanja svaki put
 void CppClass::updateTextItems()
 {
     // Clear old items
@@ -127,6 +155,12 @@ void CppClass::add_text(const QString text, int y_offset, bool is_selectable) {
     item->setTextWidth(m_width);
     item->document()->setDefaultTextOption(QTextOption(Qt::AlignCenter));
     m_textItems.append(item);
+}
+
+void CppClass::on_add_button_clicked()
+{
+    qDebug() << "Button clicked";
+    emit  add_element_request(m_composition.get(), nullptr);
 }
 
 void CppClass::mousePressEvent(QGraphicsSceneMouseEvent* event){

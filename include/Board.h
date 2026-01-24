@@ -14,6 +14,7 @@ QT_END_NAMESPACE
 
 class Validator;
 class DiagramGraph;
+class IClassElement;
 
 class Board : public QWidget
 {
@@ -41,6 +42,7 @@ private slots:
     void onCheckRadioButtonToggled();
     void onLinkageToggled();
 
+    void on_add_element_requested(IUMLClassDiagramNode* node, IClassElement* element);
 private:
     DiagramGraph* diagram;
     Ui::Board *ui;

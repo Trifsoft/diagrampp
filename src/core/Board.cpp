@@ -72,6 +72,11 @@ void Board::onLinkageToggled(){
     this->linkageMode = ui->checkBox->isChecked();
 }
 
+void Board::on_add_element_requested(IUMLClassDiagramNode *node, IClassElement* element)
+{
+    qDebug() << "Recieved signal add element signal from: " << node->get_label();
+}
+
 void Board::onAddClassClicked()
 {
     NodeFactory* node_factory = new NodeFactory(NodeType::Class, [this](const QString class_name) {
@@ -125,4 +130,6 @@ void Board::add_item(std::shared_ptr<Composition> node) {   //TODO [Nikola] - iz
     scene->addItem(item);
     //dynamic_cast<CPPStruct*>(item->getClassDiagramNode().get())->parent = item;
     diagram->add_node(item);
+
+    connect(item, &CppClass::add_element_request, this, &Board::on_add_element_requested);
 }
