@@ -7,6 +7,7 @@
 #include "src/ui/ui_Board.h"
 #include "model/elements/type/regular_type.h"
 #include "nodefactory.h"
+#include "image_paths.h"
 
 Board::Board(QWidget *parent)
     : QWidget(parent), ui(new Ui::Board), diagram(new DiagramGraph())
@@ -18,16 +19,19 @@ Board::Board(QWidget *parent)
     scene = new QGraphicsScene(this);
     ui->board->setScene(scene);
     ui->side_menu->setStyleSheet("background-color: #2c3e50;");
-    ui->checkBox->setChecked(false);
+    ui->Linkage->setChecked(false);
 
     // Connect buttons to slots
     connect(ui->add_class, &QPushButton::clicked, this, &Board::onAddClassClicked);
     connect(ui->add_interface, &QPushButton::clicked, this, &Board::onAddInterfaceClicked);
     connect(ui->add_enum, &QPushButton::clicked, this, &Board::onAddEnumClicked);
-    connect(ui->radioButton_1, &QPushButton::clicked, this, &Board::onCheckRadioButtonToggled);
-    connect(ui->radioButton_2, &QPushButton::clicked, this, &Board::onCheckRadioButtonToggled);
-    connect(ui->radioButton_3, &QPushButton::clicked, this, &Board::onCheckRadioButtonToggled);
-    connect(ui->checkBox, &QPushButton::clicked, this, &Board::onLinkageToggled);
+    connect(ui->Inheritance, &QPushButton::clicked, this, &Board::onCheckRadioButtonToggled);
+    connect(ui->Association, &QPushButton::clicked, this, &Board::onCheckRadioButtonToggled);
+    connect(ui->Navigation, &QPushButton::clicked, this, &Board::onCheckRadioButtonToggled);
+    connect(ui->Aggregation, &QPushButton::clicked, this, &Board::onCheckRadioButtonToggled);
+    connect(ui->Composition, &QPushButton::clicked, this, &Board::onCheckRadioButtonToggled);
+    connect(ui->Dependency, &QPushButton::clicked, this, &Board::onCheckRadioButtonToggled);
+    connect(ui->Linkage, &QPushButton::clicked, this, &Board::onLinkageToggled);
 }
 
 Board::~Board()
@@ -38,15 +42,25 @@ Board::~Board()
 }
 
 void Board::onCheckRadioButtonToggled(){
-    this->inheritance = ui->radioButton_1->isChecked();
-    this->association = ui->radioButton_2->isChecked();
-    this->navigation = ui->radioButton_3->isChecked();
+    if(ui->Inheritance->isChecked()){
+        branchType = BranchType::INHERITANCE;
+    }else if(ui->Association->isChecked()){
+        branchType = BranchType::ASSOCIATION;
+    }else if(ui->Navigation->isChecked()){
+        branchType = BranchType::NAVIGATION;
+    }else if(ui->Aggregation->isChecked()){
+        branchType = BranchType::AGGREGATION;
+    }else if(ui->Composition->isChecked()){
+        branchType = BranchType::COMPOSITION;
+    }else{
+        branchType = BranchType::DEPENDENCY;
+    }
 }
 
-BranchType determineBranchType(bool inheritance, bool association) {
-    if (inheritance) return BranchType::INHERITANCE;
-    if (association) return BranchType::ASSOCIATION;
-    return BranchType::NAVIGATION;
+void Board::onLinkageToggled(){
+    this->linkageMode = ui->Linkage->isChecked();
+    diagram->first_selected_node = nullptr;
+    diagram->second_selected_node = nullptr;
 }
 
 void Board::ValidateAndLink(SharedNodePtr activator){
@@ -55,24 +69,21 @@ void Board::ValidateAndLink(SharedNodePtr activator){
         return;
     }
     diagram->second_selected_node = activator;
+    //dynamic_cast<CppClass*>
+    qDebug() << "process on " << diagram->first_selected_node->get_uml_class_diagram_node()->get_name() << " ->" << diagram->second_selected_node->get_uml_class_diagram_node()->get_name();
 
-    BranchType type = determineBranchType(this->inheritance, this->association);
-    // dodati if i raditi
-    validator->checkLinkage(diagram->first_selected_node, diagram->second_selected_node, type);
-    diagram->add_branch(diagram->first_selected_node, diagram->second_selected_node, type);
-    // createConnection ?
-
-    validator->checkLinkage(diagram->first_selected_node, diagram->second_selected_node, type);
-
-    diagram->add_branch(diagram->first_selected_node, diagram->second_selected_node, type);
-    // createConnection ?
+    std::string errorMessage = "/";
+    Validator::validateDiagram(errorMessage, diagram->first_selected_node, diagram->second_selected_node, branchType, diagram->get_diagram());
+#if DEBUG >=1
+    qDebug() << errorMessage;
+    diagram->showDiagram();
+#endif
+    //diagram->first_selected_node->CPPCLASS->add
     diagram->first_selected_node = nullptr;
     diagram->second_selected_node = nullptr;
+
 }
 
-void Board::onLinkageToggled(){
-    this->linkageMode = ui->checkBox->isChecked();
-}
 
 void Board::onAddClassClicked()     { openNodeFactory(NodeType::Class);  }
 void Board::onAddInterfaceClicked() { openNodeFactory(NodeType::Struct); }

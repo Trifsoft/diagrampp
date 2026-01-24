@@ -2,127 +2,111 @@
 
 #include <QDebug>
 #include <string>
-#include "model/elements/composition/cpp_class.h"
-#include "model/elements/composition/cpp_enum.h"
-#include "model/elements/composition/cpp_struct.h"
 
-enum class CombinationType {
-    ClassClass,
-    ClassStruct,
-    ClassEnum,
-    StructClass,
-    StructStruct,
-    StructEnum,
-    EnumClass,
-    EnumEnum,
-    EnumStruct,
-    Unknown
-};
 
-CombinationType get_combination_type(const QString& label1, const QString& label2){
-    QString combination = label1 + label2;
+namespace Validator {
 
-    if(combination == "classclass")     return CombinationType::ClassClass;
-    if(combination == "classstruct")    return CombinationType::ClassStruct;
-    if(combination == "enumclass")      return CombinationType::EnumClass;
-    if(combination == "classenum")      return CombinationType::ClassEnum;
-    if(combination == "structclass")    return CombinationType::StructClass;
-    if(combination == "enumenum")       return CombinationType::EnumEnum;
-    if(combination == "enumstruct")     return CombinationType::EnumStruct;
-    if(combination == "structstruct")   return CombinationType::StructStruct;
-    if(combination == "structenum")     return CombinationType::StructEnum;
+    static const std::map<std::pair<QString, QString>, bool> combinations = {
+        {{"class", "class"}, true},
+        {{"class", "struct"}, true},
+        {{"class", "enum"}, false},
+        {{"struct", "class"}, true},
+        {{"struct", "struct"}, true},
+        {{"struct", "enum"}, false},
+        {{"enum", "class"}, true},
+        {{"enum", "struct"}, true},
+        {{"enum", "enum"}, false}
+    };
 
-    return CombinationType::Unknown;
-}
+    bool validateDiagram(std::string& errorMessage, NodeView* child, NodeView* parent, BranchType branchType, std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram){
+        if(child == parent){
+            errorMessage = "Cannot self connection";
+            return false;
+        }
+        // proveri duplication u circularity
+        if(!checkDuplication(errorMessage, child, parent, diagram) || !checkLinkage(errorMessage, child, parent)){
+            return false;
+        }
 
-Validator::Validator() {}
+        // CAUTION: validator will not modify the diagram. move to board
+        diagram[child].push_back({parent, branchType});
 
-bool Validator::checkLinkage(NodeView* first, NodeView* second, BranchType branch){
-    CombinationType type = get_combination_type(first->get_uml_class_diagram_node()->get_label(), second->get_uml_class_diagram_node()->get_label());
-    switch(type){
-    case CombinationType::ClassClass:{
-        auto cppclassfirst = dynamic_cast<CppClass*>(first);
-        auto cppclasssecond = dynamic_cast<CppClass*>(second);
-        cppclassfirst->createConnection(cppclasssecond); // dodaj branch
-        break;
+        bool result;
+        switch (branchType){
+            case BranchType::INHERITANCE:
+                result = validateInheritance(errorMessage, child, parent, diagram);
+                break;
+            default:
+                result = validateOthers(errorMessage, branchType, child, parent, diagram);
+        }
+        if(!result){
+            diagram[child].pop_back();
+            return result;
+        }
+        return result;
     }
-    case CombinationType::ClassStruct:{
 
+    bool checkDuplication(std::string& errorMessage, NodeView* child, NodeView* parent, std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram){
+        for(auto iterator : diagram[child]){
+            if(parent == iterator.first){
+                errorMessage = "Connections between nodes exists";
+                return false;
+            }
+        }
+        return true;
     }
-    case CombinationType::EnumClass:{
-        break;
+    bool validateInheritance(std::string& errorMessage, NodeView* child, NodeView* parent, std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram){
+        //diamond
+        //if(isInterface(child) || isAbstract(child))
+        std::set<NodeView*> stack;
+        if(circularity(BranchType::INHERITANCE, stack, child, diagram)){
+            errorMessage = "Connection creates circular inheritance problem";
+            return false;
+        }
+        return true;
     }
-    case CombinationType::ClassEnum:{
-        break;
+    bool validateOthers(std::string& errorMessage, BranchType branchType, NodeView* child, NodeView* parent, std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram){
+        if(branchType == BranchType::COMPOSITION || branchType == BranchType::AGGREGATION){
+            std::set<NodeView*> stack;
+            if(circularity(branchType, stack, child, diagram)){
+                errorMessage = "Connection creates circular inheritance problem";
+                return false;
+            }
+        }
+        return true;
     }
-    case CombinationType::StructClass:{
+
+    bool checkLinkage(std::string& errorMessage, NodeView* first, NodeView* second){
+        auto key = std::make_pair(first->get_uml_class_diagram_node()->get_label(), second->get_uml_class_diagram_node()->get_label());
+        auto it = combinations.find(key);
+
+        if(it != combinations.end()){
+            if(it->second == false){
+                errorMessage = "Linkage error";
+            }
+            return it->second;
+        }
+        qDebug() << "Unknown combination";
         return false;
     }
-    case CombinationType::EnumEnum:{
+
+    // can optimize via parent?
+    bool circularity(BranchType branchType, std::set<NodeView*>& stack, NodeView* node, std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram){
+        if(stack.find(node) != stack.end()){
+            return true;
+        }
+
+        stack.insert(node);
+        std::vector<std::pair<SharedNodePtr, BranchType>> value = diagram[node];
+        for(auto& pair : value){
+            if(pair.second == branchType){
+                if(circularity(branchType, stack, pair.first, diagram)){
+                    return true;
+                }
+            }
+        }
         return false;
     }
-    case CombinationType::EnumStruct:{
-
-    }
-    case CombinationType::StructStruct:{
-
-    }
-    case CombinationType::StructEnum:{
-
-    }
-    default:  // Correct spelling
-        qDebug() << "Unknown combination type";
-        break;
-    }
 
 
-    return false;
 }
-
-// bool Validator::checkLinkage(std::shared_ptr<IUMLClassDiagramNode> first, std::shared_ptr<IUMLClassDiagramNode> second, BranchType branch){
-//     CombinationType type = getCombinationType(first.get()->get_label(), second.get()->get_label());
-//     auto cppclassfirst = dynamic_cast<CPPClass*>(first.get())->parent;
-//     auto cppclasssecond = dynamic_cast<CPPClass*>(second.get())->parent;
-//     switch(type){
-//         case CombinationType::ClassClass:{
-//             auto cppclassfirst = dynamic_cast<CPPClass*>(first.get())->parent;
-//             auto cppclasssecond = dynamic_cast<CPPClass*>(second.get())->parent;
-//             cppclassfirst->createConnection(cppclasssecond); // dodaj branch
-//             break;
-//         }
-//         case CombinationType::ClassStruct:{
-
-//         }
-//         case CombinationType::EnumClass:{
-//             break;
-//         }
-//         case CombinationType::ClassEnum:{
-//             break;
-//         }
-//         case CombinationType::StructClass:{
-//             return false;
-//         }
-//         case CombinationType::EnumEnum:{
-//             return false;
-//         }
-//         case CombinationType::EnumStruct:{
-
-//         }
-//         case CombinationType::StructStruct:{
-
-//         }
-//         case CombinationType::StructEnum:{
-
-//         }
-//         default:  // Correct spelling
-//             qDebug() << "Unknown combination type";
-//             break;
-//     }
-
-
-//     return false;
-// }
-
-
-
-

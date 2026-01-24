@@ -7,6 +7,7 @@
 #include <QGraphicsScene>
 #include <QFontMetrics>
 #include <widget/class_element_text.h>
+#include <QGraphicsPixmapItem>
 #include <QTextDocument>
 #include <methodeditor.h>
 #include <memory>
@@ -24,6 +25,16 @@ CppClass::CppClass(Board* board,std::shared_ptr<Composition> composition, QGraph
     updateBoundingRect();
 }
 
+
+CppClass::~CppClass(){
+    for (const PNGConnection& conn : m_pngConnections) {
+        if (conn.imageItem && conn.imageItem->scene()) {
+            conn.imageItem->scene()->removeItem(conn.imageItem);
+            delete conn.imageItem;
+        }
+    }
+    m_pngConnections.clear();
+}
 
 QRectF CppClass::boundingRect() const
 {
@@ -131,7 +142,7 @@ void CppClass::mousePressEvent(QGraphicsSceneMouseEvent* event){
         m_board->ValidateAndLink(this);
     }
 
-    QGraphicsItem::mousePressEvent(event); // keep default behavior
+    QGraphicsItem::mousePressEvent(event);
 }
 
 QPointF CppClass::getTopCenter() const{
@@ -146,44 +157,71 @@ QPointF CppClass::getBottomCenter() const{
     return mapToScene(bottomCenterLocal);
 }
 
+void CppClass::PNGConnection::updatePosition(CppClass* source){
+    if(!imageItem || !source || !targetClass){
+        return;
+    }
+    QPointF imagePoint = targetClass->getTopCenter();
+    QPointF otherPoint = source->getBottomCenter();
+
+    imageItem->setPos(imagePoint);
+
+    // place center of the picture on class edge
+    QPixmap pixmap = imageItem->pixmap();
+    imageItem->setOffset(-pixmap.width() / 2, -pixmap.height() / 2);
+
+    // rotates to point toward target class
+    QPointF direction = otherPoint - imagePoint;
+    qreal angle = qRadiansToDegrees(qAtan2(direction.y(), direction.x()));
+    imageItem->setRotation(angle);
+
+    // scaling
+    qreal distance = qSqrt(direction.x() * direction.x() + direction.y() * direction.y());
+    qreal scale = qBound(0.5, distance / 200.0, 2.0);
+    imageItem->setScale(scale);
+}
+
+void CppClass::addPNGConnection(const QString& imagePath, CppClass* target, bool imageOnTarget){
+    if(!target || imagePath.isEmpty()){
+        qDebug() << "addPngConnection";
+        return;
+    }
+
+    QPixmap pixmap(imagePath);
+    if(pixmap.isNull()){
+        qDebug() << "Failed to load PNG:" << imagePath;
+        return;
+    }
+
+    QGraphicsPixmapItem* imageItem = new QGraphicsPixmapItem(pixmap);
+    imageItem->setTransformationMode(Qt::SmoothTransformation);
+    scene()->addItem(imageItem);
+
+    PNGConnection connection;
+    connection.imageItem = imageItem;
+    connection.targetClass = target;
+    connection.imageOnTarget = imageOnTarget;
+    connection.imagePath = imagePath;
+    connection.updatePosition(this);
+    m_pngConnections.append(connection);
+
+    qDebug() << "Added PNG connection from" << m_composition->get_name() << "with image:" << imagePath;
+
+}
+
+void CppClass::updatePNGConnections(){
+    for(PNGConnection& conn : m_pngConnections){
+        conn.updatePosition(this);
+    }
+}
+
+
 // called when objects is moved in board
 QVariant CppClass::itemChange(GraphicsItemChange change, const QVariant &value){
-    if (change == ItemPositionHasChanged) {
-        updateConnections();
+    if(change == ItemPositionHasChanged){
+        updatePNGConnections();
     }
     return QGraphicsItem::itemChange(change, value);
-}
-
-void CppClass::updateConnections(){
-    for (const ConnectionInfo& info : m_connections) {
-        QLineF currentLine = info.line->line();
-        if (info.isStart) {
-            QPointF newStart = getBottomCenter();
-            info.line->setLine(QLineF(newStart, currentLine.p2()));
-        } else {
-            QPointF newEnd = getTopCenter();
-            info.line->setLine(QLineF(currentLine.p1(), newEnd));
-        }
-    }
-}
-
-void CppClass::addConnection(QGraphicsLineItem* line, bool isStart){
-    ConnectionInfo info{line, isStart};
-    m_connections.append(info);
-}
-
-void CppClass::createConnection(CppClass* second){
-    QPointF parentPoint = this->getBottomCenter();
-    QPointF childPoint = second->getTopCenter();
-    QGraphicsLineItem* line = new QGraphicsLineItem(QLineF(parentPoint, childPoint));
-
-    QGraphicsScene* sc = this->scene();
-    line->setPen(QPen(Qt::blue, 2));
-    sc->addItem(line);
-
-    // saving parent and child relation
-    this->addConnection(line, true);
-    second->addConnection(line, false);
 }
 
 Composition* CppClass::get_uml_class_diagram_node() {

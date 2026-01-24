@@ -13,7 +13,6 @@ class Board;
 }
 QT_END_NAMESPACE
 
-class Validator;
 class DiagramGraph;
 
 class Board : public QWidget
@@ -25,15 +24,12 @@ class Board : public QWidget
 public:
     Board(QWidget *parent = nullptr);
     ~Board();
-    Validator* validator;
 
     void ValidateAndLink(SharedNodePtr activator);
     const DiagramGraph* get_diagram() const;
 
-    bool inheritance;
-    bool association;
-    bool navigation;
-    bool linkageMode;
+    BranchType branchType = BranchType::INHERITANCE;
+    bool linkageMode = false;
 
 private slots:
     void onAddClassClicked();

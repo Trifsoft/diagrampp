@@ -13,6 +13,8 @@
 #include <optional>
 #include <memory>
 
+class CppClass;
+
 class Composition : public IUMLClassDiagramNode {
 protected:
     QString name;

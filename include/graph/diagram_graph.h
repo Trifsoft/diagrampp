@@ -8,6 +8,8 @@
 #include <model/base/branches.h>
 #include <view/node_view.h>
 
+#define DEBUG_MODE 0
+
 class IUMLClassDiagramNode;
 class Composition;
 
@@ -28,7 +30,11 @@ public:
     void add_branch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type);
     void remove_branch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type);
 
-    const std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& get_diagram() const;
+#if DEBUG_MODE >= 1
+    void showDiagram();
+#endif
+
+    std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& get_diagram();
 private:
     // disscussion, shared or weak
     std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>> diagram;

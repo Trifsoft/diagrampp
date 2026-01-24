@@ -10,17 +10,15 @@
 #include <model/elements/composition/composition.h>
 #include "model/base/branches.h"
 #include "graph/diagram_graph.h"
-#include "validator.h"
 
 class DiagramGraph;
-class Validator;
 class Board;
 
 class CppClass : public NodeView {
 
 public:
     CppClass(Board *board, std::shared_ptr<Composition> composition, QGraphicsItem* parent = nullptr);
-    ~CppClass() = default;
+    ~CppClass();
 
     QRectF boundingRect() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
@@ -29,22 +27,27 @@ public:
 
     QPointF getTopCenter() const;
     QPointF getBottomCenter() const;
-    void createConnection(CppClass* second);
     void mousePressEvent(QGraphicsSceneMouseEvent* event);
     void updateConnections();
-    void addConnection(QGraphicsLineItem* line, bool isStart);
     QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
+    void addPNGConnection(const QString& imagePath, CppClass* target, bool imageOnTarget = true);
+    void removeAllPNGConnections();
 
     virtual Composition* get_uml_class_diagram_node() override;
 
 private:
-    struct ConnectionInfo {
-        QGraphicsLineItem* line;
-        bool isStart;
+    struct PNGConnection {
+        QGraphicsPixmapItem* imageItem;
+        CppClass* targetClass;
+        bool imageOnTarget;
+        QString imagePath;
+
+        void updatePosition(CppClass* source);
     };
+    void updatePNGConnections();
+    QVector<PNGConnection> m_pngConnections;
 
     BranchType branch;
-    QVector<ConnectionInfo> m_connections;
 
     Board* m_board;
     std::shared_ptr<Composition> m_composition;
