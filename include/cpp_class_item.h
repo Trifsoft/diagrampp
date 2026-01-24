@@ -7,13 +7,8 @@
 class CppClassItem : public QGraphicsItem
 {
 public:
-    enum ItemType {
-        ClassType,
-        InterfaceType,
-        EnumType
-    };
 
-    CppClassItem(const QString& name, ItemType type, QGraphicsItem* parent = nullptr);
+    CppClassItem(const QString& name, QGraphicsItem* parent = nullptr);
     ~CppClassItem() = default;
 
     QRectF boundingRect() const override;
@@ -21,11 +16,9 @@ public:
 
     QString getName() const;
     void setName(const QString& name);
-    ItemType getType() const;
 
 private:
     QString m_name;
-    ItemType m_type;
     QRectF m_boundingRect;
 
     void updateBoundingRect();

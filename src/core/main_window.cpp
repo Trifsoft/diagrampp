@@ -1,7 +1,7 @@
 #include "main_window.h"
 #include "ui_main_window.h"
 #include "new_project.h"
-#include "project.h"
+#include "Board.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QWidget(parent)
@@ -32,6 +32,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
+    delete project;
     delete ui;
 }
 
@@ -68,6 +69,6 @@ void MainWindow::onHelpClicked()
 
 void MainWindow::onExampleClicked()
 {
-    Project* project = new Project();
+    project = new Board();
     project->show();
 }

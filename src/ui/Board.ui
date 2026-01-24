@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Project</class>
- <widget class="QWidget" name="Project">
+ <class>Board</class>
+ <widget class="QWidget" name="Board">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -296,6 +296,61 @@
         <property name="spacing">
          <number>12</number>
         </property>
+        <item>
+         <widget class="QCheckBox" name="Linkage">
+          <property name="text">
+           <string>Linkage Mode</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="Inheritance">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="text">
+           <string>Inheritance</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="Association">
+          <property name="text">
+           <string>Association</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="Navigation">
+          <property name="text">
+           <string>Navigation</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="Aggregation">
+          <property name="text">
+           <string>Aggregation</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="Composition">
+          <property name="text">
+           <string>Composition</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="Dependency">
+          <property name="text">
+           <string>Dependency</string>
+          </property>
+         </widget>
+        </item>
         <item>
          <spacer name="top_spacer">
           <property name="orientation">

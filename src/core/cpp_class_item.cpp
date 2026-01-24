@@ -2,10 +2,9 @@
 #include <QPainter>
 #include <QFontMetrics>
 
-CppClassItem::CppClassItem(const QString& name, ItemType type, QGraphicsItem* parent)
+CppClassItem::CppClassItem(const QString& name, QGraphicsItem* parent)
     : QGraphicsItem(parent)
     , m_name(name)
-    , m_type(type)
 {
     setFlag(QGraphicsItem::ItemIsSelectable, true);
     setFlag(QGraphicsItem::ItemIsMovable, true);
@@ -40,16 +39,11 @@ void CppClassItem::setName(const QString& name)
     update();
 }
 
-CppClassItem::ItemType CppClassItem::getType() const
-{
-    return m_type;
-}
-
 void CppClassItem::updateBoundingRect()
 {
     QFont font;
     QFontMetrics metrics(font);
-    int width = metrics.horizontalAdvance(m_name) + 20;
-    int height = metrics.height() + 10;
+    int width = metrics.horizontalAdvance(m_name);
+    int height = metrics.height();
     m_boundingRect = QRectF(0, 0, width, height);
 }
