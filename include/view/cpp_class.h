@@ -69,6 +69,7 @@ private:
         bool isSource;
         bool endLine;
         BranchType type;
+        int offset;
     };
     QList<Connection> m_connections;
     qreal size = 15.0;
@@ -82,6 +83,7 @@ private:
     int m_width;
     int m_height;
     int m_line_height;
+    int number_of_connecitons = 0;
 
     // Editable text items for now
     QVector<QGraphicsTextItem*> m_textItems;
