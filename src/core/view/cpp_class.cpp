@@ -149,11 +149,17 @@ QPointF CppClass::getBottomCenter() const{
 void CppClass::addLineConnection(CppClass* target, BranchType branchType){
     QPointF startPoint = this->getTopCenter();
     QPointF endPoint = target->getBottomCenter();
+    target->number_of_connecitons++;
 
+
+    int offset = target->number_of_connecitons*10;
     QGraphicsPolygonItem* arrow = getArrow(branchType);
     if(branchType != BranchType::ASSOCIATION){
-        arrow->setPos(target->getBottomCenter());
+        QPointF arrowPos = target->getBottomCenter();
+        arrowPos.setX(arrowPos.x() + offset);
+        arrow->setPos(arrowPos);
         scene()->addItem(arrow);
+        endPoint = arrowPos;
         endPoint.setY(endPoint.y() + size); // on bottom of arrow
     }
 
@@ -172,15 +178,17 @@ void CppClass::addLineConnection(CppClass* target, BranchType branchType){
     sourceConn.isSource = true;
     sourceConn.endLine = false;
     sourceConn.type = branchType;
+    sourceConn.offset = offset;
     m_connections.append(sourceConn);
 
     Connection targetConn;
     targetConn.line = line;
     targetConn.arrow = arrow;
     targetConn.otherClass = this;
-    targetConn.isSource = arrow == nullptr ? true : false;
+    targetConn.isSource = arrow == nullptr;
     targetConn.endLine = true;
     targetConn.type = branchType;
+    targetConn.offset = offset;
     target->m_connections.append(targetConn);
 }
 
@@ -233,19 +241,21 @@ void CppClass::updateConnectionLine(Connection& conn){
     }
     if(conn.type == BranchType::ASSOCIATION){
         QLineF currentLine = conn.line->line();
-        if (conn.endLine) {
+        if(conn.endLine){
             QPointF newStart = getBottomCenter();
             conn.line->setLine(QLineF(newStart, currentLine.p2()));
-        } else {
+        }else{
             QPointF newEnd = getTopCenter();
             conn.line->setLine(QLineF(currentLine.p1(), newEnd));
         }
         return;
     }
-    QLineF currentLine = conn.line->line();
     QPointF newStart = getTopCenter();
+    QPointF lineEnd = conn.otherClass->getBottomCenter();;
+    lineEnd.setX(lineEnd.x() + conn.offset);
+    lineEnd.setY(lineEnd.y() + size);
 
-    conn.line->setLine(QLineF(newStart, currentLine.p2()));
+    conn.line->setLine(QLineF(newStart, lineEnd));
 }
 
 void CppClass::updateConnectionArrow(Connection& conn){
@@ -253,7 +263,7 @@ void CppClass::updateConnectionArrow(Connection& conn){
         return;
     }
     QPointF arrowPos = getBottomCenter();
-    conn.arrow->setPos(arrowPos);
+    conn.arrow->setPos(arrowPos + QPointF(conn.offset,0));
 
     QLineF currentLine = conn.line->line();
     QPointF newEnd = arrowPos;
@@ -267,10 +277,11 @@ QVariant CppClass::itemChange(GraphicsItemChange change, const QVariant &value){
         updateAllConnections();
 
         for(Connection& conn : m_connections){
-            if(conn.otherClass){
+            if(conn.otherClass && conn.isSource == false){
                 conn.otherClass->updateAllConnections();
             }
         }
+
     }
     return QGraphicsItem::itemChange(change, value);
 }
