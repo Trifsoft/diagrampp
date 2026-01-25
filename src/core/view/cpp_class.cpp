@@ -404,18 +404,19 @@ QGraphicsPolygonItem* CppClass::getArrow(BranchType branchType){
     return arrow;
 }
 
-void CppClass::updateAllConnections(){
+void CppClass::updateAllConnections(int level){
     for(Connection& conn : m_connections){
         if(!conn.line || !conn.otherClass){
             continue;
         }
         if(conn.isSource){
             updateConnectionLine(conn);
-        }else{
+        }else if(level != 1){
             updateConnectionArrow(conn);
         }
     }
 }
+
 
 void CppClass::updateConnectionLine(Connection& conn){
     if(!conn.line || !conn.otherClass){
@@ -455,12 +456,14 @@ void CppClass::updateConnectionArrow(Connection& conn){
 }
 
 QVariant CppClass::itemChange(GraphicsItemChange change, const QVariant &value){
+    int level = 0;
     if(change == ItemPositionHasChanged){
-        updateAllConnections();
+        updateAllConnections(level);
 
         for(Connection& conn : m_connections){
             if(conn.otherClass && conn.isSource == false){
-                conn.otherClass->updateAllConnections();
+                qDebug() << "uso u petlju= ZASTO";
+                conn.otherClass->updateAllConnections(level+1);
             }
         }
 
