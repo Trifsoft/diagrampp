@@ -70,14 +70,24 @@ void Board::ValidateAndLink(SharedNodePtr activator){
     }
     diagram->second_selected_node = activator;
     //dynamic_cast<CppClass*>
-    qDebug() << "process on " << diagram->first_selected_node->get_uml_class_diagram_node()->get_name() << " ->" << diagram->second_selected_node->get_uml_class_diagram_node()->get_name();
+    //qDebug() << "process on " << diagram->first_selected_node->get_uml_class_diagram_node()->get_name() << " ->" << diagram->second_selected_node->get_uml_class_diagram_node()->get_name();
 
     std::string errorMessage = "/";
-    Validator::validateDiagram(errorMessage, diagram->first_selected_node, diagram->second_selected_node, branchType, diagram->get_diagram());
+    if(!Validator::validateDiagram(errorMessage, diagram->first_selected_node, diagram->second_selected_node, branchType, diagram->get_diagram())){
+        diagram->first_selected_node = nullptr;
+        diagram->second_selected_node = nullptr;
+        return;
+    }
 #if DEBUG >=1
     qDebug() << errorMessage;
     diagram->showDiagram();
 #endif
+
+    CppClass* f = dynamic_cast<CppClass*>(diagram->first_selected_node);
+    CppClass* s = dynamic_cast<CppClass*>(diagram->second_selected_node);
+
+    f->addPNGConnection(ImagePaths::association(), s);
+    f->addLineConnection(s, BranchType::DEPENDENCY);
     //diagram->first_selected_node->CPPCLASS->add
     diagram->first_selected_node = nullptr;
     diagram->second_selected_node = nullptr;

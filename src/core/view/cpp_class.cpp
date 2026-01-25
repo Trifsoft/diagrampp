@@ -12,7 +12,7 @@
 #include <methodeditor.h>
 #include <memory>
 
-CppClass::CppClass(Board* board,std::shared_ptr<Composition> composition, QGraphicsItem* parent)
+CppClass::CppClass(Board* board,std::shared_ptr<Composition> composition, QGraphicsObject* parent)
     : NodeView(parent)
     , m_board(board)
     , m_composition(composition)
@@ -161,27 +161,24 @@ void CppClass::PNGConnection::updatePosition(CppClass* source){
     if(!imageItem || !source || !targetClass){
         return;
     }
-    QPointF imagePoint = targetClass->getTopCenter();
-    QPointF otherPoint = source->getBottomCenter();
+    QPointF imagePoint = targetClass->getBottomCenter();
+    QPointF otherPoint = source->getTopCenter();
 
-    imageItem->setPos(imagePoint);
+    imageItem->setPos(otherPoint);
 
     // place center of the picture on class edge
     QPixmap pixmap = imageItem->pixmap();
-    imageItem->setOffset(-pixmap.width() / 2, -pixmap.height() / 2);
+    int photoWidth = pixmap.width();
+    int photoHeight = pixmap.height();
+    imageItem->setOffset(0, -pixmap.height() / 2);
 
     // rotates to point toward target class
-    QPointF direction = otherPoint - imagePoint;
+    QPointF direction = -(otherPoint - imagePoint);
     qreal angle = qRadiansToDegrees(qAtan2(direction.y(), direction.x()));
     imageItem->setRotation(angle);
-
-    // scaling
-    qreal distance = qSqrt(direction.x() * direction.x() + direction.y() * direction.y());
-    qreal scale = qBound(0.5, distance / 200.0, 2.0);
-    imageItem->setScale(scale);
 }
 
-void CppClass::addPNGConnection(const QString& imagePath, CppClass* target, bool imageOnTarget){
+void CppClass::addPNGConnection(const QString& imagePath, CppClass* target){
     if(!target || imagePath.isEmpty()){
         qDebug() << "addPngConnection";
         return;
@@ -197,15 +194,12 @@ void CppClass::addPNGConnection(const QString& imagePath, CppClass* target, bool
     imageItem->setTransformationMode(Qt::SmoothTransformation);
     scene()->addItem(imageItem);
 
-    PNGConnection connection;
-    connection.imageItem = imageItem;
-    connection.targetClass = target;
-    connection.imageOnTarget = imageOnTarget;
-    connection.imagePath = imagePath;
-    connection.updatePosition(this);
-    m_pngConnections.append(connection);
-
-    qDebug() << "Added PNG connection from" << m_composition->get_name() << "with image:" << imagePath;
+    PNGConnection targetConnection;
+    targetConnection.imageItem = imageItem;
+    targetConnection.targetClass = target;
+    targetConnection.imagePath = imagePath;
+    targetConnection.updatePosition(this);
+    m_pngConnections.append(targetConnection);
 
 }
 
@@ -216,13 +210,60 @@ void CppClass::updatePNGConnections(){
 }
 
 
+void CppClass::updateConnections(){
+    for (const ConnectionInfo& info : m_connections) {
+        QLineF currentLine = info.line->line();
+        if (info.isStart) {
+            QPointF newStart = getTopCenter();
+            info.line->setLine(QLineF(newStart, currentLine.p2()));
+        } else {
+            QPointF newEnd = getBottomCenter();
+            info.line->setLine(QLineF(currentLine.p1(), newEnd));
+        }
+    }
+}
+
+
+
+void CppClass::addConnectionInfo(QGraphicsLineItem* line, bool isStart){
+    ConnectionInfo info{line, isStart};
+    m_connections.append(info);
+}
+
+
+void CppClass::addLineConnection(CppClass* second, BranchType branchType){
+    QPointF parentPoint = this->getTopCenter();
+    QPointF childPoint = second->getBottomCenter();
+    QGraphicsLineItem* line = new QGraphicsLineItem(QLineF(parentPoint, childPoint));
+    QPen pen(Qt::black, 4);
+    if(branchType != BranchType::DEPENDENCY){
+        QGraphicsScene* sc = this->scene();
+        line->setPen(pen);
+        sc->addItem(line);
+    }else{
+        QGraphicsScene* sc = this->scene();
+        pen.setStyle(Qt::DashLine);
+        line->setPen(pen);
+        sc->addItem(line);
+
+    }
+
+    // saving parent and child relation
+    this->addConnectionInfo(line, true);
+    second->addConnectionInfo(line, false);
+}
+
+
 // called when objects is moved in board
 QVariant CppClass::itemChange(GraphicsItemChange change, const QVariant &value){
     if(change == ItemPositionHasChanged){
+        updateConnections();
         updatePNGConnections();
     }
     return QGraphicsItem::itemChange(change, value);
 }
+
+
 
 Composition* CppClass::get_uml_class_diagram_node() {
     return m_composition.get();
