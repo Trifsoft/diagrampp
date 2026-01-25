@@ -62,6 +62,8 @@ private:
     void update_button();
 
     void add_text(QString text, int y_offset, bool is_selectable = false);
+    void add_new_field();
+    void add_new_method();
 
     QPushButton* m_add_button;
     QGraphicsProxyWidget* m_button_proxy;

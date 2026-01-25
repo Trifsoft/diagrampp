@@ -40,8 +40,9 @@ public:
     QVector<const IClassElement*> get_code_elements() const;
     QMap<Visibility, QVector<const IClassElement*>> get_grouped_code_elements() const;
 
-    void add_field(const QString& name, std::shared_ptr<IType> type, std::optional<Visibility> visibility = std::nullopt);
-    void add_method(const QString& name, std::shared_ptr<IType> type, Visibility visibility, MethodType method_type, const QVector<Description>& variables);
+    void add_field(const QString& name, const QString& type, std::optional<Visibility> visibility = std::nullopt);
+    // void add_field(const Description& description, std::optional<Visibility> visibility = std::nullopt);
+    void add_method(const QString& name,  std::shared_ptr<IType> type, Visibility visibility, MethodType method_type, const QVector<Description>& variables);
     void add_constructor(Visibility visibility, const QVector<Description>& arguments);
     void add_copy_constructor(Visibility visibility);
 

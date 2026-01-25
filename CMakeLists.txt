@@ -59,6 +59,7 @@ set(CORE_HEADERS
     include/model/base/branches.h
     include/model/base/branches.h
     include/view/node_view.h
+    include/view/field_dialog.h
     include/nodefactory.h
 )
 
@@ -103,6 +104,7 @@ set(CORE_SOURCES
     src/commandManager/command_manager.cpp
     src/commandManager/add_node_command.cpp
     src/core/view/node_view.cpp
+    src/core/view/field_dialog.cpp
     src/core/nodefactory.cpp
 )
 

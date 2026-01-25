@@ -17,9 +17,13 @@ private:
     ElementRank element_rank;
     QString name;
     Visibility visibility;
+
 public:
     IClassElement(ElementRank rank, const QString& name, Visibility vis);
     virtual ~IClassElement();
+
+    const Visibility get_visibility() const;
+    const QString& get_name() const;
 
     virtual QString get_declaration() const = 0;
     virtual std::optional<QString> definition(const QString& class_name) const = 0;

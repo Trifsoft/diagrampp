@@ -14,6 +14,8 @@ private:
     bool is_const;
 public:
     Description(const QString& name, const std::shared_ptr<IType>& type, Reference reference = Reference::None, bool is_const = false);
+    Description (const Description &desc) = default;
+    Description() = default;
 
     QString get_name() const;
     std::shared_ptr<IType> get_type() const;

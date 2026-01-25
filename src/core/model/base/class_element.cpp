@@ -7,6 +7,16 @@ IClassElement::IClassElement(ElementRank rank, const QString& name, Visibility v
 IClassElement::~IClassElement() {
 }
 
+const Visibility IClassElement::get_visibility() const
+{
+    return visibility;
+}
+
+const QString &IClassElement::get_name() const
+{
+    return name;
+}
+
 int IClassElement::compare_to(const IClassElement& other) const {
     // Note: First check for Method subclass comparison is skipped
     // Will need to be implemented in Method subclass if needed

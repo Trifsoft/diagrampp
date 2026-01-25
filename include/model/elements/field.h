@@ -7,15 +7,23 @@
 #include <QString>
 #include <optional>
 
+
+//Will be refactored to remove type system
 class Field : public IClassElement {
 private:
+
+    // TO BE REMOVED
     Description description;
+
+    QString type;
+
     std::optional<QString> destruction;
 
 public:
-    Field(const Description& description, Visibility visibility);
-
+    // Field(const Description& description, Visibility visibility);
+    Field(QString name, QString type, Visibility visibility, std::optional<QString> destruction = std::nullopt);
     QString get_declaration() const override;
+    QString get_type() const;
     std::optional<QString> definition(const QString& class_name) const override;
 
     Description get_description() const;

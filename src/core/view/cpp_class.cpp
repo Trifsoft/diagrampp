@@ -3,11 +3,15 @@
 #include "model/elements/composition/cpp_class.h"
 #include "model/elements/composition/cpp_enum.h"
 #include "model/elements/composition/cpp_struct.h"
+#include "view/field_dialog.h"
 #include <QPainter>
 #include <QGraphicsScene>
 #include <QFontMetrics>
 #include <QTextOption>
 #include <QTextDocument>
+#include <QMenu>
+#include <QInputDialog>
+#include <qgraphicsview.h>
 
 CppClass::CppClass(Board* board,std::shared_ptr<Composition> composition, QGraphicsItem* parent)
     : NodeView(parent)
@@ -160,8 +164,45 @@ void CppClass::add_text(const QString text, int y_offset, bool is_selectable) {
 void CppClass::on_add_button_clicked()
 {
     qDebug() << "Button clicked";
+
+    QMenu context_menu;
+
+    QAction* add_field_action = context_menu.addAction("Add Field");
+    QAction* add_method_action = context_menu.addAction("Add Method");
+
+    QPoint global_pos = QCursor::pos();
+    QAction* selected_action = context_menu.exec(global_pos);
+
+    if (selected_action == add_field_action) {
+        add_new_field();
+    } else if (selected_action == add_method_action) {
+        add_new_method();
+    }
+
+}
+
+void CppClass::add_new_field(){
+
+    auto new_field = FieldDialog::create_field(scene()->views().first());
+    if(new_field.has_value()){
+
+        //[REFACTOR] should be called from Board and commandManager
+        m_composition->add_field(new_field.value().get_name(), new_field.value().get_type(), new_field.value().get_visibility());
+        updateBoundingRect();
+        update();
+
+        qDebug() << "Dodat novi field?";
+
+    }else{
+        qDebug() << "Ne moze se dodati novi field";
+    }
     emit  add_element_request(m_composition.get(), nullptr);
 }
+
+void CppClass::add_new_method(){
+    emit  add_element_request(m_composition.get(), nullptr);
+}
+
 
 void CppClass::mousePressEvent(QGraphicsSceneMouseEvent* event){
     if (event->button() == Qt::LeftButton && m_board->linkageMode) {

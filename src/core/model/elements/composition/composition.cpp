@@ -112,10 +112,14 @@ QString Composition::definition() const {
     return definitions.join("\n\n");
 }
 
-void Composition::add_field(const QString& name, std::shared_ptr<IType> type, std::optional<Visibility> visibility) {
+void Composition::add_field(const QString& name, const QString& type, std::optional<Visibility> visibility) {
     Visibility vis = visibility.value_or(get_default_visibility());
-    fields.append(Field(Description(name, type), vis));
+    fields.append(Field(name, type, vis));
 }
+
+// void Composition::add_field(const Description &description, std::optional<Visibility> visibility){
+//     fields.append(Field(description, visibility.value()));
+// }
 
 void Composition::add_method(const QString& name, std::shared_ptr<IType> type, Visibility visibility, MethodType method_type, const QList<Description>& variables) {
     methods.append(Method(Description(name, type), visibility, method_type, variables));
