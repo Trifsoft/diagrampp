@@ -41,7 +41,7 @@ class CppClass : public NodeView {
 Q_OBJECT
 
 public:
-    CppClass(Board *board, std::shared_ptr<Composition> composition, QGraphicsItem* parent = nullptr);
+    CppClass(Board *board, std::shared_ptr<Composition> composition, QGraphicsObject* parent = nullptr);
     ~CppClass();
 
     QRectF boundingRect() const override;
@@ -55,17 +55,24 @@ public:
     void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
 
     void updateConnections();
+    void addLineConnection(CppClass* second, BranchType branch);
+    void addConnectionInfo(QGraphicsLineItem* line, bool isStart);
     QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
-    void addPNGConnection(const QString& imagePath, CppClass* target, bool imageOnTarget = true);
+    void addPNGConnection(const QString& imagePath, CppClass* target);
     void removeAllPNGConnections();
 
     virtual Composition* get_uml_class_diagram_node() override;
 
 private:
+    struct ConnectionInfo {
+        QGraphicsLineItem* line;
+        bool isStart;
+    };
+    QVector<ConnectionInfo> m_connections;
+
     struct PNGConnection {
         QGraphicsPixmapItem* imageItem;
         CppClass* targetClass;
-        bool imageOnTarget;
         QString imagePath;
 
         void updatePosition(CppClass* source);
