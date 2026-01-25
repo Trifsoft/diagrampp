@@ -18,6 +18,7 @@ Board::Board(QWidget *parent)
 
     scene = new QGraphicsScene(this);
     ui->board->setScene(scene);
+    ui->board->setStyleSheet("background-color: white");
     ui->side_menu->setStyleSheet("background-color: #2c3e50;");
     ui->Linkage->setChecked(false);
 
@@ -86,8 +87,7 @@ void Board::ValidateAndLink(SharedNodePtr activator){
     CppClass* f = dynamic_cast<CppClass*>(diagram->first_selected_node);
     CppClass* s = dynamic_cast<CppClass*>(diagram->second_selected_node);
 
-    f->addPNGConnection(ImagePaths::association(), s);
-    f->addLineConnection(s, BranchType::DEPENDENCY);
+    f->addLineConnection(s, branchType);
     //diagram->first_selected_node->CPPCLASS->add
     diagram->first_selected_node = nullptr;
     diagram->second_selected_node = nullptr;

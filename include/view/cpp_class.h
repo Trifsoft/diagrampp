@@ -42,7 +42,7 @@ Q_OBJECT
 
 public:
     CppClass(Board *board, std::shared_ptr<Composition> composition, QGraphicsObject* parent = nullptr);
-    ~CppClass();
+    ~CppClass() = default;
 
     QRectF boundingRect() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
@@ -55,32 +55,27 @@ public:
     void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
 
     void updateConnections();
-    void addLineConnection(CppClass* second, BranchType branch);
+    void addLineConnection(CppClass* target, BranchType branch);
     void addConnectionInfo(QGraphicsLineItem* line, bool isStart);
     QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
-    void addPNGConnection(const QString& imagePath, CppClass* target);
-    void removeAllPNGConnections();
-
+    void updateAllConnections();
     virtual Composition* get_uml_class_diagram_node() override;
 
 private:
-    struct ConnectionInfo {
-        QGraphicsLineItem* line;
-        bool isStart;
+    struct Connection {
+        QGraphicsLineItem* line = nullptr;
+        QGraphicsPolygonItem* arrow = nullptr;
+        CppClass* otherClass = nullptr;
+        bool isSource;
+        bool endLine;
+        BranchType type;
     };
-    QVector<ConnectionInfo> m_connections;
+    QList<Connection> m_connections;
+    qreal size = 15.0;
 
-    struct PNGConnection {
-        QGraphicsPixmapItem* imageItem;
-        CppClass* targetClass;
-        QString imagePath;
-
-        void updatePosition(CppClass* source);
-    };
-    void updatePNGConnections();
-    QVector<PNGConnection> m_pngConnections;
-
-    BranchType branch;
+    void updateConnectionLine(Connection& conn);
+    void updateConnectionArrow(Connection& conn);
+    QGraphicsPolygonItem* getArrow(BranchType branchType);
 
     Board* m_board;
     std::shared_ptr<Composition> m_composition;
