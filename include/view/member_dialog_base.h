@@ -41,6 +41,8 @@ protected:
     virtual void extra_setup_ui() {}
     virtual void extra_validate(QString& error) const {}
 
+    //Virtual destructor?
+
 };
 
 #endif //MEMBER_DIALOG_BASE_H

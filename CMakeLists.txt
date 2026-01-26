@@ -30,8 +30,8 @@ set(CORE_HEADERS
     include/graph/diagram_graph.h
     include/model/base/visibility.h
     include/model/base/reference.h
-    include/model/base/class_element.h
-    include/model/base/description.h
+    include/model/elements/argument.h
+    include/model/elements/class_element.h
     include/model/elements/type/type.h
     include/model/elements/type/regular_type.h
     include/model/elements/type/generic_type.h
@@ -78,8 +78,8 @@ set(CORE_SOURCES
     src/core/graph/diagram_graph.cpp
     src/core/model/base/visibility.cpp
     src/core/model/base/reference.cpp
-    src/core/model/base/class_element.cpp
-    src/core/model/base/description.cpp
+    src/core/model/elements/argument.cpp
+    src/core/model/elements/class_element.cpp
     src/core/model/elements/type/regular_type.cpp
     src/core/model/elements/type/generic_type.cpp
     src/core/model/elements/type/namespace_type.cpp

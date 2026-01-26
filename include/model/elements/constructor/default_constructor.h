@@ -2,8 +2,7 @@
 #define DEFAULT_CONSTRUCTOR_H
 
 #include "constructor.h"
-#include <model/base/description.h>
-#include <model/base/visibility.h>
+#include <model/elements/argument.h>
 #include <QString>
 #include <QVector>
 
@@ -12,7 +11,7 @@ protected:
     QString get_custom_definition() const override;
 
 public:
-    DefaultConstructor(const QString& class_name, const QVector<Description>& arguments, Visibility visibility);
+    DefaultConstructor(const QString& class_name, const QVector<Argument>& arguments, Visibility visibility);
 };
 
 #endif // DEFAULT_CONSTRUCTOR_H

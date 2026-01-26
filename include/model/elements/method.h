@@ -1,14 +1,14 @@
 #ifndef METHOD_H
 #define METHOD_H
 
-#include <model/base/class_element.h>
-#include <model/base/description.h>
+#include <model/elements/class_element.h>
+#include <model/elements/argument.h>
 #include <model/base/visibility.h>
 #include <QString>
 #include <QVector>
 #include <optional>
 
-enum class MethodType {
+enum class MethodKind {
     Regular,
     RegularVirtual,
     PureVirtual
@@ -16,22 +16,24 @@ enum class MethodType {
 
 class Method : public IClassElement {
 private:
-    Description description;
-    MethodType method_type;
-    QList<Description> variables;
-    QString definition_block;
+    QString return_type;
+    MethodKind method_kind;
+    QList<Argument> arguments;
 
+    QString definition_block;
     QString get_base_method_declaration() const;
 
 public:
-    Method(const Description& description, Visibility visibility, MethodType method_type, const QList<Description>& variables);
+    // Method(const Argument& description, Visibility visibility, MethodKind method_kind, const QList<Argument>& arguments);
+    Method(const QString& name, const QString& return_type, Visibility visibility, MethodKind method_kind, const QList<Argument>& arguments);
+    Method(const Method& other) = default;
 
-    QString get_declaration() const override;
+    QString declaration() const override;
     std::optional<QString> definition(const QString& class_name) const override;
 
-    Description get_description() const;
-    MethodType get_method_type() const;
-    QList<Description> get_variables() const;
+    QString get_return_type() const;
+    MethodKind get_method_kind() const;
+    QList<Argument> get_arguments() const;
     QString get_definition_block() const;
     void set_definition_block(const QString& definition_block);
 };

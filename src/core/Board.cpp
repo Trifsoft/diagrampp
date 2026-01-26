@@ -98,7 +98,7 @@ void Board::onAddClassClicked()
         new_node->add_field("test1", "tip1", Visibility::Protected);
         new_node->add_field("test2", "tip2", Visibility::Private);
         new_node->add_field("test3", "tip3");
-        new_node->add_method("method", std::make_shared<RegularType>("void"), Visibility::Private, MethodType::Regular, { Description("bar", std::make_shared<RegularType>("int")) });
+        new_node->add_method("method","void", Visibility::Private, MethodKind::Regular, { Argument("bar", "int") });
 
 
         add_item(new_node);
@@ -121,7 +121,7 @@ void Board::onAddInterfaceClicked()
         new_node->add_field("test1", "tip1", Visibility::Protected);
         new_node->add_field("test2", "tip2", Visibility::Private);
         new_node->add_field("test3", "tip3");
-        new_node->add_method("method", std::make_shared<RegularType>("void"), Visibility::Private, MethodType::Regular, { Description("bar", std::make_shared<RegularType>("int")) });
+        new_node->add_method("method","void", Visibility::Private, MethodKind::Regular, { Argument("bar", "int") });
 
         add_item(new_node);
     });
@@ -142,7 +142,7 @@ void Board::onAddEnumClicked()
         new_node->add_field("test1", "tip1", Visibility::Protected);
         new_node->add_field("test2", "tip2", Visibility::Private);
         new_node->add_field("test3", "tip3");
-        new_node->add_method("method", std::make_shared<RegularType>("void"), Visibility::Private, MethodType::Regular, { Description("bar", std::make_shared<RegularType>("int")) });
+        new_node->add_method("method","void", Visibility::Private, MethodKind::Regular, { Argument("bar", "int") });
 
 
         add_item(new_node);

@@ -83,13 +83,13 @@ void CppClass::updateBoundingRect()
     m_height = m_line_height * (1 + m_composition->fields.count() + m_composition->methods.count()) + fields_separator + methods_separator;
     m_width = metrics.horizontalAdvance(m_composition->get_name());
     for(auto& field : m_composition->fields) {
-        auto tmp_width = metrics.horizontalAdvance(field.get_declaration());
+        auto tmp_width = metrics.horizontalAdvance(field.declaration());
         if(tmp_width > m_width) {
             m_width = tmp_width;
         }
     }
     for(auto& method : m_composition->methods) {
-        auto tmp_width = metrics.horizontalAdvance(method.get_declaration());
+        auto tmp_width = metrics.horizontalAdvance(method.declaration());
         if(tmp_width > m_width) {
             m_width = tmp_width;
         }
@@ -135,7 +135,7 @@ void CppClass::updateTextItems()
     }
 
     for(auto& field : m_composition->fields) {
-        add_text(field.get_declaration(), y_offset);
+        add_text(field.declaration(), y_offset);
         y_offset += m_line_height;
     }
 
@@ -144,7 +144,7 @@ void CppClass::updateTextItems()
     }
 
     for(auto& method : m_composition->methods) {
-        add_text(method.get_declaration(), y_offset, true);
+        add_text(method.declaration(), y_offset, true);
         y_offset += m_line_height;
     }
 }

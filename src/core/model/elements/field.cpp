@@ -10,21 +10,17 @@ Field::Field(const Description& description, Visibility visibility)
 
 Field::Field(QString name, QString type, Visibility visibility, std::optional<QString> destruction)
     : IClassElement(ElementRank::Field, name, visibility),
-    type(type),
-    destruction(destruction) {}
+      type(type),
+      destruction(destruction) {}
 
-// QString Field::get_declaration() const {
+// QString Field::declaration() const {
 //     return description.to_string();
 // }
 
-QString Field::get_declaration() const {
-    return type + "  "  + get_name();
+QString Field::declaration() const {
+    return type + "  "  + name;
 }
 
-QString Field::get_type() const
-{
-    return type;
-}
 
 
 std::optional<QString> Field::definition(const QString& class_name) const {
@@ -32,9 +28,6 @@ std::optional<QString> Field::definition(const QString& class_name) const {
     return std::nullopt;
 }
 
-Description Field::get_description() const {
-    return description;
-}
 
 void Field::set_destruction(const std::optional<QString>& destruction) {
     this->destruction = destruction;
@@ -42,6 +35,11 @@ void Field::set_destruction(const std::optional<QString>& destruction) {
 
 void Field::set_destruction(const QString& destruction) {
     this->destruction = destruction;
+}
+
+QString Field::get_type() const
+{
+    return type;
 }
 
 std::optional<QString> Field::get_destruction() const {
