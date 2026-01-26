@@ -16,6 +16,7 @@
 #include <qgraphicsview.h>
 #include <methodeditor.h>
 #include <memory>
+#include <utility>
 
 // EditableTextItem implementation
 EditableTextItem::EditableTextItem(const QString& text, ItemType type, std::weak_ptr<IClassElement> element_weak, QGraphicsItem* parent)
@@ -102,6 +103,7 @@ CppClass::CppClass(Board* board,std::shared_ptr<Composition> composition, QGraph
     setFlag(QGraphicsItem::ItemIsMovable, true);
     setFlag(QGraphicsItem::ItemIsFocusable, true);
     setFlag(QGraphicsItem::ItemSendsGeometryChanges, true);
+<<<<<<< HEAD
 
     setAcceptedMouseButtons(Qt::LeftButton | Qt::RightButton);
 
@@ -112,6 +114,9 @@ CppClass::CppClass(Board* board,std::shared_ptr<Composition> composition, QGraph
     connect(m_add_button, &QPushButton::clicked, this, &CppClass::on_add_button_clicked);
 
 
+=======
+    setAcceptedMouseButtons(Qt::LeftButton | Qt::RightButton);
+>>>>>>> 4408906 (implemented diamond and cyclic detection. Created removeLink function and fixed GUI glitches)
     updateBoundingRect();
 }
 
@@ -311,6 +316,8 @@ void CppClass::mousePressEvent(QGraphicsSceneMouseEvent* event){
     if (m_board->linkageMode) {
         m_composition->Clicked = true;
         m_board->ValidateAndLink(this);
+    }else if(event->button() == Qt::RightButton){
+        m_board->onUndo();
     }
 
     QGraphicsItem::mousePressEvent(event);
@@ -331,10 +338,9 @@ QPointF CppClass::getBottomCenter() const{
 void CppClass::addLineConnection(CppClass* target, BranchType branchType){
     QPointF startPoint = this->getTopCenter();
     QPointF endPoint = target->getBottomCenter();
-    target->number_of_connecitons++;
 
 
-    int offset = target->number_of_connecitons*10;
+    int offset = target->number_of_connecitons*local_offset;
     QGraphicsPolygonItem* arrow = getArrow(branchType);
     if(branchType != BranchType::ASSOCIATION){
         QPointF arrowPos = target->getBottomCenter();
@@ -372,6 +378,7 @@ void CppClass::addLineConnection(CppClass* target, BranchType branchType){
     targetConn.type = branchType;
     targetConn.offset = offset;
     target->m_connections.append(targetConn);
+    target->number_of_connecitons++;
 }
 
 QGraphicsPolygonItem* CppClass::getArrow(BranchType branchType){
@@ -404,14 +411,14 @@ QGraphicsPolygonItem* CppClass::getArrow(BranchType branchType){
     return arrow;
 }
 
-void CppClass::updateAllConnections(int level){
+void CppClass::updateAllConnections(){
     for(Connection& conn : m_connections){
         if(!conn.line || !conn.otherClass){
             continue;
         }
         if(conn.isSource){
             updateConnectionLine(conn);
-        }else if(level != 1){
+        }else{
             updateConnectionArrow(conn);
         }
     }
@@ -434,8 +441,9 @@ void CppClass::updateConnectionLine(Connection& conn){
         return;
     }
     QPointF newStart = getTopCenter();
-    QPointF lineEnd = conn.otherClass->getBottomCenter();;
-    lineEnd.setX(lineEnd.x() + conn.offset);
+    QPointF lineEnd = conn.otherClass->getBottomCenter();
+    QPointF arrowPos = conn.arrow->pos();
+    lineEnd.setX(arrowPos.x());
     lineEnd.setY(lineEnd.y() + size);
 
     conn.line->setLine(QLineF(newStart, lineEnd));
@@ -449,26 +457,83 @@ void CppClass::updateConnectionArrow(Connection& conn){
     conn.arrow->setPos(arrowPos + QPointF(conn.offset,0));
 
     QLineF currentLine = conn.line->line();
-    QPointF newEnd = arrowPos;
+    QPointF newEnd = conn.arrow->pos();
     newEnd.setY(newEnd.y() + size);
 
     conn.line->setLine(QLineF(currentLine.p1(), newEnd));
 }
 
 QVariant CppClass::itemChange(GraphicsItemChange change, const QVariant &value){
-    int level = 0;
     if(change == ItemPositionHasChanged){
-        updateAllConnections(level);
+        updateAllConnections();
 
         for(Connection& conn : m_connections){
-            if(conn.otherClass && conn.isSource == false){
-                qDebug() << "uso u petlju= ZASTO";
-                conn.otherClass->updateAllConnections(level+1);
+            if(conn.otherClass){
+                conn.otherClass->updateAllConnections();
             }
         }
 
     }
     return QGraphicsItem::itemChange(change, value);
+}
+
+void CppClass::removeLink(CppClass* target){
+    if(!target){
+        return;
+    }
+
+    Connection *source_connection = nullptr, *target_connection = nullptr;
+    for(int i = 0; i < m_connections.size(); i++){
+        if(m_connections[i].otherClass == target){
+            source_connection = &m_connections[i];
+            m_connections.removeAt(i);
+            break;
+        }
+    }
+    for(int i = 0; i < target->m_connections.size(); i++){
+        if(target->m_connections[i].otherClass == this){
+            target_connection = &target->m_connections[i];
+            target->m_connections.removeAt(i);
+            break;
+        }
+    }
+
+    if(source_connection->isSource == false){
+        std::swap(source_connection, target_connection);
+    }
+
+    if(!source_connection || !target_connection){
+        qDebug() << "failed to find connections";
+        return;
+    }
+
+    // both target and source points to same line and arrow
+    if(source_connection->line){
+        scene()->removeItem(source_connection->line);
+        delete source_connection->line;
+    }
+    if(source_connection->arrow){
+        scene()->removeItem(source_connection->arrow);
+        delete source_connection->arrow;
+    }
+
+    target->number_of_connecitons--;
+
+    target->updateOffsets();
+
+    target->updateAllConnections();
+    updateAllConnections();
+
+}
+
+void CppClass::updateOffsets(){
+    int offset = 0;
+    for(Connection& conn : m_connections){
+        if(conn.isSource == false){
+            conn.offset = offset;
+            offset += local_offset;
+        }
+    }
 }
 
 Composition* CppClass::get_uml_class_diagram_node() {

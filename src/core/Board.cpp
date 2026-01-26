@@ -3,6 +3,8 @@
 #include "model/elements/composition/cpp_struct.h"
 #include "model/elements/composition/cpp_class.h"
 #include "model/elements/composition/cpp_enum.h"
+// ONLY FOR SLEEP
+#include <unistd.h>
 #include <QGraphicsView>
 #include "src/ui/ui_Board.h"
 #include "model/elements/type/regular_type.h"
@@ -75,30 +77,37 @@ void Board::ValidateAndLink(SharedNodePtr activator){
 
     std::string errorMessage = "/";
     if(!Validator::validateDiagram(errorMessage, diagram->first_selected_node, diagram->second_selected_node, branchType, diagram->get_diagram())){
+#if DEBUG_MODE>=1
+        qDebug() << errorMessage;
+        diagram->showDiagram();
+#endif
         diagram->first_selected_node = nullptr;
         diagram->second_selected_node = nullptr;
         return;
     }
-#if DEBUG >=1
-    qDebug() << errorMessage;
-    diagram->showDiagram();
-#endif
+
 
     CppClass* f = dynamic_cast<CppClass*>(diagram->first_selected_node);
     CppClass* s = dynamic_cast<CppClass*>(diagram->second_selected_node);
 
     f->addLineConnection(s, branchType);
-    //diagram->first_selected_node->CPPCLASS->add
+
+    last.first = f;
+    last.second = s;
+    operations.push_back(last);
     diagram->first_selected_node = nullptr;
     diagram->second_selected_node = nullptr;
 
 }
 
 
+
+
 void Board::onAddClassClicked()     { openNodeFactory(NodeType::Class);  }
 void Board::onAddInterfaceClicked() { openNodeFactory(NodeType::Struct); }
 void Board::onAddEnumClicked()      { openNodeFactory(NodeType::Enum);   }
 
+<<<<<<< HEAD
 void Board::on_add_field_requested(Composition *node, std::shared_ptr<Field> field)
 {
     if(node)
@@ -107,6 +116,19 @@ void Board::on_add_field_requested(Composition *node, std::shared_ptr<Field> fie
     }
 
     qDebug() << "Recieved signal add field from: " << node->get_label();
+=======
+void Board::onUndo(){
+    last = operations[operations.size()-3];
+    last.first->removeLink(last.second);
+    operations.pop_back();
+}
+
+void Board::add_item(std::shared_ptr<Composition> node) {   //TODO [Nikola] - izmeniti da bude IUMLClassDiagramNode umesto Composition
+    CppClass* item = new CppClass(this, node);
+    scene->addItem(item);
+    //dynamic_cast<CPPStruct*>(item->getClassDiagramNode().get())->parent = item;
+    diagram->add_node(item);
+>>>>>>> 4408906 (implemented diamond and cyclic detection. Created removeLink function and fixed GUI glitches)
 }
 
 void Board::on_add_method_requested(Composition *node, std::shared_ptr<Method> method)

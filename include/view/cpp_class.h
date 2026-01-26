@@ -57,6 +57,8 @@ public:
     void updateConnections();
     void addLineConnection(CppClass* target, BranchType branch);
     void addConnectionInfo(QGraphicsLineItem* line, bool isStart);
+    void removeLink(CppClass* target);
+
     QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
     virtual Composition* get_uml_class_diagram_node() override;
 
@@ -71,11 +73,12 @@ private:
         int offset;
     };
     QList<Connection> m_connections;
-    qreal size = 15.0;
 
+    qreal size = 15.0;
     void updateConnectionLine(Connection& conn);
     void updateConnectionArrow(Connection& conn);
-    void updateAllConnections(int level);
+    void updateAllConnections();
+    void updateOffsets();
     QGraphicsPolygonItem* getArrow(BranchType branchType);
 
     Board* m_board;
@@ -84,6 +87,7 @@ private:
     int m_height;
     int m_line_height;
     int number_of_connecitons = 0;
+    int local_offset = 15;
 
     // Editable text items for now
     QVector<QGraphicsTextItem*> m_textItems;

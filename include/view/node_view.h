@@ -11,9 +11,6 @@ public:
 
     virtual IUMLClassDiagramNode* get_uml_class_diagram_node() = 0;
 
-signals:
-    //...
-
 };
 
 #endif // NODE_VIEW_H
