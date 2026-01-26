@@ -58,9 +58,17 @@ namespace Validator {
     bool validateInheritance(std::string& errorMessage, NodeView* child, NodeView* parent, std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram){
         //diamond
         //if(isInterface(child) || isAbstract(child))
+
+        if(hasCycle(child, diagram)){
+            errorMessage = "Connection creates Cycle";
+            return false;
+        }
+
         std::set<NodeView*> stack;
-        if(circularity(BranchType::INHERITANCE, stack, child, diagram)){
-            errorMessage = "Connection creates circular inheritance problem";
+
+        if(diamond(BranchType::INHERITANCE, stack, child, diagram)){
+            qDebug() << "diamond";
+            errorMessage = "Warning diamond problem";
             return false;
         }
         return true;
@@ -68,7 +76,7 @@ namespace Validator {
     bool validateOthers(std::string& errorMessage, BranchType branchType, NodeView* child, NodeView* parent, std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram){
         if(branchType == BranchType::COMPOSITION || branchType == BranchType::AGGREGATION){
             std::set<NodeView*> stack;
-            if(circularity(branchType, stack, child, diagram)){
+            if(diamond(branchType, stack, child, diagram)){
                 errorMessage = "Connection creates circular inheritance problem";
                 return false;
             }
@@ -90,8 +98,38 @@ namespace Validator {
         return false;
     }
 
+    bool dfs(NodeView* node, std::unordered_map<NodeView*, bool>& visited,
+            std::unordered_map<NodeView*,bool>& in_stack,
+            std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram){
+        visited[node] = true;
+        in_stack[node] = true;
+
+        std::vector<std::pair<SharedNodePtr, BranchType>> value = diagram[node];
+        for(auto& pair : value){
+            if(pair.second == BranchType::INHERITANCE){
+                if(in_stack[pair.first]){
+                    return true;
+                }
+                if(!visited[pair.first]){
+                    if(dfs(pair.first, visited, in_stack, diagram)){
+                        return true;
+                    }
+                }
+            }
+        }
+
+        in_stack[node] = false;
+        return false;
+    }
+    bool hasCycle(NodeView* start, std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram){
+        int diagram_size = diagram.size();
+        std::unordered_map<NodeView*,bool> visited;
+        std::unordered_map<NodeView*,bool> in_stack;
+        return dfs(start, visited, in_stack, diagram);
+    }
+
     // can optimize via parent?
-    bool circularity(BranchType branchType, std::set<NodeView*>& stack, NodeView* node, std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram){
+    bool diamond(BranchType branchType, std::set<NodeView*>& stack, NodeView* node, std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram){
         if(stack.find(node) != stack.end()){
             return true;
         }
@@ -100,13 +138,12 @@ namespace Validator {
         std::vector<std::pair<SharedNodePtr, BranchType>> value = diagram[node];
         for(auto& pair : value){
             if(pair.second == branchType){
-                if(circularity(branchType, stack, pair.first, diagram)){
+                if(diamond(branchType, stack, pair.first, diagram)){
                     return true;
                 }
             }
         }
         return false;
     }
-
 
 }

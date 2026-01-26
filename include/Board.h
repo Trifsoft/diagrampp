@@ -27,6 +27,7 @@ public:
 
     void ValidateAndLink(SharedNodePtr activator);
     const DiagramGraph* get_diagram() const;
+    void onUndo();
 
     BranchType branchType = BranchType::INHERITANCE;
     bool linkageMode = false;
@@ -43,8 +44,9 @@ private:
     DiagramGraph* diagram;
     Ui::Board *ui;
 
+    std::pair<CppClass*, CppClass*> last;
+    std::vector<std::pair<CppClass*, CppClass*>> operations;
     void add_item(std::shared_ptr<Composition> item);
-
     void openNodeFactory(NodeType node_type);
 };
 #endif // BOARD_H

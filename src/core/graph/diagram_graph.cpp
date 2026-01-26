@@ -64,6 +64,7 @@ void DiagramGraph::remove_branch(SharedNodePtr from, SharedNodePtr to, BranchTyp
             remove_neighbour(from, to, branch_type);
             break;
     }
+
 }
 
 std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& DiagramGraph::get_diagram(){
