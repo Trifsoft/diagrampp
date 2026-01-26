@@ -77,6 +77,12 @@ void Board::on_add_element_requested(IUMLClassDiagramNode *node, IClassElement* 
     qDebug() << "Recieved signal add element signal from: " << node->get_label();
 }
 
+void Board::on_edit_element_requested(IUMLClassDiagramNode *node, IClassElement* element)
+{
+    qDebug() << "Recieved signal edit element signal from: " << node->get_label();
+}
+
+
 void Board::onAddClassClicked()
 {
     NodeFactory* node_factory = new NodeFactory(NodeType::Class, [this](const QString class_name) {
@@ -151,4 +157,5 @@ void Board::add_item(std::shared_ptr<Composition> node) {   //TODO [Nikola] - iz
     diagram->add_node(item);
 
     connect(item, &CppClass::add_element_request, this, &Board::on_add_element_requested);
+    connect(item, &CppClass::edit_element_request, this, &Board::on_edit_element_requested);
 }

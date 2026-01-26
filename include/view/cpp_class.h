@@ -70,6 +70,7 @@ private:
     void on_add_button_clicked();
 signals:
     void add_element_request(IUMLClassDiagramNode* node, IClassElement* element);
+    void edit_element_request(IUMLClassDiagramNode* node, IClassElement* element);
 };
 
 #endif // _CPP_CLASS_H

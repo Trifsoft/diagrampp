@@ -43,6 +43,7 @@ private slots:
     void onLinkageToggled();
 
     void on_add_element_requested(IUMLClassDiagramNode* node, IClassElement* element);
+    void on_edit_element_requested(IUMLClassDiagramNode* node, IClassElement* element);
 private:
     DiagramGraph* diagram;
     Ui::Board *ui;

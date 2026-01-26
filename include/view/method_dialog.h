@@ -1,0 +1,4 @@
+#ifndef METHOD_DIALOG_H
+#define METHOD_DIALOG_H
+
+#endif // METHOD_DIALOG_H
