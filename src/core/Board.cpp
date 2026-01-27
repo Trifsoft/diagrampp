@@ -30,7 +30,7 @@ Board::Board(QWidget *parent)
     connect(ui->add_enum, &QPushButton::clicked, this, &Board::onAddEnumClicked);
     connect(ui->Inheritance, &QPushButton::clicked, this, &Board::onCheckRadioButtonToggled);
     connect(ui->Association, &QPushButton::clicked, this, &Board::onCheckRadioButtonToggled);
-    connect(ui->Navigation, &QPushButton::clicked, this, &Board::onCheckRadioButtonToggled);
+    connect(ui->Realization, &QPushButton::clicked, this, &Board::onCheckRadioButtonToggled);
     connect(ui->Aggregation, &QPushButton::clicked, this, &Board::onCheckRadioButtonToggled);
     connect(ui->Composition, &QPushButton::clicked, this, &Board::onCheckRadioButtonToggled);
     connect(ui->Dependency, &QPushButton::clicked, this, &Board::onCheckRadioButtonToggled);
@@ -49,8 +49,8 @@ void Board::onCheckRadioButtonToggled(){
         branchType = BranchType::INHERITANCE;
     }else if(ui->Association->isChecked()){
         branchType = BranchType::ASSOCIATION;
-    }else if(ui->Navigation->isChecked()){
-        branchType = BranchType::NAVIGATION;
+    }else if(ui->Realization->isChecked()){
+        branchType = BranchType::REALIZATION;
     }else if(ui->Aggregation->isChecked()){
         branchType = BranchType::AGGREGATION;
     }else if(ui->Composition->isChecked()){
@@ -66,6 +66,9 @@ void Board::onLinkageToggled(){
     diagram->second_selected_node = nullptr;
 }
 
+void Board::onClassClicked(SharedNodePtr clickedClass) {
+    ValidateAndLink(clickedClass);
+}
 void Board::ValidateAndLink(SharedNodePtr activator){
     if(diagram->first_selected_node == nullptr){
         diagram->first_selected_node = activator;
@@ -76,11 +79,12 @@ void Board::ValidateAndLink(SharedNodePtr activator){
     //qDebug() << "process on " << diagram->first_selected_node->get_uml_class_diagram_node()->get_name() << " ->" << diagram->second_selected_node->get_uml_class_diagram_node()->get_name();
 
     std::string errorMessage = "/";
-    if(!Validator::validateDiagram(errorMessage, diagram->first_selected_node, diagram->second_selected_node, branchType, diagram->get_diagram())){
+    if(!Validator::validate(errorMessage, diagram->first_selected_node, diagram->second_selected_node, branchType, diagram->get_diagram())){
 #if DEBUG_MODE>=1
         qDebug() << errorMessage;
         diagram->showDiagram();
 #endif
+
         diagram->first_selected_node = nullptr;
         diagram->second_selected_node = nullptr;
         return;
@@ -162,5 +166,4 @@ void Board::onGenerateClicked(const QString& class_name, NodeType node_type) {
         break;
     }
     }
-
 }

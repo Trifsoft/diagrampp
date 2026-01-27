@@ -32,6 +32,9 @@ public:
     BranchType branchType = BranchType::INHERITANCE;
     bool linkageMode = false;
 
+public slots:
+    void onClassClicked(SharedNodePtr clickedClass);
+
 private slots:
     void onAddClassClicked();
     void onAddInterfaceClicked();

@@ -18,13 +18,14 @@ namespace Validator {
         {{"enum", "enum"}, false}
     };
 
-    bool validateDiagram(std::string& errorMessage, NodeView* child, NodeView* parent, BranchType branchType, std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram){
+
+    bool validate(std::string& errorMessage, NodeView* child, NodeView* parent, BranchType branchType, std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram){
         if(child == parent){
             errorMessage = "Cannot self connection";
             return false;
         }
         // proveri duplication u circularity
-        if(!checkDuplication(errorMessage, child, parent, diagram) || !checkLinkage(errorMessage, child, parent)){
+        if(!checkLinkage(errorMessage, child, parent)){
             return false;
         }
 
