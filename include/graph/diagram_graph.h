@@ -4,7 +4,6 @@
 #include <vector>
 #include <utility>
 #include <map>
-#include <memory>
 #include <model/base/branches.h>
 #include <view/node_view.h>
 
