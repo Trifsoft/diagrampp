@@ -8,9 +8,9 @@
 
 namespace fs = std::filesystem;
 
-namespace {
+namespace { // utlis
     void remove_existing_project(const fs::path& path){
-        fs::remove_all(path); // recursively delete content int path dir and path dir itself
+        fs::remove_all(path); // recursively delete content in dir on path and dir on path itself
     }
 
     ProjectGenerator::GenerationStatusCode determine_error_code(const std::error_code& ec){
@@ -22,7 +22,7 @@ namespace {
             return ProjectGenerator::GenerationStatusCode::NO_MEMORY_SPACE;
         }
 
-        return ProjectGenerator::GenerationStatusCode::NO_FILE_CREATED;
+        return ProjectGenerator::GenerationStatusCode::FILE_NOT_CREATED;
     }
 
     const std::unordered_set<SharedNodePtr> retrieve_diagram_nodes(const graph_type& diagram){
@@ -76,12 +76,93 @@ namespace {
         }
         return file_name;
     }
+
+    ProjectGenerator::GenerationStatusCode generate_cmake(const fs::path& path, std::string_view content){
+        std::fstream file_stream;
+        file_stream.open(fs::path(path).append("CMakeLists.txt"), std::fstream::out);
+
+        if(file_stream.is_open()){
+            file_stream << content;
+            file_stream.close();
+        }else{
+            return ProjectGenerator::GenerationStatusCode::FILE_NOT_CREATED;
+        }
+
+        return ProjectGenerator::GenerationStatusCode::OK;
+    }
+
+    ProjectGenerator::GenerationStatusCode generate_dir_hierarchy(const fs::path& root_path, std::error_code& ec){
+        auto gen_cmake_status = generate_cmake(root_path, ProjectGenerator::root_cmake);
+        if(gen_cmake_status != ProjectGenerator::GenerationStatusCode::OK){
+            return gen_cmake_status;
+        }
+
+        std::fstream file_stream;
+        for (auto& it : ProjectGenerator::project_hierarchy) {
+            fs::path root_directory = fs::path(root_path).append(it.first);
+
+            if(!fs::create_directory(root_directory, ec)){
+                return determine_error_code(ec);
+            }
+            ec.clear();
+
+            auto root_directory_subdirs = it.second;
+            for(auto& subdir_name : root_directory_subdirs){
+                fs::path subdir = fs::path(root_directory).append(subdir_name);
+                if(!create_directory(subdir, ec)){
+                    return determine_error_code(ec);
+                }
+                ec.clear();
+
+                gen_cmake_status = generate_cmake(subdir, ProjectGenerator::subdir_cmake);
+                if(gen_cmake_status != ProjectGenerator::GenerationStatusCode::OK){
+                    return gen_cmake_status;
+                }
+            }
+        }
+
+        return ProjectGenerator::OK;
+    }
+
+
+    ProjectGenerator::GenerationStatusCode generate_files(const graph_type& diagram, const fs::path& root_path, const ProjectGenerator::FileNameNotation notation){
+        auto &nodes = retrieve_diagram_nodes(diagram);
+        std::fstream file_stream;
+        for (auto& node : nodes){
+            const auto& name = format_file_name(node->get_uml_class_diagram_node()->get_name().toStdString(), notation); // get name of struct/enum/class
+
+            if(should_generate_cpp_file(node)){ // generate defnitions code for Struct/Class
+                fs::path cpp_file_path = fs::path(root_path);
+                cpp_file_path = append_n_times(cpp_file_path, ProjectGenerator::file_location["cpp"]);
+                file_stream.open(cpp_file_path.append(name).append(".cpp"), std::fstream::out);
+
+                if(file_stream.is_open()){
+                    file_stream << node->get_uml_class_diagram_node()->definition().toStdString();
+                    file_stream.close();
+                }else{
+                    return ProjectGenerator::GenerationStatusCode::FILE_NOT_CREATED;
+                }
+            }
+
+            fs::path hpp_file_path = fs::path(root_path);
+            hpp_file_path = append_n_times(hpp_file_path, ProjectGenerator::file_location["hpp"]);
+            file_stream.open(hpp_file_path.append(name).append(".hpp"), std::fstream::out);
+
+            if(file_stream.is_open()){
+                file_stream << node->get_uml_class_diagram_node()->declaration().toStdString();
+                file_stream.close();
+            }else{
+                return ProjectGenerator::GenerationStatusCode::FILE_NOT_CREATED;
+            }
+        }
+        return ProjectGenerator::OK;
+    }
 };
 
-ProjectGenerator::GenerationStatusCode ProjectGenerator::generate(const graph_type& diagram, const std::string& path, std::string& project_dir_name, const ProjectGenerator::FileNameNotation notation, const bool replace_existing){
+ProjectGenerator::GenerationStatusCode ProjectGenerator::generate(const graph_type& diagram, const std::string& path, std::string& project_dir_name, const ProjectGenerator::FileNameNotation notation, const ProjectGenerator::ReplaceToggle replace_mode){
     namespace fs = std::filesystem;
 
-    // ensures project_dir_name is string, NOT path
+    // ensures project_dir_name is string, NOT path string
     project_dir_name.erase(std::remove(project_dir_name.begin(), project_dir_name.end(), '/'), project_dir_name.end());
     project_dir_name.erase(std::remove(project_dir_name.begin(), project_dir_name.end(), '\\'), project_dir_name.end());
     fs::path root_path = fs::path(path);
@@ -93,7 +174,7 @@ ProjectGenerator::GenerationStatusCode ProjectGenerator::generate(const graph_ty
     root_path.append(project_dir_name);
 
     if(fs::exists(root_path)){
-        if(!replace_existing){
+        if(replace_mode == ProjectGenerator::ReplaceToggle::OFF){
             return ProjectGenerator::GenerationStatusCode::EXISTING_PROJECT_DIR_ON_PATH;
         }else{
             remove_existing_project(root_path);
@@ -107,54 +188,17 @@ ProjectGenerator::GenerationStatusCode ProjectGenerator::generate(const graph_ty
     ec.clear();
 
 
-    for (auto& it : ProjectGenerator::project_hierarchy) {
-        fs::path root_directory = fs::path(root_path).append(it.first);
-
-        if(!fs::create_directory(root_directory, ec)){
-            return determine_error_code(ec);
-        }
-        ec.clear();
-
-        auto root_directory_subdirs = it.second;
-        for(auto& subdir_name : root_directory_subdirs){
-            fs::path subdir = fs::path(root_directory).append(subdir_name);
-            if(!create_directory(subdir, ec)){
-                return determine_error_code(ec);
-            }
-            ec.clear();
-        }
+    auto res = generate_dir_hierarchy(root_path, ec);
+    if(res != ProjectGenerator::OK){
+        return res;
     }
+    ec.clear();
 
-    auto &nodes = retrieve_diagram_nodes(diagram);
-    std::fstream file_stream;
-    for (auto& node : nodes){
-        const auto& name = format_file_name(node->get_uml_class_diagram_node()->get_name().toStdString(), notation); // get name of struct/enum/class
-
-        if(should_generate_cpp_file(node)){ // generate defnitions code for Struct/Class
-            fs::path cpp_file_path = fs::path(root_path);
-            cpp_file_path = append_n_times(cpp_file_path, ProjectGenerator::file_location["cpp"]);
-            file_stream.open(cpp_file_path.append(name).append(".cpp"), std::fstream::out);
-
-            if(file_stream.is_open()){
-                file_stream << node->get_uml_class_diagram_node()->definition().toStdString();
-                file_stream.close();
-            }else{
-                return ProjectGenerator::GenerationStatusCode::NO_FILE_CREATED;
-            }
-        }
-
-        fs::path hpp_file_path = fs::path(root_path);
-        hpp_file_path = append_n_times(hpp_file_path, ProjectGenerator::file_location["hpp"]);
-        file_stream.open(hpp_file_path.append(name).append(".hpp"), std::fstream::out);
-
-        if(file_stream.is_open()){
-            file_stream << node->get_uml_class_diagram_node()->declaration().toStdString();
-            file_stream.close();
-        }else{
-            return ProjectGenerator::GenerationStatusCode::NO_FILE_CREATED;
-        }
+    res = generate_files(diagram, root_path, notation);
+    if(res != ProjectGenerator::OK){
+        return res;
     }
-
+    ec.clear();
 
     return ProjectGenerator::GenerationStatusCode::OK;
 }
