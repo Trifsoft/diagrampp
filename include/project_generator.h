@@ -4,7 +4,6 @@
 #include <string>
 #include <map>
 #include <vector>
-#include <memory>
 #include <model/base/branches.h>
 #include <graph/diagram_graph.h>
 
@@ -29,7 +28,7 @@ namespace ProjectGenerator
         EXISTING_PROJECT_DIR_ON_PATH,
         PERMISSION_DENIED,
         NO_MEMORY_SPACE,
-        NO_FILE_CREATED,
+        FILE_NOT_CREATED,
         NO_SUCH_DIR
     };
 
@@ -38,7 +37,12 @@ namespace ProjectGenerator
         CAMEL_NOTATION
     };
 
-    GenerationStatusCode generate(const graph_type& diagram,  const std::string& path, std::string& project_dir_name, FileNameNotation notation, const bool replace_existing);
+    enum ReplaceToggle{
+        ON,
+        OFF
+    };
+
+    GenerationStatusCode generate(const graph_type& diagram,  const std::string& path, std::string& project_dir_name, const FileNameNotation notation, const ReplaceToggle replace_mode);
 };
 
 #endif // PROJECT_GENERATOR_H
