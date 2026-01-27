@@ -77,7 +77,27 @@ namespace { // utlis
         return file_name;
     }
 
+    ProjectGenerator::GenerationStatusCode generate_cmake(const fs::path& path, std::string_view content){
+        std::fstream file_stream;
+        file_stream.open(fs::path(path).append("CMakeLists.txt"), std::fstream::out);
+
+        if(file_stream.is_open()){
+            file_stream << content;
+            file_stream.close();
+        }else{
+            return ProjectGenerator::GenerationStatusCode::FILE_NOT_CREATED;
+        }
+
+        return ProjectGenerator::GenerationStatusCode::OK;
+    }
+
     ProjectGenerator::GenerationStatusCode generate_dir_hierarchy(const fs::path& root_path, std::error_code& ec){
+        auto gen_cmake_status = generate_cmake(root_path, ProjectGenerator::root_cmake);
+        if(gen_cmake_status != ProjectGenerator::GenerationStatusCode::OK){
+            return gen_cmake_status;
+        }
+
+        std::fstream file_stream;
         for (auto& it : ProjectGenerator::project_hierarchy) {
             fs::path root_directory = fs::path(root_path).append(it.first);
 
@@ -93,6 +113,11 @@ namespace { // utlis
                     return determine_error_code(ec);
                 }
                 ec.clear();
+
+                gen_cmake_status = generate_cmake(subdir, ProjectGenerator::subdir_cmake);
+                if(gen_cmake_status != ProjectGenerator::GenerationStatusCode::OK){
+                    return gen_cmake_status;
+                }
             }
         }
 
