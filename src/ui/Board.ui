@@ -324,9 +324,9 @@
          </widget>
         </item>
         <item>
-         <widget class="QRadioButton" name="Navigation">
+         <widget class="QRadioButton" name="Realization">
           <property name="text">
-           <string>Navigation</string>
+           <string>Realization</string>
           </property>
          </widget>
         </item>

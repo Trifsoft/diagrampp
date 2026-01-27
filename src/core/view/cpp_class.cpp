@@ -103,7 +103,6 @@ CppClass::CppClass(Board* board,std::shared_ptr<Composition> composition, QGraph
     setFlag(QGraphicsItem::ItemIsMovable, true);
     setFlag(QGraphicsItem::ItemIsFocusable, true);
     setFlag(QGraphicsItem::ItemSendsGeometryChanges, true);
-<<<<<<< HEAD
 
     setAcceptedMouseButtons(Qt::LeftButton | Qt::RightButton);
 
@@ -114,9 +113,7 @@ CppClass::CppClass(Board* board,std::shared_ptr<Composition> composition, QGraph
     connect(m_add_button, &QPushButton::clicked, this, &CppClass::on_add_button_clicked);
 
 
-=======
     setAcceptedMouseButtons(Qt::LeftButton | Qt::RightButton);
->>>>>>> 4408906 (implemented diamond and cyclic detection. Created removeLink function and fixed GUI glitches)
     updateBoundingRect();
 }
 

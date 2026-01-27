@@ -62,6 +62,10 @@ public:
     QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
     virtual Composition* get_uml_class_diagram_node() override;
 
+signals:
+    void classClicked(SharedNodePtr clickedClass);
+
+
 private:
     struct Connection {
         QGraphicsLineItem* line = nullptr;
@@ -74,7 +78,7 @@ private:
     };
     QList<Connection> m_connections;
 
-    qreal size = 15.0;
+    qreal arrow_size = 15.0;
     void updateConnectionLine(Connection& conn);
     void updateConnectionArrow(Connection& conn);
     void updateAllConnections();
