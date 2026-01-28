@@ -24,7 +24,7 @@ public:
     void add_value(const QString& name, std::optional<int> value = std::nullopt);
     QString get_name() const override;
     QVector<CPPEnumValue> get_values() const;
-    QString get_label() const override;
+    NodeLabel get_label() const override;
 
 };
 
