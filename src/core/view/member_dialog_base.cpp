@@ -27,15 +27,15 @@ void MemberDialogBase::setup_base_ui()
     // Type
     m_type_edit = new QLineEdit(this);
     m_type_edit->setPlaceholderText("e.g., int, QString, std::vector<double>");
-    QRegularExpression typeRegex("[a-zA-Z_][a-zA-Z0-9_:<>]*");
-    m_type_edit->setValidator(new QRegularExpressionValidator(typeRegex, this));
+    QRegularExpression type_regex(R"([a-zA-Z_][a-zA-Z0-9_\s:&*<>:,]*)");
+    m_type_edit->setValidator(new QRegularExpressionValidator(type_regex, this));
     m_form_layout->addRow("Type:", m_type_edit);
 
     // Name
     m_name_edit = new QLineEdit(this);
     m_name_edit->setPlaceholderText("e.g., m_value, name_, items");
-    QRegularExpression nameRegex("[a-zA-Z_][a-zA-Z0-9_]*");
-    m_name_edit->setValidator(new QRegularExpressionValidator(nameRegex, this));
+    QRegularExpression name_regex("[a-zA-Z_][a-zA-Z0-9_]*");
+    m_name_edit->setValidator(new QRegularExpressionValidator(name_regex, this));
     m_form_layout->addRow("Name:", m_name_edit);
 
     m_main_layout->addLayout(m_form_layout);

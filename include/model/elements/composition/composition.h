@@ -27,6 +27,8 @@ protected:
     QVector<const IClassElement*> get_new_code_elements() const;
 
 public:
+
+    // [REFACTOR] use shared_ptr for fields and methods, useful with command manager and copy constructor for example
     QVector<Field> fields;
     QVector<Method> methods;
 
@@ -41,8 +43,9 @@ public:
     QMap<Visibility, QVector<const IClassElement*>> get_grouped_code_elements() const;
 
     void add_field(const QString& name, const QString& type, std::optional<Visibility> visibility = std::nullopt);
-    // void add_field(const Argument& description, std::optional<Visibility> visibility = std::nullopt);
+    void add_field(const Field& field);
     void add_method(const QString& name, const QString& type, Visibility visibility, MethodKind method_type, const QVector<Argument>& variables);
+    void add_method(const Method& method);
     void add_constructor(Visibility visibility, const QVector<Argument>& arguments);
     void add_copy_constructor(Visibility visibility);
 

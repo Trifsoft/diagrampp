@@ -72,16 +72,36 @@ void Board::onLinkageToggled(){
     this->linkageMode = ui->checkBox->isChecked();
 }
 
-void Board::on_add_element_requested(IUMLClassDiagramNode *node, IClassElement* element)
+
+void Board::on_add_field_requested(Composition *node, const Field& field)
 {
-    qDebug() << "Recieved signal add element signal from: " << node->get_label();
+    if(node)
+    {
+        node->add_field(field);
+    }
+
+    qDebug() << "Recieved signal signal add field from: " << node->get_label();
 }
 
-void Board::on_edit_element_requested(IUMLClassDiagramNode *node, IClassElement* element)
+void Board::on_add_method_requested(Composition *node, const Method& method)
 {
-    qDebug() << "Recieved signal edit element signal from: " << node->get_label();
+    if(node)
+    {
+        node->add_method(method);
+    }
+
+    qDebug() << "Recieved signal add method from: " << node->get_label();
 }
 
+void Board::on_edit_field_requested(Composition *node, const Field& field)
+{
+    qDebug() << "Recieved signal edit field from: " << node->get_label();
+}
+
+void Board::on_edit_method_requested(Composition *node, const Method& method)
+{
+    qDebug() << "Recieved signal edit method from: " << node->get_label();
+}
 
 void Board::onAddClassClicked()
 {
@@ -104,6 +124,7 @@ void Board::onAddClassClicked()
         add_item(new_node);
     });
     node_factory->show();
+
 }
 
 void Board::onAddInterfaceClicked()
@@ -156,6 +177,8 @@ void Board::add_item(std::shared_ptr<Composition> node) {   //TODO [Nikola] - iz
     //dynamic_cast<CPPStruct*>(item->getClassDiagramNode().get())->parent = item;
     diagram->add_node(item);
 
-    connect(item, &CppClass::add_element_request, this, &Board::on_add_element_requested);
-    connect(item, &CppClass::edit_element_request, this, &Board::on_edit_element_requested);
+    connect(item, &CppClass::add_field_request, this, &Board::on_add_field_requested);
+    connect(item, &CppClass::add_method_request, this, &Board::on_add_method_requested);
+    connect(item, &CppClass::edit_field_request, this, &Board::on_edit_field_requested);
+    connect(item, &CppClass::edit_method_request, this, &Board::on_edit_method_requested);
 }

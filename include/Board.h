@@ -5,6 +5,9 @@
 #include "validator.h"
 #include <QWidget>
 #include <QGraphicsScene>
+#include <model/elements/field.h>
+#include <model/elements/method.h>
+
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -42,8 +45,10 @@ private slots:
     void onCheckRadioButtonToggled();
     void onLinkageToggled();
 
-    void on_add_element_requested(IUMLClassDiagramNode* node, IClassElement* element);
-    void on_edit_element_requested(IUMLClassDiagramNode* node, IClassElement* element);
+    void on_add_field_requested(Composition* node, const Field& field);
+    void on_add_method_requested(Composition* node, const Method& method);
+    void on_edit_field_requested(Composition* node, const Field& field);
+    void on_edit_method_requested(Composition* node, const Method& method);
 private:
     DiagramGraph* diagram;
     Ui::Board *ui;

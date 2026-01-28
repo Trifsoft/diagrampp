@@ -4,6 +4,7 @@
 #include "model/elements/composition/cpp_enum.h"
 #include "model/elements/composition/cpp_struct.h"
 #include "view/field_dialog.h"
+#include "view/method_dialog.h"
 #include <QPainter>
 #include <QGraphicsScene>
 #include <QFontMetrics>
@@ -184,23 +185,18 @@ void CppClass::on_add_button_clicked()
 void CppClass::add_new_field(){
 
     auto new_field = FieldDialog::create_field(scene()->views().first());
-    if(new_field.has_value()){
+    emit  add_field_request(m_composition.get(), new_field.value());
 
-        //[REFACTOR] should be called from Board and commandManager
-        m_composition->add_field(new_field.value().get_name(), new_field.value().get_type(), new_field.value().get_visibility());
-        updateBoundingRect();
-        update();
-
-        qDebug() << "Dodat novi field?";
-
-    }else{
-        qDebug() << "Ne moze se dodati novi field";
-    }
-    emit  add_element_request(m_composition.get(), nullptr);
+    updateBoundingRect();
+    update();
 }
 
 void CppClass::add_new_method(){
-    emit  add_element_request(m_composition.get(), nullptr);
+    auto new_method = MethodDialog::create_method(scene()->views().first());
+    emit  add_method_request(m_composition.get(), new_method.value());
+
+    updateBoundingRect();
+    update();
 }
 
 

@@ -117,6 +117,10 @@ void Composition::add_field(const QString& name, const QString& type, std::optio
     fields.append(Field(name, type, vis));
 }
 
+void Composition::add_field(const Field& field){
+    fields.append(field);
+}
+
 // void Composition::add_field(const Argument &description, std::optional<Visibility> visibility){
 //     fields.append(Field(description, visibility.value()));
 // }
@@ -124,6 +128,11 @@ void Composition::add_field(const QString& name, const QString& type, std::optio
 void Composition::add_method(const QString& name, const QString& type, Visibility visibility, MethodKind method_type, const QList<Argument>& variables) {
     methods.append(Method(name, type, visibility, method_type, variables));
 }
+
+void Composition::add_method(const Method& method){
+    methods.append(method);
+}
+
 
 void Composition::add_constructor(Visibility visibility, const QVector<Argument>& arguments) {
     constructors.append(std::make_shared<DefaultConstructor>(name, arguments, visibility));

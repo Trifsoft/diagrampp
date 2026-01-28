@@ -69,8 +69,10 @@ private:
     QGraphicsProxyWidget* m_button_proxy;
     void on_add_button_clicked();
 signals:
-    void add_element_request(IUMLClassDiagramNode* node, IClassElement* element);
-    void edit_element_request(IUMLClassDiagramNode* node, IClassElement* element);
+    void add_field_request(Composition* node, const Field& field);
+    void add_method_request(Composition* node, const Method& method);
+    void edit_field_request(Composition* node, const Field& field);
+    void edit_method_request(Composition* node, const Method& method);
 };
 
 #endif // _CPP_CLASS_H
