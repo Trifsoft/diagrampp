@@ -67,6 +67,10 @@ void Board::onCheckRadioButtonToggled(){
 void Board::onModeClicked(){
     linkageMode = ui->linkageMode->isChecked();
     removeMode = ui->removeMode->isChecked();
+    if(linkageMode && removeNode){
+        ui->linkageMode->setChecked(false);
+        ui->removeMode->setChecked(false);
+    }
 }
 
 void Board::on_object_clicked(SharedNodePtr clicked_object){

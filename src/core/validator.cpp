@@ -29,8 +29,6 @@ namespace Validator {
             return false;
         }
 
-        // CAUTION: validator will not modify the diagram. move to board
-        diagram[child].push_back({parent, branchType});
 
         bool result;
         switch (branchType){
@@ -57,7 +55,6 @@ namespace Validator {
         return true;
     }
     bool validateInheritance(std::string& errorMessage, NodeView* child, NodeView* parent, std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram){
-        //diamond
         //if(isInterface(child) || isAbstract(child))
 
         if(hasCycle(child, diagram)){
