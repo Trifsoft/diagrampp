@@ -38,8 +38,7 @@ private:
 };
 
 class CppClass : public NodeView {
-Q_OBJECT
-
+    Q_OBJECT
 public:
     CppClass(Board *board, std::shared_ptr<Composition> composition, QGraphicsObject* parent = nullptr);
     ~CppClass() = default;
@@ -63,7 +62,7 @@ public:
     virtual Composition* get_uml_class_diagram_node() override;
 
 signals:
-    void classClicked(SharedNodePtr clickedClass);
+    void objectClicked(SharedNodePtr clickedClass);
 
 
 private:

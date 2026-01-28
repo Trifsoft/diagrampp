@@ -310,6 +310,7 @@ void CppClass::edit_method(std::weak_ptr<Method> old_method_weak)
 }
 
 void CppClass::mousePressEvent(QGraphicsSceneMouseEvent* event){
+<<<<<<< HEAD
     if (m_board->linkageMode) {
         m_composition->Clicked = true;
         m_board->ValidateAndLink(this);
@@ -317,6 +318,9 @@ void CppClass::mousePressEvent(QGraphicsSceneMouseEvent* event){
         m_board->onUndo();
     }
 
+=======
+    emit objectClicked(this);
+>>>>>>> c261330 (implemented support for signals and slots)
     QGraphicsItem::mousePressEvent(event);
 }
 

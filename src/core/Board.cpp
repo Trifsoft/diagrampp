@@ -8,9 +8,10 @@
 #include "model/elements/type/regular_type.h"
 #include "nodefactory.h"
 #include "image_paths.h"
+#include <QMessageBox>
 
 Board::Board(QWidget *parent)
-    : QWidget(parent), ui(new Ui::Board), diagram(new DiagramGraph())
+    : QWidget(parent), ui(new Ui::Board), diagram(new DiagramGraph()), signal_processor(new signalProcessor())
 {
     ui->setupUi(this);
 
@@ -20,7 +21,11 @@ Board::Board(QWidget *parent)
     ui->board->setScene(scene);
     ui->board->setStyleSheet("background-color: white");
     ui->side_menu->setStyleSheet("background-color: #2c3e50;");
-    ui->Linkage->setChecked(false);
+    ui->linkageMode->setChecked(false);
+
+    // signals for GUI
+    connect(diagram, &DiagramGraph::link_added, signal_processor, &signalProcessor::add_link_process);
+    connect(diagram, &DiagramGraph::link_removed, signal_processor, &signalProcessor::remove_link_process);
 
     // Connect buttons to slots
     connect(ui->add_class, &QPushButton::clicked, this, &Board::onAddClassClicked);
@@ -32,7 +37,8 @@ Board::Board(QWidget *parent)
     connect(ui->Aggregation, &QPushButton::clicked, this, &Board::onCheckRadioButtonToggled);
     connect(ui->Composition, &QPushButton::clicked, this, &Board::onCheckRadioButtonToggled);
     connect(ui->Dependency, &QPushButton::clicked, this, &Board::onCheckRadioButtonToggled);
-    connect(ui->Linkage, &QPushButton::clicked, this, &Board::onLinkageToggled);
+    connect(ui->linkageMode, &QPushButton::clicked, this, &Board::onModeClicked);
+    connect(ui->removeMode, &QPushButton::clicked, this, &Board::onModeClicked);
 }
 
 Board::~Board()
@@ -58,42 +64,35 @@ void Board::onCheckRadioButtonToggled(){
     }
 }
 
-void Board::onLinkageToggled(){
-    this->linkageMode = ui->Linkage->isChecked();
-    diagram->first_selected_node = nullptr;
-    diagram->second_selected_node = nullptr;
+void Board::onModeClicked(){
+    linkageMode = ui->linkageMode->isChecked();
+    removeMode = ui->removeMode->isChecked();
 }
 
-void Board::ValidateAndLink(SharedNodePtr activator){
-    if(diagram->first_selected_node == nullptr){
-        diagram->first_selected_node = activator;
+void Board::on_object_clicked(SharedNodePtr clicked_object){
+    if(!first_activated){
+        first_activated = clicked_object;
         return;
     }
-    diagram->second_selected_node = activator;
-    //dynamic_cast<CppClass*>
-    //qDebug() << "process on " << diagram->first_selected_node->get_uml_class_diagram_node()->get_name() << " ->" << diagram->second_selected_node->get_uml_class_diagram_node()->get_name();
+    second_activated = clicked_object;
 
-    std::string errorMessage = "/";
-    if(!Validator::validateDiagram(errorMessage, diagram->first_selected_node, diagram->second_selected_node, branchType, diagram->get_diagram())){
-        diagram->first_selected_node = nullptr;
-        diagram->second_selected_node = nullptr;
-        return;
+    std::string errorMessage;
+    if((first_activated && second_activated) && linkageMode){
+        if(!Validator::validate(errorMessage, first_activated, second_activated, branchType, diagram->get_diagram())){
+            #if DEBUG_MODE>=1
+                qDebug() << errorMessage;
+                diagram->showDiagram();
+            #endif
+            QMessageBox::warning(this, "Upozorenje", QString::fromStdString(errorMessage));
+        }else{
+            diagram->add_branch(first_activated, second_activated, branchType);
+        }
+    }else if((first_activated && second_activated) && removeMode){
+         diagram->remove_branch(first_activated, second_activated, branchType);
     }
-#if DEBUG >=1
-    qDebug() << errorMessage;
-    diagram->showDiagram();
-#endif
 
-    CppClass* f = dynamic_cast<CppClass*>(diagram->first_selected_node);
-    CppClass* s = dynamic_cast<CppClass*>(diagram->second_selected_node);
-
-    f->addLineConnection(s, branchType);
-    //diagram->first_selected_node->CPPCLASS->add
-    diagram->first_selected_node = nullptr;
-    diagram->second_selected_node = nullptr;
-
+    first_activated = second_activated = nullptr;
 }
-
 
 void Board::onAddClassClicked()     { openNodeFactory(NodeType::Class);  }
 void Board::onAddInterfaceClicked() { openNodeFactory(NodeType::Struct); }
@@ -117,6 +116,14 @@ void Board::on_add_method_requested(Composition *node, std::shared_ptr<Method> m
     }
 
     qDebug() << "Recieved signal add method from: " << node->get_label();
+}
+
+void Board::add_item(std::shared_ptr<Composition> node) {   //TODO [Nikola] - izmeniti da bude IUMLClassDiagramNode umesto Composition
+    CppClass* item = new CppClass(this, node);
+    scene->addItem(item);
+    diagram->add_node(item);
+
+    connect(item, &CppClass::objectClicked, this, &Board::on_object_clicked);
 }
 
 
@@ -219,6 +226,7 @@ void Board::onGenerateClicked(const QString& class_name, NodeType node_type) {
             break;
         }
     }
+
 }
 void Board::add_item(std::shared_ptr<Composition> node) {   //TODO [Nikola] - izmeniti da bude IUMLClassDiagramNode umesto Composition
     CppClass* item = new CppClass(this, node);

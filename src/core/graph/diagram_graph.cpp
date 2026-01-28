@@ -29,15 +29,7 @@ void DiagramGraph::remove_node(SharedNodePtr node) {
 }
 
 void DiagramGraph::add_branch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type) {
-    switch(branch_type){
-        case BranchType::ASSOCIATION:// ASSOCIATION -> undirected link
-            add_neighbour(from, to, branch_type);
-            add_neighbour(to, from, branch_type);
-            break;
-        default: // INHERITANCE & NAVIGATION -> directed links
-            add_neighbour(from, to, branch_type);
-            break;
-    }
+    add_neighbour(from, to, branch_type);
 }
 
 void DiagramGraph::remove_neighbour(SharedNodePtr from, SharedNodePtr to, BranchType branch_type){
@@ -52,19 +44,12 @@ void DiagramGraph::remove_neighbour(SharedNodePtr from, SharedNodePtr to, Branch
 
 void DiagramGraph::add_neighbour(SharedNodePtr from, SharedNodePtr to, BranchType branch_type){
     diagram[from].push_back({to, branch_type});
+    emit link_added(from, to, branch_type);
 }
 
 void DiagramGraph::remove_branch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type) {
-    switch(branch_type){
-        case BranchType::ASSOCIATION:// ASSOCIATION -> undirected link
-            remove_neighbour(from, to, branch_type);
-            remove_neighbour(to, from, branch_type);
-            break;
-        default: // INHERITANCE & NAVIGATION -> directed links
-            remove_neighbour(from, to, branch_type);
-            break;
-    }
-
+    remove_neighbour(from, to, branch_type);
+    emit link_removed(from, to);
 }
 
 std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& DiagramGraph::get_diagram(){
