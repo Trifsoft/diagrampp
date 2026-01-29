@@ -117,6 +117,24 @@ CppClass::CppClass(Board* board,std::shared_ptr<Composition> composition, QGraph
     updateBoundingRect();
 }
 
+CppClass::~CppClass(){
+    for(auto& connection : m_connections){
+        if(connection.line){
+            delete connection.line;
+        }
+        if(connection.arrow){
+            delete connection.arrow;
+        }
+    }
+    m_connections.clear();
+    for(auto text_item : m_textItems){
+        if(text_item){
+            delete text_item;
+        }
+    }
+    m_textItems.clear();
+}
+
 QRectF CppClass::boundingRect() const
 {
     return QRect(0,0,m_width,m_height);

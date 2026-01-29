@@ -41,7 +41,7 @@ class CppClass : public NodeView {
     Q_OBJECT
 public:
     CppClass(Board *board, std::shared_ptr<Composition> composition, QGraphicsObject* parent = nullptr);
-    ~CppClass() = default;
+    ~CppClass();
 
     QRectF boundingRect() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
