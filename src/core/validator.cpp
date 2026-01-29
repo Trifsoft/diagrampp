@@ -2,6 +2,7 @@
 
 #include <QDebug>
 #include <string>
+#include <QString>
 
 
 namespace Validator {
@@ -27,6 +28,10 @@ namespace Validator {
         if(!checkLinkage(errorMessage, child, parent)){
             return false;
         }
+        if(!check_multiple_conneciton(child, parent, diagram)){
+            errorMessage = "Connection alreardy exsists";
+            return false;
+        }
 
         bool result;
         switch (branchType){
@@ -39,6 +44,18 @@ namespace Validator {
         return result;
     }
 
+    bool check_multiple_conneciton(SharedNodePtr child, SharedNodePtr parent,
+                                   const std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram){
+        auto value = diagram.at(child);
+        int count = 0;
+        for(auto& pair : value){
+            if(pair.first == parent){
+                count++;
+            }
+        }
+        return count >= 2 ? false : true;
+
+    }
     bool validateInheritance(std::string& errorMessage, SharedNodePtr child, SharedNodePtr parent, const std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram){
         //if(isInterface(child) || isAbstract(child))
 
@@ -69,7 +86,8 @@ namespace Validator {
 
         if(it != combinations.end()){
             if(it->second == false){
-                errorMessage = "Linkage error";
+                errorMessage = "Can not " + first->get_uml_class_diagram_node()->get_label().toStdString()
+                    + "connect with " + second->get_uml_class_diagram_node()->get_label().toStdString();
             }
             return it->second;
         }
@@ -83,8 +101,8 @@ namespace Validator {
              const std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram){
         in_stack[node] = true;
 
-        std::vector<std::pair<SharedNodePtr, BranchType>> value = diagram.at(node);
-        for(auto& pair : value){
+        auto it = diagram.at(node);
+        for(auto& pair : it){
             if(pair.second == branch_type){
                 if(in_stack[pair.first]){
                     return true;

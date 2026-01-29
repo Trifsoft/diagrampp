@@ -328,17 +328,7 @@ void CppClass::edit_method(std::weak_ptr<Method> old_method_weak)
 }
 
 void CppClass::mousePressEvent(QGraphicsSceneMouseEvent* event){
-<<<<<<< HEAD
-    if (m_board->linkageMode) {
-        m_composition->Clicked = true;
-        m_board->ValidateAndLink(this);
-    }else if(event->button() == Qt::RightButton){
-        m_board->onUndo();
-    }
-
-=======
     emit objectClicked(this);
->>>>>>> c261330 (implemented support for signals and slots)
     QGraphicsItem::mousePressEvent(event);
 }
 
@@ -421,7 +411,7 @@ QGraphicsPolygonItem* CppClass::getArrow(BranchType branchType){
         return nullptr;
     case BranchType::DEPENDENCY:
         polygon << QPointF(0, 0) << QPointF(-size/3, size) << QPointF(size/3, size);
-        arrow->setBrush(Qt::white);
+        arrow->setBrush(Qt::blue);
         break;
     }
 

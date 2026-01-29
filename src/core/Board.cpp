@@ -70,6 +70,7 @@ void Board::onModeClicked(){
     if(linkageMode && removeMode){
         ui->linkageMode->setChecked(false);
         ui->removeMode->setChecked(false);
+        linkageMode = removeMode = false;
     }
 }
 
@@ -91,7 +92,11 @@ void Board::on_object_clicked(SharedNodePtr clicked_object){
             QMessageBox::warning(this, "Upozorenje", QString::fromStdString(errorMessage));
         }
     }else if((first_activated && second_activated) && removeMode){
-         diagram->remove_branch(first_activated, second_activated, branchType);
+        if(!diagram->connection_exists(first_activated, second_activated, branchType)){
+            QMessageBox::warning(this, "Upozorenje", QString::fromStdString("Connection doesn't exsist"));
+        }else{
+            diagram->remove_branch(first_activated, second_activated, branchType);
+        }
     }
 
 #if DEBUG_MODE>=1
