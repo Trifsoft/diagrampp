@@ -74,6 +74,9 @@ void Board::onModeClicked(){
 }
 
 void Board::on_object_clicked(SharedNodePtr clicked_object){
+    if(!linkageMode && !removeMode){
+        return;
+    }
     if(!first_activated){
         first_activated = clicked_object;
         return;
@@ -82,14 +85,14 @@ void Board::on_object_clicked(SharedNodePtr clicked_object){
 
     std::string errorMessage;
     if((first_activated && second_activated) && linkageMode){
+        diagram->add_branch(first_activated, second_activated, branchType);
         if(!Validator::validate(errorMessage, first_activated, second_activated, branchType, diagram->get_diagram())){
             #if DEBUG_MODE>=1
                 qDebug() << errorMessage;
                 diagram->showDiagram();
             #endif
             QMessageBox::warning(this, "Upozorenje", QString::fromStdString(errorMessage));
-        }else{
-            diagram->add_branch(first_activated, second_activated, branchType);
+            diagram->remove_branch(first_activated, second_activated, branchType);
         }
     }else if((first_activated && second_activated) && removeMode){
          diagram->remove_branch(first_activated, second_activated, branchType);
