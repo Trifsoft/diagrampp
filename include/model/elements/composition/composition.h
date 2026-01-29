@@ -29,6 +29,7 @@ protected:
     QVector<const IClassElement*> get_new_code_elements() const;
 
 public:
+
     QVector<std::shared_ptr<Field>> fields;
     QVector<std::shared_ptr<Method>> methods;
 
@@ -42,13 +43,19 @@ public:
     QVector<const IClassElement*> get_code_elements() const;
     QMap<Visibility, QVector<const IClassElement*>> get_grouped_code_elements() const;
 
-    void add_field(const QString& name, std::shared_ptr<IType> type, std::optional<Visibility> visibility = std::nullopt);
-    void add_method(const QString& name, std::shared_ptr<IType> type, Visibility visibility, MethodType method_type, const QVector<Description>& variables);
-    void add_constructor(Visibility visibility, const QVector<Description>& arguments);
+    void add_field(const QString& name, const QString& type, std::optional<Visibility> visibility = std::nullopt);
+    void add_field(std::shared_ptr<Field> field);
+    
+    void add_method(const QString& name, const QString& type, Visibility visibility, MethodKind method_type, const QVector<Argument>& variables);
+    void add_method(std::shared_ptr<Method> method);
+    
+    void add_constructor(Visibility visibility, const QVector<Argument>& arguments);
     void add_copy_constructor(Visibility visibility);
 
     int get_field_count();
     int get_method_count();
+
+
 };
 
 #endif // COMPOSITION_H

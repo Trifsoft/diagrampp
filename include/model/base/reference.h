@@ -1,14 +1,14 @@
-#ifndef REFERENCE_H
-#define REFERENCE_H
+// #ifndef REFERENCE_H
+// #define REFERENCE_H
 
-#include <QString>
+// #include <QString>
 
-enum class Reference {
-    None,
-    LValue,
-    RValue
-};
+// enum class Reference {
+//     None,
+//     LValue,
+//     RValue
+// };
 
-QString get_symbol(Reference);
+// QString get_symbol(Reference);
 
-#endif // REFERENCE_H
+// #endif // REFERENCE_H
