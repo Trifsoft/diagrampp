@@ -7,7 +7,7 @@
 #include <QGraphicsScene>
 #include <model/elements/field.h>
 #include <model/elements/method.h>
-
+#include <nodefactory.h>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -15,7 +15,6 @@ class Board;
 }
 QT_END_NAMESPACE
 
-class Validator;
 class DiagramGraph;
 class IClassElement;
 
@@ -28,15 +27,12 @@ class Board : public QWidget
 public:
     Board(QWidget *parent = nullptr);
     ~Board();
-    Validator* validator;
 
     void ValidateAndLink(SharedNodePtr activator);
     const DiagramGraph* get_diagram() const;
 
-    bool inheritance;
-    bool association;
-    bool navigation;
-    bool linkageMode;
+    BranchType branchType = BranchType::INHERITANCE;
+    bool linkageMode = false;
 
 private slots:
     void onAddClassClicked();
@@ -44,16 +40,18 @@ private slots:
     void onAddEnumClicked();
     void onCheckRadioButtonToggled();
     void onLinkageToggled();
+    void onGenerateClicked(const QString& class_name, NodeType node_type);
 
-    void on_add_field_requested(Composition* node, const Field& field);
-    void on_add_method_requested(Composition* node, const Method& method);
-    void on_edit_field_requested(Composition* node, int field_id, const Field& new_field);
-    void on_edit_method_requested(Composition* node, int method_id, const Method& new_method);
+    void on_add_field_requested(Composition* node, std::shared_ptr<Field> field);
+    void on_add_method_requested(Composition* node, std::shared_ptr<Method>  method);
+    void on_edit_field_requested(Composition* node, std::weak_ptr<Field> old_field_weak, std::shared_ptr<Field>  new_field);
+    void on_edit_method_requested(Composition* node, std::weak_ptr<Method> old_method_weak, std::shared_ptr<Method>  new_method);
 private:
     DiagramGraph* diagram;
     Ui::Board *ui;
 
     void add_item(std::shared_ptr<Composition> item);
 
+    void openNodeFactory(NodeType node_type);
 };
 #endif // BOARD_H

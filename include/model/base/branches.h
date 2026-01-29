@@ -2,9 +2,12 @@
 #define BRANCHES_H
 
 enum class BranchType{
-    INHERITANCE,    // prazan trougao
-    ASSOCIATION,    // linija
-    NAVIGATION,     // puna strelica
+    INHERITANCE,
+    ASSOCIATION,
+    NAVIGATION,
+    AGGREGATION,
+    COMPOSITION,
+    DEPENDENCY
 };
 
 #endif // BRANCHES_H

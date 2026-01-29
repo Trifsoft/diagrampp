@@ -8,20 +8,25 @@
 #include <QPainter>
 #include <QGraphicsScene>
 #include <QFontMetrics>
-#include <QTextOption>
+#include <widget/class_element_text.h>
+#include <QGraphicsPixmapItem>
 #include <QTextDocument>
 #include <QMenu>
 #include <QInputDialog>
 #include <qgraphicsview.h>
+#include <methodeditor.h>
+#include <memory>
+
+
 
 // EditableTextItem implementation
-EditableTextItem::EditableTextItem(const QString& text, ItemType type, int element_id, QGraphicsItem* parent)
+EditableTextItem::EditableTextItem(const QString& text, ItemType type, std::weak_ptr<IClassElement> element_weak, QGraphicsItem* parent)
     : QGraphicsTextItem(text, parent)
     , m_type(type)
-    , m_element_id(element_id)
+    , m_element_weak(element_weak)
 {
     setDefaultTextColor(Qt::white);
-    if (type != Title) {
+    if (type != TitleType) {
         setFlag(QGraphicsItem::ItemIsSelectable, true);
     }
 }
@@ -30,7 +35,7 @@ void EditableTextItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
 {
     Q_UNUSED(event);
     
-    if (m_type == Title) {
+    if (m_type == TitleType) {
         return; // Can't edit title this way
     }
     
@@ -39,14 +44,54 @@ void EditableTextItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
 
     
     if (parent) {
-        if (m_type == Field) {
-            parent->edit_field(m_element_id);
-        } else if (m_type == Method) {
-            parent->edit_method(m_element_id);
+        auto base = m_element_weak.lock();
+        if(!base){
+            qDebug() << "No element to edit!";
+            return;
         }
-    }else{
+
+        if (m_type == FieldType){
+            if(auto field = std::dynamic_pointer_cast<Field>(base)) {
+                parent->edit_field(field);
+            }
+        } else if (m_type == MethodType){
+            if(auto method = std::dynamic_pointer_cast<Method>(base)) {
+                parent->edit_method(method);
+            }
+        }
+    } else {
         qDebug() << "Parent not found";
     }
+
+
+}
+
+void EditableTextItem::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
+{
+    Q_UNUSED(event);
+
+    // Find parent CppClass
+    CppClass* parent = dynamic_cast<CppClass*>(this->parentItem());
+    if(!parent){
+        qDebug() << "Parent not found";
+        return;
+    }
+
+    auto base = m_element_weak.lock();
+    if(!base){
+        qDebug() << "No element to edit!";
+        return;
+    }
+
+    if(m_type == MethodType){
+        if(auto method = std::dynamic_pointer_cast<Method>(base)){
+            auto method_editor = new MethodEditor(method, parent->m_composition->get_name());
+            method_editor->show();
+        }
+    }else{
+        qDebug() << "Only methods are editable this way";
+    }
+
 }
 
 // CppClass implementation
@@ -59,6 +104,7 @@ CppClass::CppClass(Board* board,std::shared_ptr<Composition> composition, QGraph
     setFlag(QGraphicsItem::ItemIsMovable, true);
     setFlag(QGraphicsItem::ItemIsFocusable, true);
     setFlag(QGraphicsItem::ItemSendsGeometryChanges, true);
+
     setAcceptedMouseButtons(Qt::LeftButton | Qt::RightButton);
 
     //setup button
@@ -69,6 +115,17 @@ CppClass::CppClass(Board* board,std::shared_ptr<Composition> composition, QGraph
 
 
     updateBoundingRect();
+}
+
+
+CppClass::~CppClass(){
+    for (const PNGConnection& conn : m_pngConnections) {
+        if (conn.imageItem && conn.imageItem->scene()) {
+            conn.imageItem->scene()->removeItem(conn.imageItem);
+            delete conn.imageItem;
+        }
+    }
+    m_pngConnections.clear();
 }
 
 QRectF CppClass::boundingRect() const
@@ -120,13 +177,13 @@ void CppClass::updateBoundingRect()
     m_height = m_line_height * (1 + m_composition->fields.count() + m_composition->methods.count()) + fields_separator + methods_separator;
     m_width = metrics.horizontalAdvance(m_composition->get_name());
     for(auto& field : m_composition->fields) {
-        auto tmp_width = metrics.horizontalAdvance(field.declaration());
+        auto tmp_width = metrics.horizontalAdvance(field->declaration());
         if(tmp_width > m_width) {
             m_width = tmp_width;
         }
     }
     for(auto& method : m_composition->methods) {
-        auto tmp_width = metrics.horizontalAdvance(method.declaration());
+        auto tmp_width = metrics.horizontalAdvance(method->declaration());
         if(tmp_width > m_width) {
             m_width = tmp_width;
         }
@@ -159,11 +216,13 @@ void CppClass::updateTextItems()
     m_textItems.clear();
 
     // Create title
-    auto* titleItem = new EditableTextItem(m_composition->get_name(), EditableTextItem::Title, -1, this);
+
+    auto* titleItem = new EditableTextItem(m_composition->get_name(), EditableTextItem::TitleType, {}, this);
     titleItem->setPos(0, 0);
     titleItem->setTextWidth(m_width);
     titleItem->document()->setDefaultTextOption(QTextOption(Qt::AlignCenter));
     m_textItems.append(titleItem);
+
 
     int y_offset = m_line_height;
     if(!m_composition->fields.isEmpty()) {
@@ -172,7 +231,7 @@ void CppClass::updateTextItems()
 
     for(int i = 0; i < m_composition->fields.count(); ++i) {
         auto& field = m_composition->fields[i];
-        add_text(field.declaration(), y_offset, EditableTextItem::Field, field.get_id());
+        add_text(field->declaration(), y_offset, EditableTextItem::FieldType, field);
         y_offset += m_line_height;
     }
 
@@ -182,16 +241,17 @@ void CppClass::updateTextItems()
 
     for(int i = 0; i < m_composition->methods.count(); ++i) {
         auto& method = m_composition->methods[i];
-        add_text(method.declaration(), y_offset, EditableTextItem::Method, method.get_id());
+        add_text(method->declaration(), y_offset, EditableTextItem::MethodType, method);
         y_offset += m_line_height;
     }
 }
 
-void CppClass::add_text(const QString text, int y_offset, EditableTextItem::ItemType type, int element_id) {
-    auto* item = new EditableTextItem(text, type, element_id, this);
+void CppClass::add_text(const QString text, int y_offset, EditableTextItem::ItemType type, std::weak_ptr<IClassElement> element_weak) {
+    auto* item = new EditableTextItem(text, type, element_weak, this);
     item->setPos(0, y_offset);
     item->setTextWidth(m_width);
     item->document()->setDefaultTextOption(QTextOption(Qt::AlignCenter));
+
     m_textItems.append(item);
 }
 
@@ -218,8 +278,8 @@ void CppClass::on_add_button_clicked()
 void CppClass::add_new_field(){
 
     auto new_field = FieldDialog::create_field(scene()->views().first());
-    if (new_field.has_value()) {
-        emit  add_field_request(m_composition.get(), new_field.value());
+    if (new_field) {
+        emit  add_field_request(m_composition.get(), new_field);
         updateBoundingRect();
         update();
     }
@@ -227,74 +287,46 @@ void CppClass::add_new_field(){
 
 void CppClass::add_new_method(){
     auto new_method = MethodDialog::create_method(scene()->views().first());
-    if (new_method.has_value()) {
-        emit  add_method_request(m_composition.get(), new_method.value());
+    if (new_method) {
+        emit  add_method_request(m_composition.get(), new_method);
         updateBoundingRect();
         update();
     }
 }
 
-
-// [REFACTOR] finding element by id should be implemented in Composition
-void CppClass::edit_field(int field_id)
+void CppClass::edit_field(std::weak_ptr<Field> old_field_weak)
 {
-    // Find field by ID
-    int index = -1;
-    for (int i = 0; i < m_composition->fields.count(); ++i) {
-        if (m_composition->fields[i].get_id() == field_id) {
-            index = i;
-            break;
+    if(auto old_field = old_field_weak.lock()){
+
+        std::shared_ptr<Field> edited_field = FieldDialog::edit_field(*old_field, scene()->views().first());
+        if (edited_field) {
+            emit edit_field_request(m_composition.get(), old_field_weak, edited_field);
+            updateBoundingRect();
+            update();
         }
-    }
-
-    if (index < 0) {
-        return;  // Field not found
-    }
-
-    const Field& old_field = m_composition->fields[index];
-    auto edited_field = FieldDialog::edit_field(old_field, scene()->views().first());
-
-    if (edited_field.has_value()) {
-        emit edit_field_request(m_composition.get(), field_id, edited_field.value());
-        updateBoundingRect();
-        update();
     }
 }
 
-void CppClass::edit_method(int method_id)
+void CppClass::edit_method(std::weak_ptr<Method> old_method_weak)
 {
-    // Find method by ID
-    int index = -1;
-    for (int i = 0; i < m_composition->methods.count(); ++i) {
-        if (m_composition->methods[i].get_id() == method_id) {
-            index = i;
-            break;
+     if(auto old_method = old_method_weak.lock()){
+
+        std::shared_ptr<Method> edited_method = MethodDialog::edit_method(*old_method, scene()->views().first());
+        if (edited_method) {
+            emit edit_method_request(m_composition.get(), old_method_weak, edited_method);
+            updateBoundingRect();
+            update();
         }
-    }
-
-    if (index < 0) {
-        return;  // Method not found
-    }
-
-    const Method& old_method = m_composition->methods[index];
-    auto edited_method = MethodDialog::edit_method(old_method, scene()->views().first());
-
-    if (edited_method.has_value()) {
-        emit edit_method_request(m_composition.get(), method_id, edited_method.value());
-        updateBoundingRect();
-        update();
     }
 }
 
 void CppClass::mousePressEvent(QGraphicsSceneMouseEvent* event){
-    if (event->button() == Qt::LeftButton && m_board->linkageMode) {
+    if (m_board->linkageMode) {
         m_composition->Clicked = true;
         m_board->ValidateAndLink(this);
-    } else if (event->button() == Qt::RightButton) {
-        qDebug() << "Edit button (needs to be implemented)";
     }
 
-    QGraphicsItem::mousePressEvent(event); // keep default behavior
+    QGraphicsItem::mousePressEvent(event);
 }
 
 QPointF CppClass::getTopCenter() const{
@@ -309,44 +341,71 @@ QPointF CppClass::getBottomCenter() const{
     return mapToScene(bottomCenterLocal);
 }
 
+void CppClass::PNGConnection::updatePosition(CppClass* source){
+    if(!imageItem || !source || !targetClass){
+        return;
+    }
+    QPointF imagePoint = targetClass->getTopCenter();
+    QPointF otherPoint = source->getBottomCenter();
+
+    imageItem->setPos(imagePoint);
+
+    // place center of the picture on class edge
+    QPixmap pixmap = imageItem->pixmap();
+    imageItem->setOffset(-pixmap.width() / 2, -pixmap.height() / 2);
+
+    // rotates to point toward target class
+    QPointF direction = otherPoint - imagePoint;
+    qreal angle = qRadiansToDegrees(qAtan2(direction.y(), direction.x()));
+    imageItem->setRotation(angle);
+
+    // scaling
+    qreal distance = qSqrt(direction.x() * direction.x() + direction.y() * direction.y());
+    qreal scale = qBound(0.5, distance / 200.0, 2.0);
+    imageItem->setScale(scale);
+}
+
+void CppClass::addPNGConnection(const QString& imagePath, CppClass* target, bool imageOnTarget){
+    if(!target || imagePath.isEmpty()){
+        qDebug() << "addPngConnection";
+        return;
+    }
+
+    QPixmap pixmap(imagePath);
+    if(pixmap.isNull()){
+        qDebug() << "Failed to load PNG:" << imagePath;
+        return;
+    }
+
+    QGraphicsPixmapItem* imageItem = new QGraphicsPixmapItem(pixmap);
+    imageItem->setTransformationMode(Qt::SmoothTransformation);
+    scene()->addItem(imageItem);
+
+    PNGConnection connection;
+    connection.imageItem = imageItem;
+    connection.targetClass = target;
+    connection.imageOnTarget = imageOnTarget;
+    connection.imagePath = imagePath;
+    connection.updatePosition(this);
+    m_pngConnections.append(connection);
+
+    qDebug() << "Added PNG connection from" << m_composition->get_name() << "with image:" << imagePath;
+
+}
+
+void CppClass::updatePNGConnections(){
+    for(PNGConnection& conn : m_pngConnections){
+        conn.updatePosition(this);
+    }
+}
+
+
 // called when objects is moved in board
 QVariant CppClass::itemChange(GraphicsItemChange change, const QVariant &value){
-    if (change == ItemPositionHasChanged) {
-        updateConnections();
+    if(change == ItemPositionHasChanged){
+        updatePNGConnections();
     }
     return QGraphicsItem::itemChange(change, value);
-}
-
-void CppClass::updateConnections(){
-    for (const ConnectionInfo& info : m_connections) {
-        QLineF currentLine = info.line->line();
-        if (info.isStart) {
-            QPointF newStart = getBottomCenter();
-            info.line->setLine(QLineF(newStart, currentLine.p2()));
-        } else {
-            QPointF newEnd = getTopCenter();
-            info.line->setLine(QLineF(currentLine.p1(), newEnd));
-        }
-    }
-}
-
-void CppClass::addConnection(QGraphicsLineItem* line, bool isStart){
-    ConnectionInfo info{line, isStart};
-    m_connections.append(info);
-}
-
-void CppClass::createConnection(CppClass* second){
-    QPointF parentPoint = this->getBottomCenter();
-    QPointF childPoint = second->getTopCenter();
-    QGraphicsLineItem* line = new QGraphicsLineItem(QLineF(parentPoint, childPoint));
-
-    QGraphicsScene* sc = this->scene();
-    line->setPen(QPen(Qt::blue, 2));
-    sc->addItem(line);
-
-    // saving parent and child relation
-    this->addConnection(line, true);
-    second->addConnection(line, false);
 }
 
 Composition* CppClass::get_uml_class_diagram_node() {

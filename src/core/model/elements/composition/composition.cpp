@@ -16,10 +16,10 @@ Destructor Composition::get_destructor() const {
 QVector<IClassElement*> Composition::get_new_code_elements() {
     QVector<IClassElement*> elements;
     for (auto& field : fields) {
-        elements.append(&field);
+        elements.append(field.get());
     }
     for (auto& method : methods) {
-        elements.append(&method);
+        elements.append(method.get());
     }
     for (auto& constructor : constructors) {
         elements.append(constructor.get());
@@ -29,15 +29,17 @@ QVector<IClassElement*> Composition::get_new_code_elements() {
 
 QVector<const IClassElement*> Composition::get_new_code_elements() const {
     QVector<const IClassElement*> elements;
-    for (const auto& field : fields) {
-        elements.append(&field);
+    for (auto& field : fields) {
+        elements.append(field.get());
     }
-    for (const auto& method : methods) {
-        elements.append(&method);
+    for (auto& method : methods) {
+        elements.append(method.get());
     }
-    for (const auto& constructor : constructors) {
+    for (auto& constructor : constructors) {
         elements.append(constructor.get());
     }
+
+    // Potential leak?
     Destructor* destructor = new Destructor(get_destructor());
     elements.append(destructor);
     return elements;
@@ -48,7 +50,7 @@ QVector<const IClassElement*> Composition::get_code_elements() const {
 
     if (inheritance.has_value()) {
         auto inherited_elements = inheritance.value().second->get_code_elements();
-        for (const auto* elem : inherited_elements) {
+        for (auto& elem : inherited_elements) {
             const Method* method = dynamic_cast<const Method*>(elem);
             if (method && method->get_method_kind() != MethodKind::Regular) {
                 elements.append(elem);
@@ -67,7 +69,7 @@ QMap<Visibility, QVector<const IClassElement*>> Composition::get_grouped_code_el
     QMap<Visibility, QVector<const IClassElement*>> grouped;
     auto elements = get_code_elements();
 
-    for (const auto* elem : elements) {
+    for (auto& elem : elements) {
         Visibility vis = Visibility::Public;
         grouped[vis].append(elem);
     }
@@ -104,7 +106,7 @@ QString Composition::definition() const {
     QStringList definitions;
     auto elements = get_code_elements();
 
-    for (const auto* elem : elements) {
+    for (auto& elem : elements) {
         auto def = elem->definition(name);
         if (def.has_value()) {
             definitions.append(def.value());
@@ -116,22 +118,19 @@ QString Composition::definition() const {
 
 void Composition::add_field(const QString& name, const QString& type, std::optional<Visibility> visibility) {
     Visibility vis = visibility.value_or(get_default_visibility());
-    fields.append(Field(name, type, vis));
+
+    fields.append(std::make_shared<Field>(name, type, vis));
 }
 
-void Composition::add_field(const Field& field){
+void Composition::add_field(std::shared_ptr<Field> field){
     fields.append(field);
 }
 
-// void Composition::add_field(const Argument &description, std::optional<Visibility> visibility){
-//     fields.append(Field(description, visibility.value()));
-// }
-
 void Composition::add_method(const QString& name, const QString& type, Visibility visibility, MethodKind method_type, const QList<Argument>& variables) {
-    methods.append(Method(name, type, visibility, method_type, variables));
+    methods.append(std::make_shared<Method>(name, type, visibility, method_type, variables));
 }
 
-void Composition::add_method(const Method& method){
+void Composition::add_method(std::shared_ptr<Method> method){
     methods.append(method);
 }
 
@@ -141,10 +140,7 @@ void Composition::add_constructor(Visibility visibility, const QVector<Argument>
 }
 
 void Composition::add_copy_constructor(Visibility visibility) {
-    // QVector<Argument> field_descriptions;
-    // for (const auto& field : fields) {
-    //     field_descriptions.append(field.get_description());
-    // }
+
     constructors.append(std::make_shared<CopyConstructor>(name, fields, visibility));
 }
 

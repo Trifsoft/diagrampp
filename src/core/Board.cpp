@@ -7,25 +7,31 @@
 #include "src/ui/ui_Board.h"
 #include "model/elements/type/regular_type.h"
 #include "nodefactory.h"
+#include "image_paths.h"
 
 Board::Board(QWidget *parent)
     : QWidget(parent), ui(new Ui::Board), diagram(new DiagramGraph())
 {
     ui->setupUi(this);
 
+    setAttribute(Qt::WA_DeleteOnClose);
+
     scene = new QGraphicsScene(this);
     ui->board->setScene(scene);
     ui->side_menu->setStyleSheet("background-color: #2c3e50;");
-    ui->checkBox->setChecked(false);
+    ui->Linkage->setChecked(false);
 
     // Connect buttons to slots
     connect(ui->add_class, &QPushButton::clicked, this, &Board::onAddClassClicked);
     connect(ui->add_interface, &QPushButton::clicked, this, &Board::onAddInterfaceClicked);
     connect(ui->add_enum, &QPushButton::clicked, this, &Board::onAddEnumClicked);
-    connect(ui->radioButton_1, &QPushButton::clicked, this, &Board::onCheckRadioButtonToggled);
-    connect(ui->radioButton_2, &QPushButton::clicked, this, &Board::onCheckRadioButtonToggled);
-    connect(ui->radioButton_3, &QPushButton::clicked, this, &Board::onCheckRadioButtonToggled);
-    connect(ui->checkBox, &QPushButton::clicked, this, &Board::onLinkageToggled);
+    connect(ui->Inheritance, &QPushButton::clicked, this, &Board::onCheckRadioButtonToggled);
+    connect(ui->Association, &QPushButton::clicked, this, &Board::onCheckRadioButtonToggled);
+    connect(ui->Navigation, &QPushButton::clicked, this, &Board::onCheckRadioButtonToggled);
+    connect(ui->Aggregation, &QPushButton::clicked, this, &Board::onCheckRadioButtonToggled);
+    connect(ui->Composition, &QPushButton::clicked, this, &Board::onCheckRadioButtonToggled);
+    connect(ui->Dependency, &QPushButton::clicked, this, &Board::onCheckRadioButtonToggled);
+    connect(ui->Linkage, &QPushButton::clicked, this, &Board::onLinkageToggled);
 }
 
 Board::~Board()
@@ -36,15 +42,25 @@ Board::~Board()
 }
 
 void Board::onCheckRadioButtonToggled(){
-    this->inheritance = ui->radioButton_1->isChecked();
-    this->association = ui->radioButton_2->isChecked();
-    this->navigation = ui->radioButton_3->isChecked();
+    if(ui->Inheritance->isChecked()){
+        branchType = BranchType::INHERITANCE;
+    }else if(ui->Association->isChecked()){
+        branchType = BranchType::ASSOCIATION;
+    }else if(ui->Navigation->isChecked()){
+        branchType = BranchType::NAVIGATION;
+    }else if(ui->Aggregation->isChecked()){
+        branchType = BranchType::AGGREGATION;
+    }else if(ui->Composition->isChecked()){
+        branchType = BranchType::COMPOSITION;
+    }else{
+        branchType = BranchType::DEPENDENCY;
+    }
 }
 
-BranchType determineBranchType(bool inheritance, bool association) {
-    if (inheritance) return BranchType::INHERITANCE;
-    if (association) return BranchType::ASSOCIATION;
-    return BranchType::NAVIGATION;
+void Board::onLinkageToggled(){
+    this->linkageMode = ui->Linkage->isChecked();
+    diagram->first_selected_node = nullptr;
+    diagram->second_selected_node = nullptr;
 }
 
 void Board::ValidateAndLink(SharedNodePtr activator){
@@ -53,27 +69,27 @@ void Board::ValidateAndLink(SharedNodePtr activator){
         return;
     }
     diagram->second_selected_node = activator;
+    //dynamic_cast<CppClass*>
+    qDebug() << "process on " << diagram->first_selected_node->get_uml_class_diagram_node()->get_name() << " ->" << diagram->second_selected_node->get_uml_class_diagram_node()->get_name();
 
-    BranchType type = determineBranchType(this->inheritance, this->association);
-    // dodati if i raditi
-    validator->checkLinkage(diagram->first_selected_node, diagram->second_selected_node, type);
-    diagram->add_branch(diagram->first_selected_node, diagram->second_selected_node, type);
-    // createConnection ?
-
-    validator->checkLinkage(diagram->first_selected_node, diagram->second_selected_node, type);
-
-    diagram->add_branch(diagram->first_selected_node, diagram->second_selected_node, type);
-    // createConnection ?
+    std::string errorMessage = "/";
+    Validator::validateDiagram(errorMessage, diagram->first_selected_node, diagram->second_selected_node, branchType, diagram->get_diagram());
+#if DEBUG >=1
+    qDebug() << errorMessage;
+    diagram->showDiagram();
+#endif
+    //diagram->first_selected_node->CPPCLASS->add
     diagram->first_selected_node = nullptr;
     diagram->second_selected_node = nullptr;
-}
 
-void Board::onLinkageToggled(){
-    this->linkageMode = ui->checkBox->isChecked();
 }
 
 
-void Board::on_add_field_requested(Composition *node, const Field& field)
+void Board::onAddClassClicked()     { openNodeFactory(NodeType::Class);  }
+void Board::onAddInterfaceClicked() { openNodeFactory(NodeType::Struct); }
+void Board::onAddEnumClicked()      { openNodeFactory(NodeType::Enum);   }
+
+void Board::on_add_field_requested(Composition *node, std::shared_ptr<Field> field)
 {
     if(node)
     {
@@ -83,7 +99,7 @@ void Board::on_add_field_requested(Composition *node, const Field& field)
     qDebug() << "Recieved signal add field from: " << node->get_label();
 }
 
-void Board::on_add_method_requested(Composition *node, const Method& method)
+void Board::on_add_method_requested(Composition *node, std::shared_ptr<Method> method)
 {
     if(node)
     {
@@ -94,105 +110,106 @@ void Board::on_add_method_requested(Composition *node, const Method& method)
 }
 
 
-//[REFACTOR] implement get_element_by_id(int id) in Composition
-void Board::on_edit_field_requested(Composition *node, int field_id, const Field& new_field)
+// [REFACTOR] implement get_element_by_id(int id) in Composition
+void Board::on_edit_field_requested(Composition *node, std::weak_ptr<Field> old_field_weak,  std::shared_ptr<Field> new_field)
 {
-    if(node)
-    {
-        for (int i = 0; i < node->fields.count(); ++i) {
-            if (node->fields[i].get_id() == field_id) {
-                node->fields[i] = new_field;
-                break;
-            }
+    if(node){
+        // old_field is now shared_ptr
+        if(auto old_field = old_field_weak.lock()){
+            *old_field = *new_field;
         }
     }
-
     qDebug() << "Received signal edit field from: " << node->get_label();
 }
 
-void Board::on_edit_method_requested(Composition *node, int method_id, const Method& new_method)
+// [REFACTOR] implement get_element_by_id(int id) in Composition
+void Board::on_edit_method_requested(Composition *node, std::weak_ptr<Method> old_method_weak, std::shared_ptr<Method>new_method)
 {
-    if(node)
-    {
-        for (int i = 0; i < node->methods.count(); ++i) {
-            if (node->methods[i].get_id() == method_id) {
-                node->methods[i] = new_method;
-                break;
-            }
+    // if(node)
+    // {
+    //     for (int i = 0; i < node->methods.count(); ++i) {
+    //         if (node->methods[i]->get_id() == method_id) {
+    //             node->methods[i] = new_method;
+    //             break;
+    //         }
+    //     }
+    // }
+
+    if(node){
+        // old_field is now shared_ptr
+        if(auto old_method = old_method_weak.lock()){
+            *old_method = *new_method;
         }
     }
 
     qDebug() << "Received signal edit method from: " << node->get_label();
 }
 
-void Board::onAddClassClicked()
-{
-    NodeFactory* node_factory = new NodeFactory(NodeType::Class, [this](const QString class_name) {
 
-        auto new_node = std::make_shared<CPPClass>(class_name);
-        // new_node->add_field("test1", std::make_shared<RegularType>(RegularType("int")));
-        // new_node->add_field("test2", std::make_shared<RegularType>(RegularType("bool")));
-        // new_node->add_field("test3", std::make_shared<RegularType>(RegularType("float")));
-        // new_node->add_field("test4", std::make_shared<RegularType>(RegularType("double")));
-        // new_node->add_method("foo", std::make_shared<RegularType>("void"), Visibility::Private, MethodType::Regular, { Description("bar", std::make_shared<RegularType>("int")) });
+void Board::openNodeFactory(NodeType node_type) {
 
-
-        new_node->add_field("test1", "tip1", Visibility::Protected);
-        new_node->add_field("test2", "tip2", Visibility::Private);
-        new_node->add_field("test3", "tip3");
-        new_node->add_method("method","void", Visibility::Private, MethodKind::Regular, { Argument("bar", "int") });
-
-
-        add_item(new_node);
-    });
-    node_factory->show();
-
-}
-
-void Board::onAddInterfaceClicked()
-{
-    NodeFactory* node_factory = new NodeFactory(NodeType::Class, [this](const QString class_name) {
-
-        auto new_node = std::make_shared<CPPStruct>(class_name);
-        // new_node->add_field("test1", std::make_shared<RegularType>(RegularType("int")));
-        // new_node->add_field("test2", std::make_shared<RegularType>(RegularType("bool")));
-        // new_node->add_field("test3", std::make_shared<RegularType>(RegularType("float")));
-        // new_node->add_field("test4", std::make_shared<RegularType>(RegularType("double")));
-        // new_node->add_method("foo", std::make_shared<RegularType>("void"), Visibility::Private, MethodType::Regular, { Description("bar", std::make_shared<RegularType>("int")) });
-
-
-        new_node->add_field("test1", "tip1", Visibility::Protected);
-        new_node->add_field("test2", "tip2", Visibility::Private);
-        new_node->add_field("test3", "tip3");
-        new_node->add_method("method","void", Visibility::Private, MethodKind::Regular, { Argument("bar", "int") });
-
-        add_item(new_node);
-    });
+    // [FIX] Probably a leak
+    NodeFactory* node_factory = new NodeFactory(node_type);
+    connect(node_factory, &NodeFactory::generateClicked, this, &Board::onGenerateClicked);
     node_factory->show();
 }
 
-void Board::onAddEnumClicked()
-{
-    NodeFactory* node_factory = new NodeFactory(NodeType::Class, [this](const QString class_name) {
-
-        auto new_node = std::make_shared<CPPClass>(class_name);
-        // new_node->add_field("test1", std::make_shared<RegularType>(RegularType("int")));
-        // new_node->add_field("test2", std::make_shared<RegularType>(RegularType("bool")));
-        // new_node->add_field("test3", std::make_shared<RegularType>(RegularType("float")));
-        // new_node->add_field("test4", std::make_shared<RegularType>(RegularType("double")));
-        // new_node->add_method("foo", std::make_shared<RegularType>("void"), Visibility::Private, MethodType::Regular, { Description("bar", std::make_shared<RegularType>("int")) });
-
-        new_node->add_field("test1", "tip1", Visibility::Protected);
-        new_node->add_field("test2", "tip2", Visibility::Private);
-        new_node->add_field("test3", "tip3");
-        new_node->add_method("method","void", Visibility::Private, MethodKind::Regular, { Argument("bar", "int") });
+void Board::onGenerateClicked(const QString& class_name, NodeType node_type) {
+    switch(node_type) {
+        case NodeType::Class: {
+            auto new_node = std::make_shared<CPPClass>(class_name);
+            // new_node->add_field("test1", std::make_shared<RegularType>(RegularType("int")));
+            // new_node->add_field("test2", std::make_shared<RegularType>(RegularType("bool")));
+            // new_node->add_field("test3", std::make_shared<RegularType>(RegularType("float")));
+            // new_node->add_field("test4", std::make_shared<RegularType>(RegularType("double")));
+            // new_node->add_method("foo", std::make_shared<RegularType>("void"), Visibility::Private, MethodType::Regular, { Description("bar", std::make_shared<RegularType>("int")) });
 
 
-        add_item(new_node);
-    });
-    node_factory->show();
+            new_node->add_field("test1", "tip1", Visibility::Protected);
+            new_node->add_field("test2", "tip2", Visibility::Private);
+            new_node->add_field("test3", "tip3");
+            new_node->add_method("method","void", Visibility::Private, MethodKind::Regular, { Argument("bar", "int") });
+
+
+            add_item(new_node);
+            break;
+        }
+        case NodeType::Struct: {
+            auto new_node = std::make_shared<CPPStruct>(class_name);
+            // new_node->add_field("test1", std::make_shared<RegularType>(RegularType("int")));
+            // new_node->add_field("test2", std::make_shared<RegularType>(RegularType("bool")));
+            // new_node->add_field("test3", std::make_shared<RegularType>(RegularType("float")));
+            // new_node->add_field("test4", std::make_shared<RegularType>(RegularType("double")));
+            // new_node->add_method("foo", std::make_shared<RegularType>("void"), Visibility::Private, MethodType::Regular, { Description("bar", std::make_shared<RegularType>("int")) });
+
+
+            new_node->add_field("test1", "tip1", Visibility::Protected);
+            new_node->add_field("test2", "tip2", Visibility::Private);
+            new_node->add_field("test3", "tip3");
+            new_node->add_method("method","void", Visibility::Private, MethodKind::Regular, { Argument("bar", "int") });
+
+            add_item(new_node);
+            break;
+        }
+        case NodeType::Enum: {
+            auto new_node = std::make_shared<CPPClass>(class_name);
+            // new_node->add_field("test1", std::make_shared<RegularType>(RegularType("int")));
+            // new_node->add_field("test2", std::make_shared<RegularType>(RegularType("bool")));
+            // new_node->add_field("test3", std::make_shared<RegularType>(RegularType("float")));
+            // new_node->add_field("test4", std::make_shared<RegularType>(RegularType("double")));
+            // new_node->add_method("foo", std::make_shared<RegularType>("void"), Visibility::Private, MethodType::Regular, { Description("bar", std::make_shared<RegularType>("int")) });
+
+            new_node->add_field("test1", "tip1", Visibility::Protected);
+            new_node->add_field("test2", "tip2", Visibility::Private);
+            new_node->add_field("test3", "tip3");
+            new_node->add_method("method","void", Visibility::Private, MethodKind::Regular, { Argument("bar", "int") });
+
+
+            add_item(new_node);
+            break;
+        }
+    }
 }
-
 void Board::add_item(std::shared_ptr<Composition> node) {   //TODO [Nikola] - izmeniti da bude IUMLClassDiagramNode umesto Composition
     CppClass* item = new CppClass(this, node);
     scene->addItem(item);

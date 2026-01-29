@@ -13,11 +13,8 @@ enum class ElementRank {
 };
 
 class IClassElement {
-protected:
-    static int s_next_id;
-    
+protected:  
     ElementRank element_rank;
-    int element_id;  // Unique identifier that persists even if position changes
     QString name;
     Visibility visibility;
 

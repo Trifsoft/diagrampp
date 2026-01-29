@@ -18,8 +18,8 @@ public:
     QList<Argument> get_arguments() const;
     QString get_definition_block() const;
 
-    static std::optional<Method> create_method(QWidget* parent = nullptr);
-    static std::optional<Method> edit_method(const Method& method, QWidget* parent = nullptr);
+    static std::shared_ptr<Method> create_method(QWidget* parent = nullptr);
+    static std::shared_ptr<Method> edit_method(const Method& method, QWidget* parent = nullptr);
 
 private slots:
     void on_method_kind_changed(int index);

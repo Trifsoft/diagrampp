@@ -1,9 +1,8 @@
 #include "model/elements/class_element.h"
 
-int IClassElement::s_next_id = 0;
 
 IClassElement::IClassElement(ElementRank rank, const QString& name, Visibility vis)
-    : element_rank(rank), element_id(s_next_id++), name(name), visibility(vis) {
+    : element_rank(rank), name(name), visibility(vis) {
 }
 
 IClassElement::~IClassElement() {
@@ -22,11 +21,6 @@ const QString IClassElement::get_name() const
 const ElementRank IClassElement::get_rank() const
 {
     return element_rank;
-}
-
-int IClassElement::get_id() const
-{
-    return element_id;
 }
 
 int IClassElement::compare_to(const IClassElement& other) const {

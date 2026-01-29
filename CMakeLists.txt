@@ -63,6 +63,8 @@ set(CORE_HEADERS
     include/view/field_dialog.h
     include/view/method_dialog.h
     include/nodefactory.h
+    include/methodeditor.h
+    include/widget/class_element_text.h
 )
 
 set(CORE_SOURCES
@@ -110,12 +112,15 @@ set(CORE_SOURCES
     src/core/view/field_dialog.cpp
     src/core/view/method_dialog.cpp
     src/core/nodefactory.cpp
+    src/core/methodeditor.cpp
+    src/core/widget/class_element_text.cpp
 )
 
 set(UI_SOURCES
     src/ui/main_window.ui
     src/ui/Board.ui
     src/ui/nodefactory.ui
+    src/ui/methodeditor.ui
 )
 
 # Glavni projekat izvori
@@ -134,6 +139,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(DiagramPP
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
+        include/image_paths.h
     )
 else()
     add_executable(DiagramPP ${PROJECT_SOURCES})

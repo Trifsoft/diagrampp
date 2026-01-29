@@ -75,33 +75,32 @@ std::optional<QString> FieldDialog::get_destruction() const
     }
 }
 
-std::optional<Field> FieldDialog::create_field(QWidget* parent)
+std::shared_ptr<Field> FieldDialog::create_field(QWidget* parent)
 {
     FieldDialog dialog(parent);
     if (dialog.exec() == QDialog::Accepted) {
 
         // Create a field
-        Field field(dialog.get_name(),
+        auto field = std::make_shared<Field>(dialog.get_name(),
                     dialog.get_type(),
                     dialog.get_visibility(),
                     dialog.get_destruction());
 
         return field;
     }
-    return std::nullopt;
+    return nullptr;
 }
-
-std::optional<Field> FieldDialog::edit_field(const Field& field, QWidget* parent)
+std::shared_ptr<Field> FieldDialog::edit_field(const Field& field, QWidget* parent)
 {
     FieldDialog dialog(field, parent);
     if (dialog.exec() == QDialog::Accepted) {
 
-        Field updated(dialog.get_name(),
+        auto updated = std::make_shared<Field>(dialog.get_name(),
                       dialog.get_type(),
                       dialog.get_visibility(),
                       dialog.get_destruction());
 
         return updated;
     }
-    return std::nullopt;
+    return nullptr;
 }

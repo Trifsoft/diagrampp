@@ -13,6 +13,8 @@
 #include <optional>
 #include <memory>
 
+class CppClass;
+
 class Composition : public IUMLClassDiagramNode {
 protected:
     QString name;
@@ -28,9 +30,8 @@ protected:
 
 public:
 
-    // [REFACTOR] use shared_ptr for fields and methods, useful with command manager and copy constructor for example
-    QVector<Field> fields;
-    QVector<Method> methods;
+    QVector<std::shared_ptr<Field>> fields;
+    QVector<std::shared_ptr<Method>> methods;
 
     Composition(const QString& name, Visibility visibility, std::optional<std::pair<Visibility, Composition*>> inheritance = std::nullopt);
     virtual ~Composition() = default;
@@ -43,16 +44,17 @@ public:
     QMap<Visibility, QVector<const IClassElement*>> get_grouped_code_elements() const;
 
     void add_field(const QString& name, const QString& type, std::optional<Visibility> visibility = std::nullopt);
-    void add_field(const Field& field);
+    void add_field(std::shared_ptr<Field> field);
     
     void add_method(const QString& name, const QString& type, Visibility visibility, MethodKind method_type, const QVector<Argument>& variables);
-    void add_method(const Method& method);
+    void add_method(std::shared_ptr<Method> method);
     
     void add_constructor(Visibility visibility, const QVector<Argument>& arguments);
     void add_copy_constructor(Visibility visibility);
 
     int get_field_count();
     int get_method_count();
+
 
 };
 

@@ -16,8 +16,8 @@ public:
     std::optional<QString> get_destruction() const;
     QString get_description() const;
 
-    static std::optional<Field> create_field(QWidget* parent = nullptr);
-    static std::optional<Field> edit_field(const Field& field, QWidget* parent = nullptr);
+    static std::shared_ptr<Field> create_field(QWidget* parent = nullptr);
+    static std::shared_ptr<Field> edit_field(const Field& field, QWidget* parent = nullptr);
 
 private slots:
     void on_destruction_checkbox_changed(int state);

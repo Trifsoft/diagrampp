@@ -153,32 +153,32 @@ QString MethodDialog::get_definition_block() const
     return m_definition_edit->toPlainText();
 }
 
-std::optional<Method> MethodDialog::create_method(QWidget* parent)
+std::shared_ptr<Method> MethodDialog::create_method(QWidget* parent)
 {
     MethodDialog dialog(parent);
     if (dialog.exec() == QDialog::Accepted) {
-        Method method(dialog.get_name(),
+        auto method = std::make_shared<Method>(dialog.get_name(),
                       dialog.get_type(),
                       dialog.get_visibility(),
                       dialog.get_method_kind(),
                       dialog.get_arguments());
-        method.set_definition_block(dialog.get_definition_block());
+        method->set_definition_block(dialog.get_definition_block());
         return method;
     }
-    return std::nullopt;
+    return nullptr;
 }
 
-std::optional<Method> MethodDialog::edit_method(const Method& method, QWidget* parent)
+std::shared_ptr<Method> MethodDialog::edit_method(const Method& method, QWidget* parent)
 {
     MethodDialog dialog(method, parent);
     if (dialog.exec() == QDialog::Accepted) {
-        Method updated(dialog.get_name(),
+        auto updated = std::make_shared<Method>(dialog.get_name(),
                        dialog.get_type(),
                        dialog.get_visibility(),
                        dialog.get_method_kind(),
                        dialog.get_arguments());
-        updated.set_definition_block(dialog.get_definition_block());
+        updated->set_definition_block(dialog.get_definition_block());
         return updated;
     }
-    return std::nullopt;
+    return nullptr;
 }

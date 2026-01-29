@@ -18,14 +18,15 @@ class NodeFactory : public QWidget
     Q_OBJECT
 
 public:
-    NodeFactory(NodeType node_type, std::function<void(const QString)> generate_class, QWidget *parent = nullptr);
+    NodeFactory(NodeType node_type, QWidget *parent = nullptr);
     ~NodeFactory();
+signals:
+    void generateClicked(const QString&, NodeType node_type);
 private slots:
     void onGenerateClick();
 private:
     Ui::NodeFactory *ui;
-
-    std::function<void(const QString)> m_generate_class;
+    NodeType m_node_type;
 };
 
 #endif // NODEFACTORY_H

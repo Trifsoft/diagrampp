@@ -11,14 +11,14 @@ class Field;
 class Destructor : public IClassElement {
 private:
     QString class_name;
-    QVector<Field> fields;
+    QVector<std::shared_ptr<Field>> fields;
     bool is_virtual;
 
     bool is_default() const;
     QString get_definition_block() const;
 
 public:
-    Destructor(const QString& class_name, const QVector<Field>& fields, bool is_virtual = false);
+    Destructor(const QString& class_name, const QVector<std::shared_ptr<Field>>& fields, bool is_virtual = false);
 
     QString declaration() const override;
     std::optional<QString> definition(const QString& class_name) const override;

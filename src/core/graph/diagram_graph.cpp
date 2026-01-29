@@ -66,6 +66,20 @@ void DiagramGraph::remove_branch(SharedNodePtr from, SharedNodePtr to, BranchTyp
     }
 }
 
-const std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& DiagramGraph::get_diagram() const{
+std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& DiagramGraph::get_diagram(){
     return diagram;
 }
+
+#if DEBUG_MODE >=1
+void DiagramGraph::showDiagram(){
+    for(auto &value : diagram){
+        QDebug debug_stream = qDebug();
+        debug_stream << value.first->get_uml_class_diagram_node()->get_name() << ":";
+        std::vector<std::pair<SharedNodePtr, BranchType>>& sequence = value.second;
+        for(auto &pairs : sequence){
+            debug_stream << pairs.first->get_uml_class_diagram_node()->get_name();
+        }
+        qDebug() << "----";
+    }
+}
+#endif
