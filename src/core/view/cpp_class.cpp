@@ -484,14 +484,14 @@ void CppClass::removeLink(CppClass* target){
     }
 
     Connection *source_connection = nullptr, *target_connection = nullptr;
-    for(int i = 0; i < m_connections.size(); i++){
+    for(int i = m_connections.size()-1; i >= 0; i--){
         if(m_connections[i].otherClass == target){
             source_connection = &m_connections[i];
             m_connections.removeAt(i);
             break;
         }
     }
-    for(int i = 0; i < target->m_connections.size(); i++){
+    for(int i = target->m_connections.size()-1; i >= 0; i--){
         if(target->m_connections[i].otherClass == this){
             target_connection = &target->m_connections[i];
             target->m_connections.removeAt(i);

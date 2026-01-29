@@ -24,7 +24,6 @@ namespace Validator {
             errorMessage = "Cannot self connection";
             return false;
         }
-        // proveri duplication u circularity
         if(!checkLinkage(errorMessage, child, parent)){
             return false;
         }

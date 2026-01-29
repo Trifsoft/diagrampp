@@ -87,16 +87,17 @@ void Board::on_object_clicked(SharedNodePtr clicked_object){
     if((first_activated && second_activated) && linkageMode){
         diagram->add_branch(first_activated, second_activated, branchType);
         if(!Validator::validate(errorMessage, first_activated, second_activated, branchType, diagram->get_diagram())){
-            #if DEBUG_MODE>=1
-                qDebug() << errorMessage;
-                diagram->showDiagram();
-            #endif
-            QMessageBox::warning(this, "Upozorenje", QString::fromStdString(errorMessage));
             diagram->remove_branch(first_activated, second_activated, branchType);
+            QMessageBox::warning(this, "Upozorenje", QString::fromStdString(errorMessage));
         }
     }else if((first_activated && second_activated) && removeMode){
          diagram->remove_branch(first_activated, second_activated, branchType);
     }
+
+#if DEBUG_MODE>=1
+    qDebug() << errorMessage;
+    diagram->showDiagram();
+#endif
 
     first_activated = second_activated = nullptr;
 }
