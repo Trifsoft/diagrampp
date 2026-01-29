@@ -14,7 +14,10 @@ enum class ElementRank {
 
 class IClassElement {
 protected:
+    static int s_next_id;
+    
     ElementRank element_rank;
+    int element_id;  // Unique identifier that persists even if position changes
     QString name;
     Visibility visibility;
 
@@ -26,6 +29,7 @@ public:
     const ElementRank get_rank() const;
     const QString get_name() const;
     const Visibility get_visibility() const;
+    int get_id() const;  // Get unique ID
 
     virtual QString declaration() const = 0;
     virtual std::optional<QString> definition(const QString& class_name) const = 0;

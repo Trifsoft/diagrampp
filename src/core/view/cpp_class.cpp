@@ -14,6 +14,42 @@
 #include <QInputDialog>
 #include <qgraphicsview.h>
 
+// EditableTextItem implementation
+EditableTextItem::EditableTextItem(const QString& text, ItemType type, int element_id, QGraphicsItem* parent)
+    : QGraphicsTextItem(text, parent)
+    , m_type(type)
+    , m_element_id(element_id)
+{
+    setDefaultTextColor(Qt::white);
+    if (type != Title) {
+        setFlag(QGraphicsItem::ItemIsSelectable, true);
+    }
+}
+
+void EditableTextItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
+{
+    Q_UNUSED(event);
+    
+    if (m_type == Title) {
+        return; // Can't edit title this way
+    }
+    
+    // Find parent CppClass
+    CppClass* parent = dynamic_cast<CppClass*>(this->parentItem());
+
+    
+    if (parent) {
+        if (m_type == Field) {
+            parent->edit_field(m_element_id);
+        } else if (m_type == Method) {
+            parent->edit_method(m_element_id);
+        }
+    }else{
+        qDebug() << "Parent not found";
+    }
+}
+
+// CppClass implementation
 CppClass::CppClass(Board* board,std::shared_ptr<Composition> composition, QGraphicsItem* parent)
     : NodeView(parent)
     , m_board(board)
@@ -123,9 +159,8 @@ void CppClass::updateTextItems()
     m_textItems.clear();
 
     // Create title
-    auto* titleItem = new QGraphicsTextItem(m_composition->get_name(), this);
+    auto* titleItem = new EditableTextItem(m_composition->get_name(), EditableTextItem::Title, -1, this);
     titleItem->setPos(0, 0);
-    titleItem->setDefaultTextColor(Qt::white);
     titleItem->setTextWidth(m_width);
     titleItem->document()->setDefaultTextOption(QTextOption(Qt::AlignCenter));
     m_textItems.append(titleItem);
@@ -135,8 +170,9 @@ void CppClass::updateTextItems()
         y_offset += 1;
     }
 
-    for(auto& field : m_composition->fields) {
-        add_text(field.declaration(), y_offset);
+    for(int i = 0; i < m_composition->fields.count(); ++i) {
+        auto& field = m_composition->fields[i];
+        add_text(field.declaration(), y_offset, EditableTextItem::Field, field.get_id());
         y_offset += m_line_height;
     }
 
@@ -144,19 +180,16 @@ void CppClass::updateTextItems()
         y_offset += 1;
     }
 
-    for(auto& method : m_composition->methods) {
-        add_text(method.declaration(), y_offset, true);
+    for(int i = 0; i < m_composition->methods.count(); ++i) {
+        auto& method = m_composition->methods[i];
+        add_text(method.declaration(), y_offset, EditableTextItem::Method, method.get_id());
         y_offset += m_line_height;
     }
 }
 
-void CppClass::add_text(const QString text, int y_offset, bool is_selectable) {
-    auto* item = new QGraphicsTextItem(text, this);
+void CppClass::add_text(const QString text, int y_offset, EditableTextItem::ItemType type, int element_id) {
+    auto* item = new EditableTextItem(text, type, element_id, this);
     item->setPos(0, y_offset);
-    item->setDefaultTextColor(Qt::white);
-    if(is_selectable) {
-        item->setFlag(QGraphicsItem::ItemIsSelectable);
-    }
     item->setTextWidth(m_width);
     item->document()->setDefaultTextOption(QTextOption(Qt::AlignCenter));
     m_textItems.append(item);
@@ -185,20 +218,73 @@ void CppClass::on_add_button_clicked()
 void CppClass::add_new_field(){
 
     auto new_field = FieldDialog::create_field(scene()->views().first());
-    emit  add_field_request(m_composition.get(), new_field.value());
-
-    updateBoundingRect();
-    update();
+    if (new_field.has_value()) {
+        emit  add_field_request(m_composition.get(), new_field.value());
+        updateBoundingRect();
+        update();
+    }
 }
 
 void CppClass::add_new_method(){
     auto new_method = MethodDialog::create_method(scene()->views().first());
-    emit  add_method_request(m_composition.get(), new_method.value());
-
-    updateBoundingRect();
-    update();
+    if (new_method.has_value()) {
+        emit  add_method_request(m_composition.get(), new_method.value());
+        updateBoundingRect();
+        update();
+    }
 }
 
+
+// [REFACTOR] finding element by id should be implemented in Composition
+void CppClass::edit_field(int field_id)
+{
+    // Find field by ID
+    int index = -1;
+    for (int i = 0; i < m_composition->fields.count(); ++i) {
+        if (m_composition->fields[i].get_id() == field_id) {
+            index = i;
+            break;
+        }
+    }
+
+    if (index < 0) {
+        return;  // Field not found
+    }
+
+    const Field& old_field = m_composition->fields[index];
+    auto edited_field = FieldDialog::edit_field(old_field, scene()->views().first());
+
+    if (edited_field.has_value()) {
+        emit edit_field_request(m_composition.get(), field_id, edited_field.value());
+        updateBoundingRect();
+        update();
+    }
+}
+
+void CppClass::edit_method(int method_id)
+{
+    // Find method by ID
+    int index = -1;
+    for (int i = 0; i < m_composition->methods.count(); ++i) {
+        if (m_composition->methods[i].get_id() == method_id) {
+            index = i;
+            break;
+        }
+    }
+
+    if (index < 0) {
+        return;  // Method not found
+    }
+
+    const Method& old_method = m_composition->methods[index];
+    auto edited_method = MethodDialog::edit_method(old_method, scene()->views().first());
+
+    if (edited_method.has_value()) {
+        emit edit_method_request(m_composition.get(), method_id, edited_method.value());
+        updateBoundingRect();
+        update();
+    }
+}
 
 void CppClass::mousePressEvent(QGraphicsSceneMouseEvent* event){
     if (event->button() == Qt::LeftButton && m_board->linkageMode) {
@@ -266,3 +352,5 @@ void CppClass::createConnection(CppClass* second){
 Composition* CppClass::get_uml_class_diagram_node() {
     return m_composition.get();
 }
+
+

@@ -47,8 +47,8 @@ private slots:
 
     void on_add_field_requested(Composition* node, const Field& field);
     void on_add_method_requested(Composition* node, const Method& method);
-    void on_edit_field_requested(Composition* node, const Field& field);
-    void on_edit_method_requested(Composition* node, const Method& method);
+    void on_edit_field_requested(Composition* node, int field_id, const Field& new_field);
+    void on_edit_method_requested(Composition* node, int method_id, const Method& new_method);
 private:
     DiagramGraph* diagram;
     Ui::Board *ui;

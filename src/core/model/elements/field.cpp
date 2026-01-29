@@ -18,7 +18,7 @@ Field::Field(QString name, QString type, Visibility visibility, std::optional<QS
 // }
 
 QString Field::declaration() const {
-    return type + "  "  + name;
+    return type + " : "  + name;
 }
 
 

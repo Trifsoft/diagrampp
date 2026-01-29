@@ -80,7 +80,7 @@ void Board::on_add_field_requested(Composition *node, const Field& field)
         node->add_field(field);
     }
 
-    qDebug() << "Recieved signal signal add field from: " << node->get_label();
+    qDebug() << "Recieved signal add field from: " << node->get_label();
 }
 
 void Board::on_add_method_requested(Composition *node, const Method& method)
@@ -93,14 +93,36 @@ void Board::on_add_method_requested(Composition *node, const Method& method)
     qDebug() << "Recieved signal add method from: " << node->get_label();
 }
 
-void Board::on_edit_field_requested(Composition *node, const Field& field)
+
+//[REFACTOR] implement get_element_by_id(int id) in Composition
+void Board::on_edit_field_requested(Composition *node, int field_id, const Field& new_field)
 {
-    qDebug() << "Recieved signal edit field from: " << node->get_label();
+    if(node)
+    {
+        for (int i = 0; i < node->fields.count(); ++i) {
+            if (node->fields[i].get_id() == field_id) {
+                node->fields[i] = new_field;
+                break;
+            }
+        }
+    }
+
+    qDebug() << "Received signal edit field from: " << node->get_label();
 }
 
-void Board::on_edit_method_requested(Composition *node, const Method& method)
+void Board::on_edit_method_requested(Composition *node, int method_id, const Method& new_method)
 {
-    qDebug() << "Recieved signal edit method from: " << node->get_label();
+    if(node)
+    {
+        for (int i = 0; i < node->methods.count(); ++i) {
+            if (node->methods[i].get_id() == method_id) {
+                node->methods[i] = new_method;
+                break;
+            }
+        }
+    }
+
+    qDebug() << "Received signal edit method from: " << node->get_label();
 }
 
 void Board::onAddClassClicked()

@@ -18,6 +18,24 @@ class DiagramGraph;
 class Validator;
 class Board;
 
+// Custom text item to track field/method info
+class EditableTextItem : public QGraphicsTextItem {
+public:
+    enum ItemType { Title, Field, Method };
+    
+    EditableTextItem(const QString& text, ItemType type, int element_id, QGraphicsItem* parent = nullptr);
+    
+    ItemType get_type() const { return m_type; }
+    int get_element_id() const { return m_element_id; }
+    
+protected:
+    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
+    
+private:
+    ItemType m_type;
+    int m_element_id;  // Unique ID
+};
+
 class CppClass : public NodeView {
 Q_OBJECT
 
@@ -33,7 +51,7 @@ public:
     QPointF getTopCenter() const;
     QPointF getBottomCenter() const;
     void createConnection(CppClass* second);
-    void mousePressEvent(QGraphicsSceneMouseEvent* event);
+    void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
     void updateConnections();
     void addConnection(QGraphicsLineItem* line, bool isStart);
     QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
@@ -55,24 +73,30 @@ private:
     int m_height;
     int m_line_height;
 
+    // Editable text items for now
     QVector<QGraphicsTextItem*> m_textItems;
 
     void updateBoundingRect();
     void updateTextItems();
     void update_button();
 
-    void add_text(QString text, int y_offset, bool is_selectable = false);
+    void add_text(QString text, int y_offset, EditableTextItem::ItemType type = EditableTextItem::Title, int element_id = -1);
     void add_new_field();
     void add_new_method();
+    void edit_field(int field_id);
+    void edit_method(int method_id);
 
     QPushButton* m_add_button;
     QGraphicsProxyWidget* m_button_proxy;
     void on_add_button_clicked();
+    
+    friend class EditableTextItem;
+
 signals:
     void add_field_request(Composition* node, const Field& field);
     void add_method_request(Composition* node, const Method& method);
-    void edit_field_request(Composition* node, const Field& field);
-    void edit_method_request(Composition* node, const Method& method);
+    void edit_field_request(Composition* node, int field_id, const Field& new_field);
+    void edit_method_request(Composition* node, int method_id, const Method& new_method);
 };
 
 #endif // _CPP_CLASS_H

@@ -96,7 +96,6 @@ std::optional<Field> FieldDialog::edit_field(const Field& field, QWidget* parent
     FieldDialog dialog(field, parent);
     if (dialog.exec() == QDialog::Accepted) {
 
-        // Similar to create_field, to be tested!
         Field updated(dialog.get_name(),
                       dialog.get_type(),
                       dialog.get_visibility(),

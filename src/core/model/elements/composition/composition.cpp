@@ -11,6 +11,8 @@ Destructor Composition::get_destructor() const {
     return Destructor(name, fields);
 }
 
+
+// [REFACTOR] returning references, dangerous if vector gets reallocated !!!
 QVector<IClassElement*> Composition::get_new_code_elements() {
     QVector<IClassElement*> elements;
     for (auto& field : fields) {
