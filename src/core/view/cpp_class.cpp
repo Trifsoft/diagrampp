@@ -478,21 +478,21 @@ QVariant CppClass::itemChange(GraphicsItemChange change, const QVariant &value){
     return QGraphicsItem::itemChange(change, value);
 }
 
-void CppClass::removeLink(CppClass* target){
+void CppClass::removeLink(CppClass* target, BranchType branch_type){
     if(!target){
         return;
     }
 
     Connection *source_connection = nullptr, *target_connection = nullptr;
     for(int i = m_connections.size()-1; i >= 0; i--){
-        if(m_connections[i].otherClass == target){
+        if(m_connections[i].otherClass == target && m_connections[i].type == branch_type){
             source_connection = &m_connections[i];
             m_connections.removeAt(i);
             break;
         }
     }
     for(int i = target->m_connections.size()-1; i >= 0; i--){
-        if(target->m_connections[i].otherClass == this){
+        if(target->m_connections[i].otherClass == this && target->m_connections[i].type == branch_type){
             target_connection = &target->m_connections[i];
             target->m_connections.removeAt(i);
             break;

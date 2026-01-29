@@ -56,7 +56,7 @@ public:
     void updateConnections();
     void addLineConnection(CppClass* target, BranchType branch);
     void addConnectionInfo(QGraphicsLineItem* line, bool isStart);
-    void removeLink(CppClass* target);
+    void removeLink(CppClass* target, BranchType branch);
 
     QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
     virtual Composition* get_uml_class_diagram_node() override;

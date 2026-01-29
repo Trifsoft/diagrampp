@@ -49,7 +49,7 @@ void DiagramGraph::add_neighbour(SharedNodePtr from, SharedNodePtr to, BranchTyp
 
 void DiagramGraph::remove_branch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type) {
     remove_neighbour(from, to, branch_type);
-    emit link_removed(from, to);
+    emit link_removed(from, to, branch_type);
 }
 
 std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& DiagramGraph::get_diagram(){
