@@ -1,20 +1,20 @@
-#ifndef GENERIC_TYPE_H
-#define GENERIC_TYPE_H
+// #ifndef GENERIC_TYPE_H
+// #define GENERIC_TYPE_H
 
-#include "type.h"
-#include <QString>
-#include <memory>
+// #include "type.h"
+// #include <QString>
+// #include <memory>
 
-class GenericType : public IType {
-private:
-    std::unique_ptr<IType> outer_type;
-    std::unique_ptr<IType> inner_type;
+// class GenericType : public IType {
+// private:
+//     std::unique_ptr<IType> outer_type;
+//     std::unique_ptr<IType> inner_type;
 
-public:
-    GenericType(std::unique_ptr<IType> outer_type, std::unique_ptr<IType> inner_type);
-    ~GenericType() override = default;
+// public:
+//     GenericType(std::unique_ptr<IType> outer_type, std::unique_ptr<IType> inner_type);
+//     ~GenericType() override = default;
 
-    QString get_name() const override;
-};
+//     QString get_name() const override;
+// };
 
-#endif // GENERIC_TYPE_H
+// #endif // GENERIC_TYPE_H

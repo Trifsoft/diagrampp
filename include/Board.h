@@ -5,6 +5,8 @@
 #include "validator.h"
 #include <QWidget>
 #include <QGraphicsScene>
+#include <model/elements/field.h>
+#include <model/elements/method.h>
 #include <nodefactory.h>
 
 QT_BEGIN_NAMESPACE
@@ -14,6 +16,7 @@ class Board;
 QT_END_NAMESPACE
 
 class DiagramGraph;
+class IClassElement;
 
 class Board : public QWidget
 {
@@ -39,6 +42,10 @@ private slots:
     void onLinkageToggled();
     void onGenerateClicked(const QString& class_name, NodeType node_type);
 
+    void on_add_field_requested(Composition* node, std::shared_ptr<Field> field);
+    void on_add_method_requested(Composition* node, std::shared_ptr<Method>  method);
+    void on_edit_field_requested(Composition* node, std::weak_ptr<Field> old_field_weak, std::shared_ptr<Field>  new_field);
+    void on_edit_method_requested(Composition* node, std::weak_ptr<Method> old_method_weak, std::shared_ptr<Method>  new_method);
 private:
     DiagramGraph* diagram;
     Ui::Board *ui;

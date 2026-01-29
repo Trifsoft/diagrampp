@@ -13,14 +13,14 @@ class MethodEditor : public QWidget
     Q_OBJECT
 
 public:
-    MethodEditor(Method* method, const QString& class_name, QWidget *parent = nullptr);
+    MethodEditor(std::weak_ptr<Method> method_weak, const QString& class_name, QWidget *parent = nullptr);
     ~MethodEditor();
 private slots:
     void onSaveClick();
 
 private:
     Ui::MethodEditor *ui;
-    Method* m_method;
+    std::weak_ptr<Method> m_method_weak;
 };
 
 #endif // METHODEDITOR_H

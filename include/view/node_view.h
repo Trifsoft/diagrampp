@@ -4,7 +4,7 @@
 #include <QGraphicsItem>
 #include <model/base/uml_class_diagram_node.h>
 
-class NodeView: public QGraphicsItem {
+class NodeView: public QGraphicsObject {
 public:
     NodeView(QGraphicsItem* parent = nullptr);
 

@@ -1,7 +1,7 @@
 #include "model/elements/constructor/default_constructor.h"
 
-DefaultConstructor::DefaultConstructor(const QString& class_name, const QVector<Description>& arguments, Visibility visibility)
-    : Constructor(class_name, arguments, visibility) {}
+DefaultConstructor::DefaultConstructor(const QString& class_name, const QVector<Argument>& arguments, Visibility visibility)
+    : Constructor(class_name, QVector<Argument>{}, visibility) {}
 
 QString DefaultConstructor::get_custom_definition() const {
     QStringList init_list;

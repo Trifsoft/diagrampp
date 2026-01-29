@@ -1,8 +1,5 @@
 #include "model/elements/destructor.h"
 #include "model/elements/field.h"
-#include "model/elements/type/regular_type.h"
-#include "model/base/description.h"
-#include <memory>
 
 Destructor::Destructor(const QString& class_name, const QVector<std::shared_ptr<Field>>& fields, bool is_virtual)
     : IClassElement(ElementRank::Destructor, "", Visibility::Public),
@@ -29,7 +26,7 @@ QString Destructor::get_definition_block() const {
     return destructions.join("\n");
 }
 
-QString Destructor::get_declaration() const {
+QString Destructor::declaration() const {
     QString decl;
     if (is_virtual) {
         decl += "virtual ";
