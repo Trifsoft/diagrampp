@@ -127,7 +127,7 @@ CppClass::~CppClass(){
         }
     }
     m_connections.clear();
-    for(auto text_item : m_textItems){
+    for(auto& text_item : m_textItems){
         if(text_item){
             delete text_item;
         }
@@ -485,13 +485,6 @@ void CppClass::updateConnectionArrow(Connection& conn){
 QVariant CppClass::itemChange(GraphicsItemChange change, const QVariant &value){
     if(change == ItemPositionHasChanged){
         updateAllConnections();
-
-        for(Connection& conn : m_connections){
-            if(conn.otherClass){
-                conn.otherClass->updateAllConnections();
-            }
-        }
-
     }
     return QGraphicsItem::itemChange(change, value);
 }
