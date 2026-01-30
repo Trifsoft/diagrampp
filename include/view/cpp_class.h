@@ -57,6 +57,8 @@ public:
     void addLineConnection(CppClass* target, BranchType branch);
     void addConnectionInfo(QGraphicsLineItem* line, bool isStart);
     void removeLink(CppClass* target, BranchType branch);
+    void set_object_visible(bool visible);
+    void remove_node();
 
     QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
     virtual Composition* get_uml_class_diagram_node() override;
@@ -82,6 +84,8 @@ private:
     void updateConnectionArrow(Connection& conn);
     void updateAllConnections();
     void updateOffsets();
+    void disconnect_all_connections();
+    void remove_connection_to(CppClass* target);
     QGraphicsPolygonItem* getArrow(BranchType branchType);
 
     Board* m_board;

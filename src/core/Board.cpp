@@ -84,6 +84,13 @@ void Board::on_object_clicked(SharedNodePtr clicked_object){
     }
     second_activated = clicked_object;
 
+    // check
+    if((first_activated == second_activated) && removeMode){
+        CppClass* node = dynamic_cast<CppClass*>(first_activated);
+        node->remove_node();
+        return;
+    }
+
     std::string errorMessage;
     if((first_activated && second_activated) && linkageMode){
         diagram->add_branch(first_activated, second_activated, branchType);

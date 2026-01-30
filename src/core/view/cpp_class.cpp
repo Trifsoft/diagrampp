@@ -382,7 +382,7 @@ void CppClass::addLineConnection(CppClass* target, BranchType branchType){
     targetConn.line = line;
     targetConn.arrow = arrow;
     targetConn.otherClass = this;
-    targetConn.isSource = arrow == nullptr;
+    targetConn.isSource = false;
     targetConn.endLine = true;
     targetConn.type = branchType;
     targetConn.offset = offset;
@@ -413,6 +413,13 @@ QGraphicsPolygonItem* CppClass::getArrow(BranchType branchType){
         polygon << QPointF(0, 0) << QPointF(-size/3, size) << QPointF(size/3, size);
         arrow->setBrush(Qt::blue);
         break;
+
+    case BranchType::ASSOCIATION:
+        polygon << QPointF(-arrow_size/2, arrow_size) << QPointF(arrow_size/2, arrow_size) << QPointF(0, 0);
+        arrow->setBrush(Qt::white);
+        arrow->setPolygon(polygon);
+        arrow->setPen(QPen(Qt::white, 2));
+        return arrow;
     }
 
     arrow->setPolygon(polygon);
@@ -458,6 +465,54 @@ void CppClass::updateConnectionLine(Connection& conn){
     conn.line->setLine(QLineF(newStart, lineEnd));
 }
 
+void CppClass::remove_node(){
+    // firstly we will disconnect all connections from this node
+    disconnect_all_connections();
+    if(scene()){
+        scene()->removeItem(this);
+    }
+}
+
+void CppClass::disconnect_all_connections(){
+    for(Connection& conn : m_connections){
+        if(conn.otherClass){
+            conn.otherClass->remove_connection_to(this);
+            if(conn.line && conn.arrow && scene()){
+                scene()->removeItem(conn.line);
+                scene()->removeItem(conn.arrow);
+                delete conn.line;
+                delete conn.arrow;
+            }
+        }
+    }
+    m_connections.clear();
+}
+
+void CppClass::remove_connection_to(CppClass* target){
+    for(int iterator = m_connections.size()-1; iterator >= 0; iterator--){
+        if(m_connections[iterator].otherClass == target){
+            // safe operation because target alreardy freed all allocations
+            m_connections.removeAt(iterator);
+
+            updateOffsets();
+            updateAllConnections();
+        }
+    }
+}
+
+void CppClass::set_object_visible(bool visible){
+    this->setVisible(visible);
+    for(Connection& conn : m_connections){
+        if(conn.line){
+            conn.line->setVisible(visible);
+        }
+        if(conn.arrow){
+            conn.arrow->setVisible(visible);
+        }
+    }
+}
+
+
 void CppClass::updateConnectionArrow(Connection& conn){
     if(!conn.arrow || !conn.line || !conn.otherClass){
         return;
@@ -487,6 +542,7 @@ void CppClass::removeLink(CppClass* target, BranchType branch_type){
     Connection *source_connection = nullptr, *target_connection = nullptr;
     for(int i = m_connections.size()-1; i >= 0; i--){
         if(m_connections[i].otherClass == target && m_connections[i].type == branch_type){
+            qDebug() << "uso u soruce";
             source_connection = &m_connections[i];
             m_connections.removeAt(i);
             break;
@@ -500,13 +556,15 @@ void CppClass::removeLink(CppClass* target, BranchType branch_type){
         }
     }
 
-    if(source_connection->isSource == false){
-        std::swap(source_connection, target_connection);
+    if(!source_connection || !target_connection){
+#if DEBUG>=1
+        qDebug() << "failed to find connections";
+#endif
+        return;
     }
 
-    if(!source_connection || !target_connection){
-        qDebug() << "failed to find connections";
-        return;
+    if(source_connection->isSource == false){
+        std::swap(source_connection, target_connection);
     }
 
     // both target and source points to same line and arrow
@@ -520,11 +578,8 @@ void CppClass::removeLink(CppClass* target, BranchType branch_type){
     }
 
     target->number_of_connecitons--;
-
     target->updateOffsets();
-
     target->updateAllConnections();
-    updateAllConnections();
 
 }
 
