@@ -17,5 +17,10 @@ void signalProcessor::remove_link_process(SharedNodePtr from, SharedNodePtr to, 
     if(child && parent){
         child->removeLink(parent, branch);
     }
-
 }
+
+void signalProcessor::remove_node_process(SharedNodePtr target){
+    CppClass* node = dynamic_cast<CppClass*>(target);
+    node->remove_node();
+}
+

@@ -26,6 +26,7 @@ void DiagramGraph::remove_node(SharedNodePtr node) {
             }
         }
     }
+    emit node_removed(node);
 }
 
 void DiagramGraph::add_branch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type) {

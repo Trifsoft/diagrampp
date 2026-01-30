@@ -26,6 +26,7 @@ Board::Board(QWidget *parent)
     // signals for GUI
     connect(diagram, &DiagramGraph::link_added, signal_processor, &signalProcessor::add_link_process);
     connect(diagram, &DiagramGraph::link_removed, signal_processor, &signalProcessor::remove_link_process);
+    connect(diagram, &DiagramGraph::node_removed, signal_processor, &signalProcessor::remove_node_process);
 
     // Connect buttons to slots
     connect(ui->add_class, &QPushButton::clicked, this, &Board::onAddClassClicked);
@@ -72,6 +73,7 @@ void Board::onModeClicked(){
         ui->removeMode->setChecked(false);
         linkageMode = removeMode = false;
     }
+    first_activated = second_activated = nullptr;
 }
 
 void Board::on_object_clicked(SharedNodePtr clicked_object){
@@ -84,10 +86,9 @@ void Board::on_object_clicked(SharedNodePtr clicked_object){
     }
     second_activated = clicked_object;
 
-    // check
     if((first_activated == second_activated) && removeMode){
-        CppClass* node = dynamic_cast<CppClass*>(first_activated);
-        node->remove_node();
+        diagram->remove_node(first_activated);
+        first_activated = second_activated = nullptr;
         return;
     }
 
@@ -96,11 +97,11 @@ void Board::on_object_clicked(SharedNodePtr clicked_object){
         diagram->add_branch(first_activated, second_activated, branchType);
         if(!Validator::validate(errorMessage, first_activated, second_activated, branchType, diagram->get_diagram())){
             diagram->remove_branch(first_activated, second_activated, branchType);
-            QMessageBox::warning(this, "Upozorenje", QString::fromStdString(errorMessage));
+            QMessageBox::warning(this, "Warning", QString::fromStdString(errorMessage));
         }
     }else if((first_activated && second_activated) && removeMode){
         if(!diagram->connection_exists(first_activated, second_activated, branchType)){
-            QMessageBox::warning(this, "Upozorenje", QString::fromStdString("Connection doesn't exsist"));
+            QMessageBox::warning(this, "Warning", QString::fromStdString("Connection doesn't exsist"));
         }else{
             diagram->remove_branch(first_activated, second_activated, branchType);
         }

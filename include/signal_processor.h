@@ -15,7 +15,7 @@ public:
 public slots:
     void add_link_process(SharedNodePtr from, SharedNodePtr to, BranchType branch);
     void remove_link_process(SharedNodePtr from, SharedNodePtr to, BranchType branch);
-
+    void remove_node_process(SharedNodePtr node);
 
 };
 

@@ -43,6 +43,7 @@ public:
 signals:
     void link_added(SharedNodePtr from, SharedNodePtr to, BranchType branch);
     void link_removed(SharedNodePtr from, SharedNodePtr to, BranchType branch);
+    void node_removed(SharedNodePtr node);
 
 private:
     // disscussion, shared or weak

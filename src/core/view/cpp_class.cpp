@@ -351,14 +351,21 @@ void CppClass::addLineConnection(CppClass* target, BranchType branchType){
 
     int offset = target->number_of_connecitons*local_offset;
     QGraphicsPolygonItem* arrow = getArrow(branchType);
-    if(branchType != BranchType::ASSOCIATION){
-        QPointF arrowPos = target->getBottomCenter();
-        arrowPos.setX(arrowPos.x() + offset);
-        arrow->setPos(arrowPos);
-        scene()->addItem(arrow);
-        endPoint = arrowPos;
-        endPoint.setY(endPoint.y() + size); // on bottom of arrow
+
+    QPointF arrowPos = target->getBottomCenter();
+    arrowPos.setX(arrowPos.x() + offset);
+    arrow->setPos(arrowPos);
+    qDebug() << "this->numberofconn: " << this->number_of_connecitons << "target-> " << target->number_of_connecitons;
+    qDebug() << "scene failed " << scene()->objectName();
+
+    if(scene()){
+
+    }else{
+        qDebug() << scene()->objectName();
     }
+    scene()->addItem(arrow);
+    endPoint = arrowPos;
+    endPoint.setY(endPoint.y() + ((branchType == BranchType::ASSOCIATION) ? 0 : arrow_size)); // on bottom of arrow
 
     QGraphicsLineItem* line = new QGraphicsLineItem(QLineF(startPoint, endPoint));
     QPen pen(Qt::black, 4);
@@ -491,6 +498,9 @@ void CppClass::disconnect_all_connections(){
 void CppClass::remove_connection_to(CppClass* target){
     for(int iterator = m_connections.size()-1; iterator >= 0; iterator--){
         if(m_connections[iterator].otherClass == target){
+            if(m_connections[iterator].isSource == false){
+                this->number_of_connecitons--;
+            }
             // safe operation because target alreardy freed all allocations
             m_connections.removeAt(iterator);
 
