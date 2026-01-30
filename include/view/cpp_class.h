@@ -27,7 +27,7 @@ public:
 
     QPointF getTopCenter() const;
     QPointF getBottomCenter() const;
-    void mousePressEvent(QGraphicsSceneMouseEvent* event);
+    void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
     void updateConnections();
     QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
     void addPNGConnection(const QString& imagePath, CppClass* target, bool imageOnTarget = true);

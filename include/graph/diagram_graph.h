@@ -4,7 +4,6 @@
 #include <vector>
 #include <utility>
 #include <map>
-#include <memory>
 #include <model/base/branches.h>
 #include <view/node_view.h>
 
@@ -14,6 +13,7 @@ class IUMLClassDiagramNode;
 class Composition;
 
 using SharedNodePtr = NodeView*;
+using graph_type = std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>;
 
 class DiagramGraph {
 public:
@@ -34,10 +34,10 @@ public:
     void showDiagram();
 #endif
 
-    std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& get_diagram();
+    graph_type& get_diagram();
 private:
     // disscussion, shared or weak
-    std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>> diagram;
+    graph_type diagram;
 
     void remove_neighbour(SharedNodePtr from, SharedNodePtr to, BranchType branch_type);
     void add_neighbour(SharedNodePtr from, SharedNodePtr to, BranchType branch_type);

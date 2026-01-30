@@ -4,13 +4,10 @@
 #include <string>
 #include <map>
 #include <vector>
-#include <memory>
 #include <model/base/branches.h>
 #include <graph/diagram_graph.h>
 
 class IUMLClassDiagramNode;
-
-using graph_type = std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>;
 
 namespace ProjectGenerator
 {

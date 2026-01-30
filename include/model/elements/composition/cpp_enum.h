@@ -24,8 +24,7 @@ public:
     void add_value(const QString& name, std::optional<int> value = std::nullopt);
     QString get_name() const override;
     QVector<CPPEnumValue> get_values() const;
-    NodeLabel get_label() const override;
-
+    QString get_label() const override;
 };
 
 #endif // CPP_ENUM_H

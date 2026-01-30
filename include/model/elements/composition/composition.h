@@ -20,15 +20,17 @@ protected:
     QString name;
     Visibility visibility;
     std::optional<std::pair<Visibility, Composition*>> inheritance;
-    QVector<std::shared_ptr<Constructor>> constructors;
 
     virtual Visibility get_default_visibility() const = 0;
 
-    Destructor get_destructor() const;
     QVector<IClassElement*> get_new_code_elements();
     QVector<const IClassElement*> get_new_code_elements() const;
 
 public:
+
+    Destructor get_destructor() const;
+
+    QVector<std::shared_ptr<Constructor>> constructors;
     QVector<std::shared_ptr<Field>> fields;
     QVector<std::shared_ptr<Method>> methods;
 

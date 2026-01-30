@@ -7,15 +7,10 @@ class CppClass;
 
 class IUMLClassDiagramNode : public std::enable_shared_from_this<IUMLClassDiagramNode> {
 public:
-    enum NodeLabel{
-        ENUM,
-        CLASS,
-        STRUCT
-    };
     virtual ~IUMLClassDiagramNode() = default;
 
     virtual QString get_name() const = 0;
-    virtual NodeLabel get_label() const = 0;
+    virtual QString get_label() const = 0;
     virtual QString declaration() const = 0;
     virtual QString definition() const = 0;
 
