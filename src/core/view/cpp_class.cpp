@@ -355,14 +355,6 @@ void CppClass::addLineConnection(CppClass* target, BranchType branchType){
     QPointF arrowPos = target->getBottomCenter();
     arrowPos.setX(arrowPos.x() + offset);
     arrow->setPos(arrowPos);
-    qDebug() << "this->numberofconn: " << this->number_of_connecitons << "target-> " << target->number_of_connecitons;
-    qDebug() << "scene failed " << scene()->objectName();
-
-    if(scene()){
-
-    }else{
-        qDebug() << scene()->objectName();
-    }
     scene()->addItem(arrow);
     endPoint = arrowPos;
     endPoint.setY(endPoint.y() + ((branchType == BranchType::ASSOCIATION) ? 0 : arrow_size)); // on bottom of arrow

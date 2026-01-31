@@ -11,7 +11,8 @@
 #include <QMessageBox>
 
 Board::Board(QWidget *parent)
-    : QWidget(parent), ui(new Ui::Board), diagram(new DiagramGraph()), signal_processor(new signalProcessor())
+    : QWidget(parent), ui(new Ui::Board), diagram(new DiagramGraph()), signal_processor(new signalProcessor()),
+    recovery_log(new recoveryLog())
 {
     ui->setupUi(this);
 
@@ -27,6 +28,10 @@ Board::Board(QWidget *parent)
     connect(diagram, &DiagramGraph::link_added, signal_processor, &signalProcessor::add_link_process);
     connect(diagram, &DiagramGraph::link_removed, signal_processor, &signalProcessor::remove_link_process);
     connect(diagram, &DiagramGraph::node_removed, signal_processor, &signalProcessor::remove_node_process);
+    // signals for log file
+    connect(diagram, &DiagramGraph::link_added, recovery_log, &recoveryLog::add_link_operation);
+    connect(diagram, &DiagramGraph::link_removed, recovery_log, &recoveryLog::remove_link_operation);
+    connect(diagram, &DiagramGraph::node_removed, recovery_log, &recoveryLog::remove_node_operation);
 
     // Connect buttons to slots
     connect(ui->add_class, &QPushButton::clicked, this, &Board::onAddClassClicked);
@@ -47,6 +52,8 @@ Board::~Board()
     delete diagram;
     delete ui;
     delete scene;
+    delete signal_processor;
+    delete recovery_log;
 }
 
 void Board::onCheckRadioButtonToggled(){

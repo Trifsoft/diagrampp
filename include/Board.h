@@ -4,6 +4,7 @@
 #include "graph/diagram_graph.h"
 #include "signal_processor.h"
 #include "validator.h"
+#include "recoveyLog.h"
 #include <QWidget>
 #include <QGraphicsScene>
 #include <model/elements/field.h>
@@ -55,6 +56,7 @@ private:
     DiagramGraph *diagram;
     Ui::Board *ui;
     signalProcessor *signal_processor;
+    recoveryLog *recovery_log;
 
     SharedNodePtr first_activated = nullptr;
     SharedNodePtr second_activated = nullptr;

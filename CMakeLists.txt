@@ -141,6 +141,9 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         ${PROJECT_SOURCES}
         include/signal_processor.h
         src/core/signal_processor.cpp
+        src/core/recoveryLog.cpp
+        include/recoveyLog.h
+
     )
 else()
     add_executable(DiagramPP ${PROJECT_SOURCES})
