@@ -8,25 +8,28 @@ void DiagramGraph::add_node(SharedNodePtr node) {
     diagram[node] = {};
 }
 
-void DiagramGraph::remove_node(SharedNodePtr node) {
-    if(diagram.find(node) == diagram.end()){
+void DiagramGraph::remove_node(SharedNodePtr node_to_remove) {
+    if(diagram.find(node_to_remove) == diagram.end()){
         return;
     }
 
-    // erase node as a key
-    diagram.erase(node);
+    diagram.erase(node_to_remove);
 
     // erase all branches linked to node
-    for(auto& it : diagram){
-        auto& neighbours = it.second;
-        for (auto neighbours_it = neighbours.begin(); neighbours_it != neighbours.end(); neighbours_it++){
-            auto& [neighbour, _] = (*neighbours_it);
-            if(neighbour == node){
+    for(auto& node_pair : diagram){
+        auto& neighbours = node_pair.second;
+        auto neighbours_it = neighbours.begin();
+        while(neighbours_it != neighbours.end()){
+            auto& [neighbour_node, _] = (*neighbours_it);
+            // [FILIP] BUG fix (erase will increment iterator)
+            if(neighbour_node == node_to_remove){
                 neighbours_it = neighbours.erase(neighbours_it);
+            }else{
+                neighbours_it++;
             }
         }
     }
-    emit node_removed(node);
+    emit node_removed(node_to_remove);
 }
 
 void DiagramGraph::add_branch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type) {
