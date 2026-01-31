@@ -63,15 +63,10 @@ set(CORE_HEADERS
     include/nodefactory.h
     include/methodeditor.h
     include/widget/class_element_text.h
-    include/serializer/node_serializer/enum_serializer.h
-    include/serializer/node_serializer/composition_serializer.h
-    include/serializer/diagram_json_serializer.h
-    include/serializer/node_serializer/serializer.h
-    include/serializer/composition_element_serializer/serializer.h
-    include/serializer/composition_element_serializer/destructor_serializer.h
-    include/serializer/composition_element_serializer/constructor_serializer.h
-    include/serializer/composition_element_serializer/field_serializer.h
-    include/serializer/composition_element_serializer/serializer.h
+    include/serializers/diagram_json_serializer.h
+    include/serializers/node_serializers.h
+    include/serializers/composition_element_serializers.h
+    include/serializers/utils/utils.h
 )
 
 set(CORE_SOURCES
@@ -118,15 +113,10 @@ set(CORE_SOURCES
     src/core/nodefactory.cpp
     src/core/methodeditor.cpp
     src/core/widget/class_element_text.cpp
-    src/serializer/node_serializer/enum_serializer.cpp
-    src/serializer/node_serializer/composition_serializer.cpp
-    src/serializer/node_serializer/serializer.cpp
-    src/serializer/diagram_json_serializer.cpp
-    src/serializer/composition_element_serializer/destructor_serializer.cpp
-    src/serializer/composition_element_serializer/constructor_serializer.cpp
-    src/serializer/composition_element_serializer/method_serializer.cpp
-    src/serializer/composition_element_serializer/field_serializer.cpp
-    src/serializer/composition_element_serializer/serializer.cpp
+    src/serializers/diagram_json_serializer.cpp
+    src/serializers/node_serializers.cpp
+    src/serializers/composition_element_serializers.cpp
+    src/serializers/utils/utils.cpp
 )
 
 set(UI_SOURCES
@@ -153,7 +143,6 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(DiagramPP
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
-        include/image_paths.h
     )
 else()
     add_executable(DiagramPP ${PROJECT_SOURCES})
