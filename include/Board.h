@@ -37,9 +37,6 @@ public:
     bool linkageMode = false;
     bool removeMode = false;
 
-public slots:
-    void on_object_clicked(SharedNodePtr clickedClass);
-
 private slots:
     void onAddClassClicked();
     void onAddInterfaceClicked();
@@ -47,6 +44,8 @@ private slots:
     void onCheckRadioButtonToggled();
     void onModeClicked();
     void onGenerateClicked(const QString& class_name, NodeType node_type);
+    void on_object_clicked(SharedNodePtr clickedClass);
+
 
     void on_add_field_requested(Composition* node, std::shared_ptr<Field> field);
     void on_add_method_requested(Composition* node, std::shared_ptr<Method>  method);

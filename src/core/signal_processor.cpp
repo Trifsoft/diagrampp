@@ -7,7 +7,7 @@ void signalProcessor::add_link_process(SharedNodePtr from, SharedNodePtr to, Bra
     CppClass* child = dynamic_cast<CppClass*>(from);
     CppClass* parent = dynamic_cast<CppClass*>(to);
     if(child && parent){
-        child->addLineConnection(parent, branch);
+        child->add_line_connection(parent, branch);
     }
 }
 
@@ -15,7 +15,7 @@ void signalProcessor::remove_link_process(SharedNodePtr from, SharedNodePtr to, 
     CppClass* child = dynamic_cast<CppClass*>(from);
     CppClass* parent = dynamic_cast<CppClass*>(to);
     if(child && parent){
-        child->removeLink(parent, branch);
+        child->remove_link_connection(parent, branch);
     }
 }
 

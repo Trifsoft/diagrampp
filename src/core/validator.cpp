@@ -25,7 +25,7 @@ namespace Validator {
             errorMessage = "Cannot self connection";
             return false;
         }
-        if(!checkLinkage(errorMessage, child, parent)){
+        if(!check_linkage(errorMessage, child, parent)){
             return false;
         }
         if(!check_multiple_conneciton(child, parent, diagram)){
@@ -36,10 +36,10 @@ namespace Validator {
         bool result;
         switch (branchType){
             case BranchType::INHERITANCE:
-                result = validateInheritance(errorMessage, child, parent, diagram);
+                result = validate_inheritance(errorMessage, child, parent, diagram);
                 break;
             default:
-                result = validateOthers(errorMessage, branchType, child, parent, diagram);
+                result = validate_others(errorMessage, branchType, child, parent, diagram);
         }
         return result;
     }
@@ -56,10 +56,10 @@ namespace Validator {
         return count >= 2 ? false : true;
 
     }
-    bool validateInheritance(std::string& errorMessage, SharedNodePtr child, SharedNodePtr parent, const std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram){
+    bool validate_inheritance(std::string& errorMessage, SharedNodePtr child, SharedNodePtr parent, const std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram){
         //if(isInterface(child) || isAbstract(child))
 
-        if(hasCycle(child, BranchType::INHERITANCE, diagram)){
+        if(check_cycle(child, BranchType::INHERITANCE, diagram)){
             errorMessage = "Connection creates Cycle";
             return false;
         }
@@ -70,9 +70,9 @@ namespace Validator {
         }
         return true;
     }
-    bool validateOthers(std::string& errorMessage, BranchType branchType, SharedNodePtr child, SharedNodePtr parent, const std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram){
+    bool validate_others(std::string& errorMessage, BranchType branchType, SharedNodePtr child, SharedNodePtr parent, const std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram){
         if(branchType == BranchType::COMPOSITION || branchType == BranchType::AGGREGATION){
-            if(hasCycle(child, branchType, diagram)){
+            if(check_cycle(child, branchType, diagram)){
                 errorMessage = "Connection creates circular inheritance problem";
                 return false;
             }
@@ -80,7 +80,7 @@ namespace Validator {
         return true;
     }
 
-    bool checkLinkage(std::string& errorMessage, SharedNodePtr first, SharedNodePtr second){
+    bool check_linkage(std::string& errorMessage, SharedNodePtr first, SharedNodePtr second){
         auto key = std::make_pair(first->get_uml_class_diagram_node()->get_label(), second->get_uml_class_diagram_node()->get_label());
         auto it = combinations.find(key);
 
@@ -116,7 +116,7 @@ namespace Validator {
         in_stack[node] = false;
         return false;
     }
-    bool hasCycle(SharedNodePtr start,
+    bool check_cycle(SharedNodePtr start,
                   BranchType branch_type,
                   const std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram){
         int diagram_size = diagram.size();

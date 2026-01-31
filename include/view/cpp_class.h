@@ -57,6 +57,15 @@ public:
     void addLineConnection(CppClass* target, BranchType branch);
     void addConnectionInfo(QGraphicsLineItem* line, bool isStart);
     void removeLink(CppClass* target, BranchType branch);
+
+    void mousePressEvent(QGraphicsSceneMouseEvent* event);
+
+    void change_composition(std::function<void(std::shared_ptr<Composition>)> change);
+    QPointF get_top_center() const;
+    QPointF get_bottom_center() const;
+    void update_connections();
+    void add_line_connection(CppClass* target, BranchType branch);
+    void remove_link_connection(CppClass* target, BranchType branch);
     void set_object_visible(bool visible);
     void remove_node();
 
@@ -65,7 +74,6 @@ public:
 
 signals:
     void objectClicked(SharedNodePtr clickedClass);
-
 
 private:
     struct Connection {
@@ -80,13 +88,13 @@ private:
     QList<Connection> m_connections;
 
     qreal arrow_size = 15.0;
-    void updateConnectionLine(Connection& conn);
-    void updateConnectionArrow(Connection& conn);
-    void updateAllConnections();
-    void updateOffsets();
+    void update_connection_line(Connection& conn);
+    void update_connection_arrow(Connection& conn);
+    void update_all_connections();
+    void update_offsets();
     void disconnect_all_connections();
     void remove_connection_to(CppClass* target);
-    QGraphicsPolygonItem* getArrow(BranchType branchType);
+    QGraphicsPolygonItem* get_arrow(BranchType branchType);
 
     Board* m_board;
     std::shared_ptr<Composition> m_composition;

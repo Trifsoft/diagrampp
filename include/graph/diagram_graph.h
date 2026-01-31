@@ -9,7 +9,7 @@
 #include <QObject>
 
 
-#define DEBUG_MODE 0
+#define DEBUG_MODE 2
 
 class IUMLClassDiagramNode;
 class Composition;
