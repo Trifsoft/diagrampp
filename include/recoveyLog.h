@@ -25,9 +25,9 @@ private:
     unsigned OPERATION_WIDTH = 20;
     unsigned INFO_WIDTH      = 20;
     void write_log_header();
-    std::string branch_to_string(BranchType branch_type);
-    std::string get_current_timestamp();
-    std::string get_username();
+    std::string branch_to_string(BranchType branch_type) const;
+    std::string get_current_timestamp() const;
+    std::string get_username() const;
 
 };
 

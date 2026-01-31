@@ -3,7 +3,7 @@
 signalProcessor::signalProcessor() {}
 
 
-void signalProcessor::add_link_process(SharedNodePtr from, SharedNodePtr to, BranchType branch){
+void signalProcessor::add_link_process(SharedNodePtr from, SharedNodePtr to, BranchType branch) const {
     CppClass* child = dynamic_cast<CppClass*>(from);
     CppClass* parent = dynamic_cast<CppClass*>(to);
     if(child && parent){
@@ -11,7 +11,7 @@ void signalProcessor::add_link_process(SharedNodePtr from, SharedNodePtr to, Bra
     }
 }
 
-void signalProcessor::remove_link_process(SharedNodePtr from, SharedNodePtr to, BranchType branch){
+void signalProcessor::remove_link_process(SharedNodePtr from, SharedNodePtr to, BranchType branch) const {
     CppClass* child = dynamic_cast<CppClass*>(from);
     CppClass* parent = dynamic_cast<CppClass*>(to);
     if(child && parent){
@@ -19,7 +19,7 @@ void signalProcessor::remove_link_process(SharedNodePtr from, SharedNodePtr to, 
     }
 }
 
-void signalProcessor::remove_node_process(SharedNodePtr target){
+void signalProcessor::remove_node_process(SharedNodePtr target) const {
     CppClass* node = dynamic_cast<CppClass*>(target);
     node->remove_node();
 }

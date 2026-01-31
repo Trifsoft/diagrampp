@@ -32,7 +32,7 @@ public:
     void add_branch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type);
     void remove_branch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type);
 
-    bool connection_exists(SharedNodePtr from, SharedNodePtr to, BranchType branch_type);
+    bool connection_exists(SharedNodePtr from, SharedNodePtr to, BranchType branch_type) const;
 
 #if DEBUG_MODE >= 1
     void showDiagram();

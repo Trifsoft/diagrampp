@@ -251,6 +251,7 @@ void CppClass::updateTextItems()
         add_text(method->declaration(), y_offset, EditableTextItem::MethodType, method);
         y_offset += m_line_height;
     }
+    update_all_connections();
 }
 
 void CppClass::add_text(const QString text, int y_offset, EditableTextItem::ItemType type, std::weak_ptr<IClassElement> element_weak) {
@@ -344,10 +345,9 @@ QPointF CppClass::get_bottom_center() const{
     return mapToScene(bottomCenterLocal);
 }
 
-void CppClass::add_line_connection(CppClass* target, BranchType branchType){
+void CppClass::add_line_connection(CppClass* target, const BranchType branchType){
     QPointF startPoint = this->get_top_center();
     QPointF endPoint = target->get_bottom_center();
-
 
     int offset = target->number_of_connecitons*local_offset;
     QGraphicsPolygonItem* arrow = get_arrow(branchType);
@@ -389,30 +389,27 @@ void CppClass::add_line_connection(CppClass* target, BranchType branchType){
     target->number_of_connecitons++;
 }
 
-QGraphicsPolygonItem* CppClass::get_arrow(BranchType branchType){
+QGraphicsPolygonItem* CppClass::get_arrow(const BranchType branchType) const {
     QGraphicsPolygonItem* arrow = new QGraphicsPolygonItem();
     QPolygonF polygon;
 
     switch(branchType) {
     case BranchType::INHERITANCE:
-        polygon << QPointF(-size/2, size) << QPointF(size/2, size) << QPointF(0, 0);
+        polygon << QPointF(-arrow_size/2, arrow_size) << QPointF(arrow_size/2, arrow_size) << QPointF(0, 0);
         arrow->setBrush(Qt::white);
         break;
     case BranchType::COMPOSITION:
-        polygon << QPointF(0, 0) << QPointF(-size/2, size/2) << QPointF(0, size) << QPointF(size/2, size/2);
+        polygon << QPointF(0, 0) << QPointF(-arrow_size/2, arrow_size/2) << QPointF(0, arrow_size) << QPointF(arrow_size/2, arrow_size/2);
         arrow->setBrush(Qt::black);
         break;
     case BranchType::AGGREGATION:
-        polygon << QPointF(0, 0) << QPointF(-size/2, size/2) << QPointF(0, size) << QPointF(size/2, size/2);
+        polygon << QPointF(0, 0) << QPointF(-arrow_size/2, arrow_size/2) << QPointF(0, arrow_size) << QPointF(arrow_size/2, arrow_size/2);
         arrow->setBrush(Qt::white);
         break;
-    case BranchType::ASSOCIATION:
-        return nullptr;
     case BranchType::DEPENDENCY:
-        polygon << QPointF(0, 0) << QPointF(-size/3, size) << QPointF(size/3, size);
+        polygon << QPointF(0, 0) << QPointF(-arrow_size/3, arrow_size) << QPointF(arrow_size/3, arrow_size);
         arrow->setBrush(Qt::blue);
         break;
-
     case BranchType::ASSOCIATION:
         polygon << QPointF(-arrow_size/2, arrow_size) << QPointF(arrow_size/2, arrow_size) << QPointF(0, 0);
         arrow->setBrush(Qt::white);
@@ -448,7 +445,7 @@ void CppClass::update_connection_line(Connection& conn){
     QPointF arrowPos = conn.arrow->pos();
     QPointF lineEnd = conn.otherClass->get_bottom_center();
     lineEnd.setX(arrowPos.x());
-    lineEnd.setY(lineEnd.y() + size);
+    lineEnd.setY(lineEnd.y() + arrow_size);
 
     conn.line->setLine(QLineF(newStart, lineEnd));
 }
@@ -486,6 +483,8 @@ void CppClass::remove_connection_to(CppClass* target){
 
             update_offsets();
             update_all_connections();
+            // because maximum number of connections is one (even different branch types) aren't allowed
+            break;
         }
     }
 }
@@ -512,7 +511,7 @@ void CppClass::update_connection_arrow(Connection& conn){
 
     QLineF currentLine = conn.line->line();
     QPointF newEnd = conn.arrow->pos();
-    newEnd.setY(newEnd.y() + size);
+    newEnd.setY(newEnd.y() + arrow_size);
 
     conn.line->setLine(QLineF(currentLine.p1(), newEnd));
 }

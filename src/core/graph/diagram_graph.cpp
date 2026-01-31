@@ -60,11 +60,11 @@ std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& Diag
     return diagram;
 }
 
-bool DiagramGraph::connection_exists(SharedNodePtr child, SharedNodePtr parent, BranchType branch_type){
+bool DiagramGraph::connection_exists(SharedNodePtr child, SharedNodePtr parent, BranchType branch_type) const {
     for(auto const& pair : diagram){
         if(pair.first == child){
             for(auto const& child_connections : pair.second){
-                if(child_connections.first == parent){
+                if(child_connections.first == parent && child_connections.second == branch_type){
                     return true;
                 }
             }

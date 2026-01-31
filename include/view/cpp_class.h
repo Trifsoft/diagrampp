@@ -47,33 +47,23 @@ public:
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
 
     void change_composition(std::function<void(std::shared_ptr<Composition>)> change);
-
-    QPointF getTopCenter() const;
-    QPointF getBottomCenter() const;
-
     void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
 
-    void updateConnections();
-    void addLineConnection(CppClass* target, BranchType branch);
     void addConnectionInfo(QGraphicsLineItem* line, bool isStart);
     void removeLink(CppClass* target, BranchType branch);
 
-    void mousePressEvent(QGraphicsSceneMouseEvent* event);
 
-    void change_composition(std::function<void(std::shared_ptr<Composition>)> change);
     QPointF get_top_center() const;
     QPointF get_bottom_center() const;
     void update_connections();
-    void add_line_connection(CppClass* target, BranchType branch);
-    void remove_link_connection(CppClass* target, BranchType branch);
+    void add_line_connection(CppClass* target, const BranchType branch);
+    void remove_link_connection(CppClass* target, const BranchType branch);
     void set_object_visible(bool visible);
     void remove_node();
 
     QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
     virtual Composition* get_uml_class_diagram_node() override;
 
-signals:
-    void objectClicked(SharedNodePtr clickedClass);
 
 private:
     struct Connection {
@@ -94,7 +84,7 @@ private:
     void update_offsets();
     void disconnect_all_connections();
     void remove_connection_to(CppClass* target);
-    QGraphicsPolygonItem* get_arrow(BranchType branchType);
+    QGraphicsPolygonItem* get_arrow(const BranchType branchType) const;
 
     Board* m_board;
     std::shared_ptr<Composition> m_composition;
@@ -129,6 +119,7 @@ signals:
     void add_method_request(Composition* node, std::shared_ptr<Method> method);
     void edit_field_request(Composition* node, std::weak_ptr<Field> old_field, std::shared_ptr<Field> new_field);
     void edit_method_request(Composition* node, std::weak_ptr<Method> old_method,std::shared_ptr<Method> new_method);
+    void objectClicked(SharedNodePtr node);
 
 };
 

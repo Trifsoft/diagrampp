@@ -41,7 +41,7 @@ private slots:
     void onAddClassClicked();
     void onAddInterfaceClicked();
     void onAddEnumClicked();
-    void onCheckRadioButtonToggled();
+    void onCheckRadioButtonClicked();
     void onModeClicked();
     void onGenerateClicked(const QString& class_name, NodeType node_type);
     void on_object_clicked(SharedNodePtr clickedClass);

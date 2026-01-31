@@ -37,12 +37,12 @@ Board::Board(QWidget *parent)
     connect(ui->add_class, &QPushButton::clicked, this, &Board::onAddClassClicked);
     connect(ui->add_interface, &QPushButton::clicked, this, &Board::onAddInterfaceClicked);
     connect(ui->add_enum, &QPushButton::clicked, this, &Board::onAddEnumClicked);
-    connect(ui->Inheritance, &QPushButton::clicked, this, &Board::onCheckRadioButtonToggled);
-    connect(ui->Association, &QPushButton::clicked, this, &Board::onCheckRadioButtonToggled);
-    connect(ui->Navigation, &QPushButton::clicked, this, &Board::onCheckRadioButtonToggled);
-    connect(ui->Aggregation, &QPushButton::clicked, this, &Board::onCheckRadioButtonToggled);
-    connect(ui->Composition, &QPushButton::clicked, this, &Board::onCheckRadioButtonToggled);
-    connect(ui->Dependency, &QPushButton::clicked, this, &Board::onCheckRadioButtonToggled);
+    connect(ui->Inheritance, &QPushButton::clicked, this, &Board::onCheckRadioButtonClicked);
+    connect(ui->Association, &QPushButton::clicked, this, &Board::onCheckRadioButtonClicked);
+    connect(ui->Realization, &QPushButton::clicked, this, &Board::onCheckRadioButtonClicked);
+    connect(ui->Aggregation, &QPushButton::clicked, this, &Board::onCheckRadioButtonClicked);
+    connect(ui->Composition, &QPushButton::clicked, this, &Board::onCheckRadioButtonClicked);
+    connect(ui->Dependency, &QPushButton::clicked, this, &Board::onCheckRadioButtonClicked);
     connect(ui->linkageMode, &QPushButton::clicked, this, &Board::onModeClicked);
     connect(ui->removeMode, &QPushButton::clicked, this, &Board::onModeClicked);
 }
@@ -56,13 +56,13 @@ Board::~Board()
     delete recovery_log;
 }
 
-void Board::onCheckRadioButtonToggled(){
+void Board::onCheckRadioButtonClicked(){
     if(ui->Inheritance->isChecked()){
         branchType = BranchType::INHERITANCE;
     }else if(ui->Association->isChecked()){
         branchType = BranchType::ASSOCIATION;
-    }else if(ui->Navigation->isChecked()){
-        branchType = BranchType::NAVIGATION;
+    }else if(ui->Realization->isChecked()){
+        branchType = BranchType::REALIZATION;
     }else if(ui->Aggregation->isChecked()){
         branchType = BranchType::AGGREGATION;
     }else if(ui->Composition->isChecked()){
@@ -146,13 +146,13 @@ void Board::on_add_method_requested(Composition *node, std::shared_ptr<Method> m
     qDebug() << "Recieved signal add method from: " << node->get_label();
 }
 
-void Board::add_item(std::shared_ptr<Composition> node) {   //TODO [Nikola] - izmeniti da bude IUMLClassDiagramNode umesto Composition
-    CppClass* item = new CppClass(this, node);
-    scene->addItem(item);
-    diagram->add_node(item);
+// void Board::add_item(std::shared_ptr<Composition> node) {   //TODO [Nikola] - izmeniti da bude IUMLClassDiagramNode umesto Composition
+//     CppClass* item = new CppClass(this, node);
+//     scene->addItem(item);
+//     diagram->add_node(item);
 
-    connect(item, &CppClass::objectClicked, this, &Board::on_object_clicked);
-}
+//     connect(item, &CppClass::objectClicked, this, &Board::on_object_clicked);
+// }
 
 
 // [REFACTOR] implement get_element_by_id(int id) in Composition
@@ -261,6 +261,9 @@ void Board::add_item(std::shared_ptr<Composition> node) {   //TODO [Nikola] - iz
     scene->addItem(item);
     //dynamic_cast<CPPStruct*>(item->getClassDiagramNode().get())->parent = item;
     diagram->add_node(item);
+
+    connect(item, &CppClass::objectClicked, this, &Board::on_object_clicked);
+
 
     connect(item, &CppClass::add_field_request, this, &Board::on_add_field_requested);
     connect(item, &CppClass::add_method_request, this, &Board::on_add_method_requested);

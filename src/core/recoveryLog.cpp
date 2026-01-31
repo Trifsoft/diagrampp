@@ -60,7 +60,7 @@ void recoveryLog::remove_node_operation(SharedNodePtr target) {
 
 }
 
-std::string recoveryLog::get_current_timestamp(){
+std::string recoveryLog::get_current_timestamp() const {
     auto now = std::chrono::system_clock::now();
     auto in_time = std::chrono::system_clock::to_time_t(now);
 
@@ -73,7 +73,7 @@ std::string recoveryLog::get_current_timestamp(){
     return ss.str();
 }
 
-std::string recoveryLog::get_username() {
+std::string recoveryLog::get_username() const {
     uid_t uid = getuid();
     struct passwd *pw = getpwuid(uid);
     if(pw){
@@ -100,7 +100,7 @@ void recoveryLog::write_log_header() {
     log_file.flush();
 }
 
-std::string recoveryLog::branch_to_string(BranchType branch_type){
+std::string recoveryLog::branch_to_string(BranchType branch_type) const {
     if(branch_type == BranchType::INHERITANCE){
         return std::string("INHERITANCE");
     }else if(branch_type == BranchType::REALIZATION){
