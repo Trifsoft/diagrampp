@@ -66,7 +66,6 @@ set(CORE_HEADERS
     include/serializer/node_serializer/enum_serializer.h
     include/serializer/node_serializer/composition_serializer.h
     include/serializer/diagram_json_serializer.h
-    include/serializer/node_serializer/struct_serializer.h
     include/serializer/node_serializer/serializer.h
     include/serializer/composition_element_serializer/serializer.h
     include/serializer/composition_element_serializer/destructor_serializer.h
@@ -121,7 +120,6 @@ set(CORE_SOURCES
     src/core/widget/class_element_text.cpp
     src/serializer/node_serializer/enum_serializer.cpp
     src/serializer/node_serializer/composition_serializer.cpp
-    src/serializer/node_serializer/struct_serializer.cpp
     src/serializer/node_serializer/serializer.cpp
     src/serializer/diagram_json_serializer.cpp
     src/serializer/composition_element_serializer/destructor_serializer.cpp

@@ -3,14 +3,15 @@
 
 #include <model/elements/field.h>
 #include <serializer/composition_element_serializer/serializer.h>
+#include <fstream>
 
 class FieldSerializer : CompositionElementSerializer{
 private:
     Field* m_field;
 public:
-    FieldSerializer(Field* f, std::stringstream* writing_stream, std::stringstream* reading_stream, const int indentation_counter);
+    FieldSerializer(std::fstream* file_stream, const int indentation_counter, Field* f = nullptr);
 
-    std::string serialize() override;
+    void serialize() override;
     Field* deserialize() override;
 };
 

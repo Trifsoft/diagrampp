@@ -13,8 +13,8 @@ class CompositionSerializer : NodeSerializer{
 private:
     Composition* m_composition_node;
 public:
-    CompositionSerializer(Composition* cs, std::stringstream* writing_stream, std::stringstream* reading_stream, const int indentation_counter);
-    std::string serialize() override;
+    CompositionSerializer(std::fstream* file_stream, const int indentation_counter, Composition* cs = nullptr);
+    void serialize() override;
     Composition* deserialize() override;
 };
 

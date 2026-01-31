@@ -3,14 +3,15 @@
 
 #include <serializer/composition_element_serializer/serializer.h>
 #include <model/elements/method.h>
+#include <fstream>
 
 class MethodSerializer : CompositionElementSerializer{
 private:
     Method* m_method;
 public:
-    MethodSerializer(Method* m, std::stringstream* writing_stream, std::stringstream* reading_stream, const int indentation_counter);
+    MethodSerializer(std::fstream* file_stream, const int indentation_counter, Method* m = nullptr);
 
-    std::string serialize() override;
+    void serialize() override;
     Method* deserialize() override;
 };
 

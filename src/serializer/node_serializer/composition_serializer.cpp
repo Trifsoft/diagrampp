@@ -5,94 +5,88 @@
 #include <serializer/composition_element_serializer/constructor_serializer.h>
 #include <serializer/composition_element_serializer/destructor_serializer.h>
 
-CompositionSerializer::CompositionSerializer(Composition* c, std::stringstream* writing_stream, std::stringstream* reading_stream, const int indentation_counter)
-    : NodeSerializer(writing_stream, reading_stream, indentation_counter)
+CompositionSerializer::CompositionSerializer(std::fstream* file_stream, const int indentation_counter, Composition* c)
+    : NodeSerializer(file_stream, indentation_counter)
 {
-    if(!writing_stream){ // deserialization
-        m_composition_node = nullptr; // will be intialized ad made in deserialization function
-    }else{
-        m_composition_node = c;
-    }
+    m_composition_node = c;
 }
 
-std::string CompositionSerializer::serialize(){
-    *m_output_stream << "{\n";
+void CompositionSerializer::serialize(){
+    *m_file_stream << "{\n";
     ++m_indentation_counter;
-    indent(); *m_output_stream << "\"label\": ";  *m_output_stream << '\"' << m_composition_node->get_label().toStdString() << "\",\n" ;
-    indent(); *m_output_stream << "\"name\": "; *m_output_stream << m_composition_node->get_name().toStdString() << ",\n";
+    indent(); *m_file_stream << "\"label\": ";  *m_file_stream << '\"' << m_composition_node->get_label().toStdString() << "\",\n" ;
+    indent(); *m_file_stream << "\"name\": "; *m_file_stream << m_composition_node->get_name().toStdString() << ",\n";
 
     // CONSTRUCTORS
-    indent(); *m_output_stream << "\"constructors\": [\n";
+    indent(); *m_file_stream << "\"constructors\": [\n";
     ++m_indentation_counter;
 
     auto& constructors = m_composition_node->constructors;
     for(auto constructor_it = constructors.begin(); constructor_it != constructors.end(); ){
-        auto cs = ConstructorSerializer(constructor_it->get(), m_output_stream, m_input_stream, m_indentation_counter);
+        auto cs = ConstructorSerializer(m_file_stream, m_indentation_counter, constructor_it->get());
         cs.serialize();
         if(++constructor_it == constructors.end()){
-            *m_output_stream << '\n';
+            *m_file_stream << '\n';
         }else{
-            *m_output_stream << ",\n";
+            *m_file_stream << ",\n";
         }
     }
 
     --m_indentation_counter;
-    indent(); *m_output_stream << "], \n";
+    indent(); *m_file_stream << "], \n";
 
 
     // DESTRUCTOR
-    indent(); *m_output_stream << "\"destructor\": {\n";
+    indent(); *m_file_stream << "\"destructor\": {\n";
     ++m_indentation_counter;
 
     auto destructor = m_composition_node->get_destructor();
-    auto ds = DestructorSerializer(destructor, m_output_stream, m_input_stream, m_indentation_counter);
+    auto ds = DestructorSerializer(m_file_stream, m_indentation_counter, destructor);
     ds.serialize();
 
     --m_indentation_counter;
-    indent(); *m_output_stream << "},\n";
+    indent(); *m_file_stream << "},\n";
 
 
 
     // FIELDS
-    indent(); *m_output_stream << "\"fields\": [\n";
+    indent(); *m_file_stream << "\"fields\": [\n";
     ++m_indentation_counter;
 
     auto& fields = m_composition_node->fields;
     for (auto field_it = fields.begin(); field_it != fields.end(); ){
-        auto fs = FieldSerializer(field_it->get(), m_output_stream, m_input_stream, m_indentation_counter);
+        auto fs = FieldSerializer(m_file_stream, m_indentation_counter, field_it->get());
         fs.serialize();
         if(++field_it == fields.end()){
-            *m_output_stream << '\n';
+            *m_file_stream << '\n';
         }else{
-            *m_output_stream << ",\n";
+            *m_file_stream << ",\n";
         }
     }
 
     --m_indentation_counter;
-    indent(); *m_output_stream << "], \n";
+    indent(); *m_file_stream << "], \n";
 
     // METHODS
-    indent(); *m_output_stream << "\"methods\": [\n";
+    indent(); *m_file_stream << "\"methods\": [\n";
     ++m_indentation_counter;
 
     auto& methods = m_composition_node->methods;
     for (auto method_it = methods.begin(); method_it != methods.end(); ){
-        auto fs = MethodSerializer(method_it->get(), m_output_stream, m_input_stream, m_indentation_counter);
+        auto fs = MethodSerializer(m_file_stream, m_indentation_counter, method_it->get());
         fs.serialize();
         if(++method_it == methods.end()){
-            *m_output_stream << '\n';
+            *m_file_stream << '\n';
         }else{
-            *m_output_stream << ",\n";
+            *m_file_stream << ",\n";
         }
     }
     --m_indentation_counter;
-    indent(); *m_output_stream << "]\n";
+    indent(); *m_file_stream << "]\n";
 
 
     --m_indentation_counter;
-    indent(); *m_output_stream << "}";
-
-    return (*m_output_stream).str();
+    indent(); *m_file_stream << "}";
 }
 
 Composition* CompositionSerializer::deserialize(){

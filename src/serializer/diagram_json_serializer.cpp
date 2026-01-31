@@ -2,6 +2,7 @@
 #include <model/base/uml_class_diagram_node.h>
 #include <serializer/node_serializer/composition_serializer.h>
 #include <serializer/node_serializer/enum_serializer.h>
+#include <external/json.hpp>
 
 /*
  * rules:
@@ -28,25 +29,14 @@
  *
  */
 
-DiagramJsonSerializer::DiagramJsonSerializer(graph_type* m_diagram_graph, std::stringstream* stream, DiagramJsonSerializer::StreamMode sm) {
+DiagramJsonSerializer::DiagramJsonSerializer(graph_type* m_diagram_graph, std::fstream* stream) {
     m_diagram = m_diagram_graph;
     m_indentation_counter = 0;
-
-    switch(sm){
-        case DiagramJsonSerializer::StreamMode::READ:
-            m_input_stream = stream;
-            m_output_stream = nullptr;
-            break;
-        case DiagramJsonSerializer::StreamMode::WRITE:
-            m_output_stream = stream;
-            m_input_stream = nullptr;
-            break;
-    }
+    m_file_stream = stream;
 }
 
 DiagramJsonSerializer::~DiagramJsonSerializer(){
-    delete m_output_stream;
-    delete m_input_stream;
+    delete m_file_stream;
 }
 
 void DiagramJsonSerializer::call_corresponding_node_serializer(IUMLClassDiagramNode* node){
@@ -54,12 +44,12 @@ void DiagramJsonSerializer::call_corresponding_node_serializer(IUMLClassDiagramN
 
     if(label == "class" || label == "struct"){
         Composition* c = dynamic_cast<Composition*>(node);
-        CompositionSerializer cs = CompositionSerializer(c, m_output_stream, m_input_stream, m_indentation_counter);
+        CompositionSerializer cs = CompositionSerializer(m_file_stream, m_indentation_counter, c);
 
         cs.serialize();
     }else {
         CPPEnum* e = dynamic_cast<CPPEnum*>(node);
-        EnumSerializer es = EnumSerializer(e, m_output_stream, m_input_stream, m_indentation_counter);
+        EnumSerializer es = EnumSerializer(m_file_stream, m_indentation_counter, e);
 
         es.serialize();
     }
@@ -67,7 +57,7 @@ void DiagramJsonSerializer::call_corresponding_node_serializer(IUMLClassDiagramN
 
 void DiagramJsonSerializer::indent(){
     for (int i = 0; i < m_indentation_counter; i++){
-        *m_output_stream << "\t";
+        *m_file_stream << "\t";
     }
 }
 
@@ -79,108 +69,112 @@ void DiagramJsonSerializer::trim_end(std::string& s) const {
 }
 
 void DiagramJsonSerializer::write_coords(double x, double y){
-    indent(); *m_output_stream << "\"coords\": {\n";
+    indent(); *m_file_stream << "\"coords\": {\n";
     ++m_indentation_counter;
 
-    indent(); *m_output_stream << "\"x\": "; *m_output_stream << x << ',' << '\n';
+    indent(); *m_file_stream << "\"x\": "; *m_file_stream << x << ',' << '\n';
 
-    indent(); *m_output_stream << "\"y\": "; *m_output_stream << y << '\n';
+    indent(); *m_file_stream << "\"y\": "; *m_file_stream << y << '\n';
 
     --m_indentation_counter;
-    indent(); *m_output_stream << '}';
+    indent(); *m_file_stream << '}';
 }
 
 void DiagramJsonSerializer::write_inheritance(BranchType branch_type){
     indent();
     switch(branch_type){
         case BranchType::INHERITANCE:
-            *m_output_stream << "\"branch_type\": " << "\"inheritance\"";
+            *m_file_stream << "\"branch_type\": " << "\"inheritance\"";
             break;
         case BranchType::ASSOCIATION:
-            *m_output_stream << "\"branch_type\": " << "\"association\"";
+            *m_file_stream << "\"branch_type\": " << "\"association\"";
             break;
         case BranchType::NAVIGATION:
-            *m_output_stream << "\"branch_type\": " << "\"navigation\"";
+            *m_file_stream << "\"branch_type\": " << "\"navigation\"";
             break;
         case BranchType::AGGREGATION:
-            *m_output_stream << "\"branch_type\": " << "\"aggregation\"";
+            *m_file_stream << "\"branch_type\": " << "\"aggregation\"";
             break;
         case BranchType::COMPOSITION:
-            *m_output_stream << "\"branch_type\": " << "\"composition\"";
+            *m_file_stream << "\"branch_type\": " << "\"composition\"";
             break;
         case BranchType::DEPENDENCY:
-            *m_output_stream << "\"branch_type\": " << "\"dependency\"";
+            *m_file_stream << "\"branch_type\": " << "\"dependency\"";
             break;
     }
 }
 
-
-std::string DiagramJsonSerializer::serialize(){
+void DiagramJsonSerializer::serialize(){
     int m_indentation_counter = 0;
     ;
-    *m_output_stream << "[\n";
+    *m_file_stream << "[\n";
     ++m_indentation_counter;
     indent();
 
     for (auto it = m_diagram->begin(); it != m_diagram->end(); ){
         auto& node_view = it->first;
-        *m_output_stream << "{\n";
+        *m_file_stream << "{\n";
         ++m_indentation_counter;
 
         // 1) coords
         write_coords(node_view->x(), node_view->y());
-        *m_output_stream << ",\n";
+        *m_file_stream << ",\n";
 
         // 2) node
         const auto node = node_view->get_uml_class_diagram_node(); // does not return const IUMLClassDiagramNode
         call_corresponding_node_serializer(node);
-        *m_output_stream << ",\n";
+        *m_file_stream << ",\n";
 
         // 3) neighbours (list of <{node, coords}, branch_type}>)
-        *m_output_stream << "\"neighbours\":" << '[' << '\n';
+        *m_file_stream << "\"neighbours\":" << '[' << '\n';
         ++m_indentation_counter;
         for (auto neighbour_it = it->second.begin(); neighbour_it != it->second.end(); ){
-            indent(); *m_output_stream << "{\n";
+            indent(); *m_file_stream << "{\n";
             ++m_indentation_counter;
 
-            indent(); write_inheritance(neighbour_it->second); *m_output_stream << ",\n";
+            indent(); write_inheritance(neighbour_it->second); *m_file_stream << ",\n";
 
 
             const auto& neighbour = neighbour_it->first->get_uml_class_diagram_node();
-            call_corresponding_node_serializer(neighbour); *m_output_stream << ",\n";
+            call_corresponding_node_serializer(neighbour); *m_file_stream << ",\n";
 
-            indent(); write_coords(neighbour_it->first->x(), neighbour_it->first->y()); *m_output_stream << '\n';
+            indent(); write_coords(neighbour_it->first->x(), neighbour_it->first->y()); *m_file_stream << '\n';
             --m_indentation_counter;
-            indent(); *m_output_stream << "}";
+            indent(); *m_file_stream << "}";
 
             if(++neighbour_it == it->second.end()){
-                *m_output_stream << '\n';
+                *m_file_stream << '\n';
             }else {
-                *m_output_stream << ",\n";
+                *m_file_stream << ",\n";
             }
         }
 
         --m_indentation_counter;
-        indent(); *m_output_stream << "]\n";
+        indent(); *m_file_stream << "]\n";
 
         --m_indentation_counter;
-        indent(); *m_output_stream << "}";
+        indent(); *m_file_stream << "}";
 
         if(++it == m_diagram->end()){
-            *m_output_stream << '\n';
+            *m_file_stream << '\n';
         }else{
-            *m_output_stream << ",\n";
+            *m_file_stream << ",\n";
         }
     }
 
     --m_indentation_counter;
     indent();
-    *m_output_stream << "]\n";
+    *m_file_stream << "]\n";
 
-    return (*m_output_stream).str();
 }
 
 
-DiagramJsonSerializer::deserialize(){
+using json = nlohmann::json;
 
+graph_type* DiagramJsonSerializer::deserialize(){
+    json json_obj_list;
+
+    *m_file_stream >> json_obj_list;
+
+    return nullptr;
 }

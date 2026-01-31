@@ -8,9 +8,9 @@ class EnumSerializer : NodeSerializer{
 private:
     CPPEnum* m_enum_node;
 public:
-    EnumSerializer(CPPEnum* ce, std::stringstream* writing_stream, std::stringstream* reading_stream, const int indentation_counter);
+    EnumSerializer(std::fstream* file_stream, const int indentation_counter, CPPEnum* ce = nullptr);
 
-    std::string serialize() override;
+    void serialize() override;
     IUMLClassDiagramNode* deserialize() override;
 };
 

@@ -8,9 +8,9 @@ class ConstructorSerializer : CompositionElementSerializer{
 private:
     Constructor* m_constructor;
 public:
-    ConstructorSerializer(Constructor* c, std::stringstream* writing_stream, std::stringstream* reading_stream, const int indentation_counter);
+    ConstructorSerializer(std::fstream* file_stream, const int indentation_counter, Constructor* c = nullptr);
 
-    std::string serialize() override;
+    void serialize() override;
     Constructor* deserialize() override;
 };
 

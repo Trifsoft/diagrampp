@@ -8,9 +8,9 @@ class DestructorSerializer : CompositionElementSerializer{
 private:
     Destructor* m_destructor;
 public:
-    DestructorSerializer(Destructor& d, std::stringstream* writing_stream, std::stringstream* reading_stream, const int indentation_counter);
+    DestructorSerializer(std::fstream* file_stream, const int indentation_counter, Destructor* d = nullptr);
 
-    std::string serialize() override; // should print just properties, without {}
+    void serialize() override; // should print just properties, without {}
     Destructor* deserialize() override;
 };
 
