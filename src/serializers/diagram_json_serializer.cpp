@@ -33,7 +33,7 @@ DiagramJsonSerializer::DiagramJsonSerializer(graph_type* m_diagram_graph) {
     m_indentation_counter = 0;
 }
 
-void DiagramJsonSerializer::call_corresponding_node_serializer(std::ostream* output_stream, IUMLClassDiagramNode* node) const {
+void DiagramJsonSerializer::call_corresponding_node_serializer(std::ostream& output_stream, IUMLClassDiagramNode* node) const {
     auto label = node->get_label().toStdString();
 
     if(label == "class" || label == "struct"){
@@ -52,103 +52,103 @@ void DiagramJsonSerializer::trim_end(std::string& s) const {
     );
 }
 
-void DiagramJsonSerializer::write_coords(std::ostream* output_stream, double x, double y){
-    SerializeHelpers::indent(output_stream, m_indentation_counter); *output_stream << "\"coords\": {\n";
+void DiagramJsonSerializer::write_coords(std::ostream& output_stream, double x, double y){
+    SerializeHelpers::indent(output_stream, m_indentation_counter); output_stream << "\"coords\": {\n";
     ++m_indentation_counter;
 
-    SerializeHelpers::indent(output_stream, m_indentation_counter); *output_stream << "\"x\": "; *output_stream << x << ',' << '\n';
+    SerializeHelpers::indent(output_stream, m_indentation_counter); output_stream << "\"x\": "; output_stream << x << ',' << '\n';
 
-    SerializeHelpers::indent(output_stream, m_indentation_counter); *output_stream << "\"y\": "; *output_stream << y << '\n';
+    SerializeHelpers::indent(output_stream, m_indentation_counter); output_stream << "\"y\": "; output_stream << y << '\n';
 
     --m_indentation_counter;
-    SerializeHelpers::indent(output_stream, m_indentation_counter); *output_stream << '}';
+    SerializeHelpers::indent(output_stream, m_indentation_counter); output_stream << '}';
 }
 
-void DiagramJsonSerializer::write_inheritance(std::ostream* output_stream, BranchType branch_type) const {
+void DiagramJsonSerializer::write_inheritance(std::ostream& output_stream, BranchType branch_type) const {
     SerializeHelpers::indent(output_stream, m_indentation_counter);
     switch(branch_type){
         case BranchType::INHERITANCE:
-            *output_stream << "\"branch_type\": " << "\"inheritance\"";
+            output_stream << "\"branch_type\": " << "\"inheritance\"";
             break;
         case BranchType::ASSOCIATION:
-            *output_stream << "\"branch_type\": " << "\"association\"";
+            output_stream << "\"branch_type\": " << "\"association\"";
             break;
         case BranchType::NAVIGATION:
-            *output_stream << "\"branch_type\": " << "\"navigation\"";
+            output_stream << "\"branch_type\": " << "\"navigation\"";
             break;
         case BranchType::AGGREGATION:
-            *output_stream << "\"branch_type\": " << "\"aggregation\"";
+            output_stream << "\"branch_type\": " << "\"aggregation\"";
             break;
         case BranchType::COMPOSITION:
-            *output_stream << "\"branch_type\": " << "\"composition\"";
+            output_stream << "\"branch_type\": " << "\"composition\"";
             break;
         case BranchType::DEPENDENCY:
-            *output_stream << "\"branch_type\": " << "\"dependency\"";
+            output_stream << "\"branch_type\": " << "\"dependency\"";
             break;
     }
 }
 
-void DiagramJsonSerializer::serialize(std::ostream* output_stream){
+void DiagramJsonSerializer::serialize(std::ostream& output_stream){
     int m_indentation_counter = 0;
     ;
-    *output_stream << "[\n";
+    output_stream << "[\n";
     ++m_indentation_counter;
     SerializeHelpers::indent(output_stream, m_indentation_counter);
 
     for (auto it = m_diagram->begin(); it != m_diagram->end(); ){
         auto& node_view = it->first;
-        *output_stream << "{\n";
+        output_stream << "{\n";
         ++m_indentation_counter;
 
         // 1) coords
         write_coords(output_stream, node_view->x(), node_view->y());
-        *output_stream << ",\n";
+        output_stream << ",\n";
 
         // 2) node
         const auto node = node_view->get_uml_class_diagram_node(); // does not return const IUMLClassDiagramNode
         call_corresponding_node_serializer(output_stream, node);
-        *output_stream << ",\n";
+        output_stream << ",\n";
 
         // 3) neighbours (list of <{node, coords}, branch_type}>)
-        *output_stream << "\"neighbours\":" << '[' << '\n';
+        output_stream << "\"neighbours\":" << '[' << '\n';
         ++m_indentation_counter;
         for (auto neighbour_it = it->second.begin(); neighbour_it != it->second.end(); ){
-            SerializeHelpers::indent(output_stream, m_indentation_counter); *output_stream << "{\n";
+            SerializeHelpers::indent(output_stream, m_indentation_counter); output_stream << "{\n";
             ++m_indentation_counter;
 
-            SerializeHelpers::indent(output_stream, m_indentation_counter); write_inheritance(output_stream, neighbour_it->second); *output_stream << ",\n";
+            SerializeHelpers::indent(output_stream, m_indentation_counter); write_inheritance(output_stream, neighbour_it->second); output_stream << ",\n";
 
 
             const auto& neighbour = neighbour_it->first->get_uml_class_diagram_node();
-            call_corresponding_node_serializer(output_stream, neighbour); *output_stream << ",\n";
+            call_corresponding_node_serializer(output_stream, neighbour); output_stream << ",\n";
 
-            SerializeHelpers::indent(output_stream, m_indentation_counter); write_coords(output_stream, neighbour_it->first->x(), neighbour_it->first->y()); *output_stream << '\n';
+            SerializeHelpers::indent(output_stream, m_indentation_counter); write_coords(output_stream, neighbour_it->first->x(), neighbour_it->first->y()); output_stream << '\n';
             --m_indentation_counter;
-            SerializeHelpers::indent(output_stream, m_indentation_counter); *output_stream << "}";
+            SerializeHelpers::indent(output_stream, m_indentation_counter); output_stream << "}";
 
             if(++neighbour_it == it->second.end()){
-                *output_stream << '\n';
+                output_stream << '\n';
             }else {
-                *output_stream << ",\n";
+                output_stream << ",\n";
             }
         }
 
         --m_indentation_counter;
-        SerializeHelpers::indent(output_stream, m_indentation_counter); *output_stream << "]\n";
+        SerializeHelpers::indent(output_stream, m_indentation_counter); output_stream << "]\n";
 
         --m_indentation_counter;
-        SerializeHelpers::indent(output_stream, m_indentation_counter); *output_stream << "}";
+        SerializeHelpers::indent(output_stream, m_indentation_counter); output_stream << "}";
 
         if(++it == m_diagram->end()){
-            *output_stream << '\n';
+            output_stream << '\n';
         }else{
-            *output_stream << ",\n";
+            output_stream << ",\n";
         }
     }
 
     --m_indentation_counter;
     SerializeHelpers::indent(output_stream, m_indentation_counter);
-    *output_stream << "]\n";
+    output_stream << "]\n";
 
 }
 

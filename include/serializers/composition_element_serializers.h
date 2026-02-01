@@ -40,17 +40,17 @@
 
 namespace CompositionElementSerializers
 {
-    void serialize_method(std::ostream* output_stream, int indentation_counter, const Method* method);
+    void serialize_method(std::ostream& output_stream, int indentation_counter, const Method* method);
     Method* deserialize_method(const QJsonObject json_method);
 
-    void serialize_field(std::ostream* output_stream, int indentation_counter, const Field* field);
+    void serialize_field(std::ostream& output_stream, int indentation_counter, const Field* field);
     Field* deserialize_field(const QJsonObject json_field);
 
-    void serialize_constructor(std::ostream* output_stream, int indentation_counter, const Constructor* constructor);
+    void serialize_constructor(std::ostream& output_stream, int indentation_counter, const Constructor* constructor);
     Constructor* deserialize_constructor(const QJsonObject json_constructor);
 
 
-    void serialize_destructor(std::ostream* output_stream, int indentation_counter, const Destructor* destructor);
+    void serialize_destructor(std::ostream& output_stream, int indentation_counter, const Destructor* destructor);
     Destructor* deserialize_destructor(const QJsonObject json_destructor);
 };
 
