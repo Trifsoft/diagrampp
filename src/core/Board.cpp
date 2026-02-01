@@ -100,10 +100,14 @@ void Board::on_object_clicked(SharedNodePtr clicked_object){
 
     std::string errorMessage;
     if((first_activated && second_activated) && linkageMode){
-        diagram->add_branch(first_activated, second_activated, branchType);
-        if(!Validator::validate(errorMessage, first_activated, second_activated, branchType, diagram->get_diagram())){
-            diagram->remove_branch(first_activated, second_activated, branchType);
-            QMessageBox::warning(this, "Warning", QString::fromStdString(errorMessage));
+        if(!diagram->connection_exists(first_activated, second_activated, branchType)){
+            diagram->add_branch(first_activated, second_activated, branchType);
+            if(!Validator::validate(errorMessage, first_activated, second_activated, branchType, diagram->get_diagram())){
+                diagram->remove_branch(first_activated, second_activated, branchType);
+                QMessageBox::warning(this, "Warning", QString::fromStdString(errorMessage));
+            }
+        }else{
+            QMessageBox::warning(this, "Warning", "Connection already exists.");
         }
     }else if((first_activated && second_activated) && removeMode){
         if(!diagram->connection_exists(first_activated, second_activated, branchType)){
