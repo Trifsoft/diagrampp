@@ -1,18 +1,22 @@
 #include "model/elements/method.h"
 
-Method::Method(const Description& description, Visibility visibility, MethodType method_type, const QList<Description>& variables)
-    : IClassElement(ElementRank::Method, description.get_name(), visibility),
+Method::Method(std::shared_ptr<Description> description, Visibility visibility, MethodType method_type, const QList<Description*>& variables, const QString& definition_block)
+    : IClassElement(ElementRank::Method, description->get_name(), visibility),
       description(description),
       method_type(method_type),
       variables(variables),
-      definition_block("") {}
+      definition_block(definition_block) {}
+Method::~Method()
+{
+    qDeleteAll(variables);
+}
 
 QString Method::get_base_method_declaration() const {
     QStringList var_strings;
     for (const auto& var : variables) {
-        var_strings.append(var.to_string());
+        var_strings.append(var->to_string());
     }
-    return description.to_string() + "(" + var_strings.join(", ") + ")";
+    return description->to_string() + "(" + var_strings.join(", ") + ")";
 }
 
 QString Method::get_declaration() const {
@@ -35,24 +39,24 @@ std::optional<QString> Method::definition(const QString& class_name) const {
 
     QStringList var_strings;
     for (const auto& var : variables) {
-        var_strings.append(var.to_string());
+        var_strings.append(var->to_string());
     }
 
-    QString def = description.get_type()->get_name() + " " + class_name + "::" +
-                  description.get_name() + "(" + var_strings.join(", ") + ") {\n" +
+    QString def = description->get_type()->get_name() + " " + class_name + "::" +
+                  description->get_name() + "(" + var_strings.join(", ") + ") {\n" +
                   definition_block + "\n}";
     return def;
 }
 
-Description Method::get_description() const {
-    return description;
+Description* Method::get_description() const {
+    return description.get();
 }
 
 MethodType Method::get_method_type() const {
     return method_type;
 }
 
-QList<Description> Method::get_variables() const {
+QList<Description*> Method::get_variables() const {
     return variables;
 }
 

@@ -16,22 +16,23 @@ enum class MethodType {
 
 class Method : public IClassElement {
 private:
-    Description description;
+    std::shared_ptr<Description> description;
     MethodType method_type;
-    QList<Description> variables;
+    QList<Description*> variables;
     QString definition_block;
 
     QString get_base_method_declaration() const;
 
 public:
-    Method(const Description& description, Visibility visibility, MethodType method_type, const QList<Description>& variables);
+    Method(std::shared_ptr<Description> description, Visibility visibility, MethodType method_type, const QList<Description*>& variables, const QString& definition_block = "");
+    ~Method();
 
     QString get_declaration() const override;
     std::optional<QString> definition(const QString& class_name) const override;
 
-    Description get_description() const;
+    Description* get_description() const;
     MethodType get_method_type() const;
-    QList<Description> get_variables() const;
+    QList<Description*> get_variables() const;
     QString get_definition_block() const;
     void set_definition_block(const QString& definition_block);
 };

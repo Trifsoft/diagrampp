@@ -117,8 +117,8 @@ void Composition::add_field(const QString& name, std::shared_ptr<IType> type, st
     fields.append(std::make_shared<Field>(std::make_shared<Description>(name, type), vis));
 }
 
-void Composition::add_method(const QString& name, std::shared_ptr<IType> type, Visibility visibility, MethodType method_type, const QList<Description>& variables) {
-    methods.append(std::make_shared<Method>(Description(name, type), visibility, method_type, variables));
+void Composition::add_method(const QString& name, std::shared_ptr<IType> type, Visibility visibility, MethodType method_type, const QList<Description*>& variables) {
+    methods.append(std::make_shared<Method>(std::make_shared<Description>(name, type), visibility, method_type, variables));
 }
 
 void Composition::add_constructor(Visibility visibility, const QVector<Description>& arguments) {

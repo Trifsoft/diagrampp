@@ -110,7 +110,7 @@ void Board::onGenerateClicked(const QString& class_name, NodeType node_type) {
         new_node->add_field("test2", std::make_shared<RegularType>(RegularType("bool")));
         new_node->add_field("test3", std::make_shared<RegularType>(RegularType("float")));
         new_node->add_field("test4", std::make_shared<RegularType>(RegularType("double")));
-        new_node->add_method("foo", std::make_shared<RegularType>("void"), Visibility::Private, MethodType::Regular, { Description("bar", std::make_shared<RegularType>("int")) });
+        new_node->add_method("foo", std::make_shared<RegularType>("void"), Visibility::Private, MethodType::Regular, { new Description("bar", std::make_shared<RegularType>("int")) });
 
         add_item(new_node);
         break;
@@ -121,7 +121,7 @@ void Board::onGenerateClicked(const QString& class_name, NodeType node_type) {
         new_node->add_field("test2", std::make_shared<RegularType>(RegularType("bool")));
         new_node->add_field("test3", std::make_shared<RegularType>(RegularType("float")));
         new_node->add_field("test4", std::make_shared<RegularType>(RegularType("double")));
-        new_node->add_method("foo", std::make_shared<RegularType>("void"), Visibility::Private, MethodType::Regular, { Description("bar", std::make_shared<RegularType>("int")) });
+        new_node->add_method("foo", std::make_shared<RegularType>("void"), Visibility::Private, MethodType::Regular, { new Description("bar", std::make_shared<RegularType>("int")) });
 
         add_item(new_node);
         break;
@@ -132,7 +132,7 @@ void Board::onGenerateClicked(const QString& class_name, NodeType node_type) {
         new_node->add_field("test2", std::make_shared<RegularType>(RegularType("bool")));
         new_node->add_field("test3", std::make_shared<RegularType>(RegularType("float")));
         new_node->add_field("test4", std::make_shared<RegularType>(RegularType("double")));
-        new_node->add_method("foo", std::make_shared<RegularType>("void"), Visibility::Private, MethodType::Regular, { Description("bar", std::make_shared<RegularType>("int")) });
+        new_node->add_method("foo", std::make_shared<RegularType>("void"), Visibility::Private, MethodType::Regular, { new Description("bar", std::make_shared<RegularType>("int")) });
 
         add_item(new_node);
         break;
