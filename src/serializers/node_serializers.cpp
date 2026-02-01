@@ -79,9 +79,6 @@ void NodeSerializers::serialize_composition_node(std::ostream &output_stream, in
     SerializeHelpers::indent(output_stream, indentation_counter); output_stream<< "\"destructor\": {\n";
     ++indentation_counter;
 
-    auto destructor = composition_node->get_destructor();
-    CompositionElementSerializers::serialize_destructor(output_stream, indentation_counter, &destructor);
-
     --indentation_counter;
     SerializeHelpers::indent(output_stream, indentation_counter); output_stream<< "},\n";
 
