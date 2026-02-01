@@ -7,7 +7,6 @@
 #include "src/ui/ui_Board.h"
 #include "model/elements/type/regular_type.h"
 #include "nodefactory.h"
-#include "image_paths.h"
 #include <QMessageBox>
 
 Board::Board(QWidget *parent)

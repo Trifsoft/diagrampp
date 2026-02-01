@@ -18,10 +18,8 @@ void DiagramGraph::remove_node(SharedNodePtr node_to_remove) {
     // erase all branches linked to node
     for(auto& node_pair : diagram){
         auto& neighbours = node_pair.second;
-        auto neighbours_it = neighbours.begin();
-        while(neighbours_it != neighbours.end()){
+        for(auto neighbours_it = neighbours.begin(); neighbours_it != neighbours.end(); ){
             auto& [neighbour_node, _] = (*neighbours_it);
-            // [FILIP] BUG fix (erase will increment iterator)
             if(neighbour_node == node_to_remove){
                 neighbours_it = neighbours.erase(neighbours_it);
             }else{
