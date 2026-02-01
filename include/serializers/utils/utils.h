@@ -3,6 +3,7 @@
 
 #include <ostream>
 #include <functional>
+#include <QList>
 
 namespace SerializeHelpers{
     void indent(std::ostream& output_stream, const int indentation_counter);
@@ -25,6 +26,20 @@ namespace SerializeHelpers{
 
         serializer(output_stream, indentation_counter+1, value);
 
+    }
+
+    template <typename T>
+    void write_indented_serialized_list_field(std::ostream& output_stream, const int indentation_counter, const std::string& key, const QList<T*>& list, std::function<void(std::ostream&, const int, T*)> serializer) {
+        SerializeHelpers::indent(output_stream, indentation_counter);
+        write_with_quotes(output_stream, key);
+        output_stream << ": [\n";
+        for(auto element: list) {
+            SerializeHelpers::indent(output_stream, indentation_counter+1);
+            serializer(output_stream, indentation_counter+1, element);
+            output_stream << ",\n";
+        }
+        SerializeHelpers::indent(output_stream, indentation_counter);
+        output_stream << "]";
     }
 }
 
