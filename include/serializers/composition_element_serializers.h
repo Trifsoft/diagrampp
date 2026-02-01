@@ -6,7 +6,7 @@
 #include <ostream>
 #include <model/base/class_element.h>
 #include <model/elements/field.h>
-#include <model/elements/constructor/constructor.h>
+#include <model/elements/constructor/default_constructor.h>
 #include <model/elements/destructor.h>
 #include <model/elements/method.h>
 
@@ -46,8 +46,8 @@ namespace CompositionElementSerializers
     void serialize_field(std::ostream& output_stream, int indentation_counter, const Field* field);
     Field* deserialize_field(const QJsonObject json_field);
 
-    void serialize_constructor(std::ostream& output_stream, int indentation_counter, const Constructor* constructor);
-    Constructor* deserialize_constructor(const QJsonObject json_constructor);
+    void serialize_constructor(std::ostream& output_stream, int indentation_counter, const DefaultConstructor* constructor);
+    DefaultConstructor* deserialize_constructor(const QJsonObject json_constructor, const QString& class_name);
 
     void serialize_description(std::ostream& output_stream, int indentation_counter, const Description* description);
     Description* deserialize_description(const QJsonObject json_description);

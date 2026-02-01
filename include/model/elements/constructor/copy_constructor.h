@@ -10,13 +10,13 @@
 
 class CopyConstructor : public Constructor {
 private:
-    QVector<std::shared_ptr<Field>> class_fields;
+    QList<std::shared_ptr<Field>> class_fields;
 
 protected:
     QString get_custom_definition() const override;
 
 public:
-    CopyConstructor(const QString& class_name, const QVector<std::shared_ptr<Field>>& class_fields, Visibility visibility);
+    CopyConstructor(const QString& class_name, const QList<std::shared_ptr<Field>>& class_fields, Visibility visibility);
 };
 
 #endif // COPY_CONSTRUCTOR_H

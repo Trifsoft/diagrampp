@@ -1,6 +1,7 @@
 #include <serializers/composition_element_serializers.h>
 #include <serializers/utils/utils.h>
 #include <model/elements/type/regular_type.h>
+#include <model/elements/constructor/copy_constructor.h>
 
 void CompositionElementSerializers::serialize_method(std::ostream& output_stream, int indentation_counter, const Method *method)
 {
@@ -59,14 +60,25 @@ Field *CompositionElementSerializers::deserialize_field(const QJsonObject json_f
     }
 }
 
-void CompositionElementSerializers::serialize_constructor(std::ostream& output_stream, int indentation_counter, const Constructor *constructor)
+void CompositionElementSerializers::serialize_constructor(std::ostream& output_stream, int indentation_counter, const DefaultConstructor *constructor)
 {
-
+    output_stream << "{\n";
+    SerializeHelpers::write_indented_field<int>(output_stream, indentation_counter+1, "visibility", static_cast<int>(constructor->get_visibility()));
+    output_stream << ",\n";
+    SerializeHelpers::write_indented_serialized_list_field<Description>(output_stream, indentation_counter+1, "arguments", constructor->get_arguments(), &CompositionElementSerializers::serialize_description);
+    output_stream << "\n";
+    SerializeHelpers::indent(output_stream, indentation_counter);
+    output_stream << "}";
 }
-
-Constructor *CompositionElementSerializers::deserialize_constructor(const QJsonObject json_constructor)
+DefaultConstructor *CompositionElementSerializers::deserialize_constructor(const QJsonObject json_constructor, const QString& class_name)
 {
-
+    Visibility visibility = static_cast<Visibility>(json_constructor["visibility"].toInt());
+    QList<Description*> arguments;
+    QJsonArray arguments_json_array = json_constructor["arguments"].toArray();
+    for(auto element : arguments_json_array) {
+        arguments.append(deserialize_description(element.toObject()));
+    }
+    return new DefaultConstructor(class_name, arguments, visibility);
 }
 
 void CompositionElementSerializers::serialize_description(std::ostream& output_stream, int indentation_counter, const Description* description)

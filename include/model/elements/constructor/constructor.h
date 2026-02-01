@@ -11,18 +11,18 @@
 class Constructor : public IClassElement {
 protected:
     QString class_name;
-    QVector<Description> arguments;
+    QList<Description*> arguments;
 
     virtual QString get_custom_definition() const = 0;
 
 public:
-    Constructor(const QString& class_name, const QVector<Description>& arguments, Visibility visibility);
-    virtual ~Constructor() = default;
+    Constructor(const QString& class_name, const QList<Description*>& arguments, Visibility visibility);
+    virtual ~Constructor();
 
     QString get_declaration() const override;
     std::optional<QString> definition(const QString& class_name) const override;
 
-    QVector<Description> get_arguments() const;
+    QList<Description*> get_arguments() const;
 };
 
 #endif // CONSTRUCTOR_H

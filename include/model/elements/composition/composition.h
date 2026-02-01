@@ -7,6 +7,7 @@
 #include <model/elements/method.h>
 #include <model/elements/constructor/constructor.h>
 #include <model/elements/constructor/copy_constructor.h>
+#include <model/elements/constructor/default_constructor.h>
 #include <model/elements/destructor.h>
 #include <QString>
 #include <QVector>
@@ -34,7 +35,7 @@ public:
     Destructor get_destructor() const;
     std::shared_ptr<CopyConstructor> get_copy_constructor() const;
 
-    QVector<std::shared_ptr<Constructor>> constructors;
+    QVector<std::shared_ptr<DefaultConstructor>> constructors;
     QVector<std::shared_ptr<Field>> fields;
     QVector<std::shared_ptr<Method>> methods;
 
@@ -50,7 +51,7 @@ public:
 
     void add_field(const QString& name, std::shared_ptr<IType> type, std::optional<Visibility> visibility = std::nullopt);
     void add_method(const QString& name, std::shared_ptr<IType> type, Visibility visibility, MethodType method_type, const QVector<Description*>& variables);
-    void add_constructor(Visibility visibility, const QVector<Description>& arguments);
+    void add_constructor(Visibility visibility, const QList<Description*>& arguments);
     void add_copy_constructor(Visibility visibility);
     void remove_copy_constructor();
 

@@ -3,9 +3,8 @@
 #include "model/base/reference.h"
 #include <memory>
 
-CopyConstructor::CopyConstructor(const QString& class_name, const QVector<std::shared_ptr<Field>>& class_fields, Visibility visibility)
-    : Constructor(class_name,
-                  QVector<Description>{Description("other", std::make_shared<RegularType>(class_name), Reference::LValue, true)},
+CopyConstructor::CopyConstructor(const QString& class_name, const QList<std::shared_ptr<Field>>& class_fields, Visibility visibility)
+    : Constructor(class_name, {new Description("other", std::make_shared<RegularType>(class_name), Reference::LValue, true)},
                   visibility),
       class_fields(class_fields) {}
 

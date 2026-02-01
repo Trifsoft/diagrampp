@@ -133,7 +133,7 @@ void Composition::add_method(const QString& name, std::shared_ptr<IType> type, V
     methods.append(std::make_shared<Method>(std::make_shared<Description>(name, type), visibility, method_type, variables));
 }
 
-void Composition::add_constructor(Visibility visibility, const QVector<Description>& arguments) {
+void Composition::add_constructor(Visibility visibility, const QList<Description*>& arguments) {
     constructors.append(std::make_shared<DefaultConstructor>(name, arguments, visibility));
 }
 
