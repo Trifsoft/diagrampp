@@ -17,7 +17,7 @@
 3. Корисник има две опције (описане у наредним подописима):
     
     3.1. Чување дијаграма:
-        `save_diagram_use_case_description.md`
+        `export_diagram_use_case_description.md`
     
     3.2. Генерисање пројекта према направљеном дијаграму:
         `generate_project_use_case_description.md`
