@@ -1,12 +1,15 @@
 #include "model/elements/field.h"
 
-Field::Field(const Description& description, Visibility visibility)
-    : IClassElement(ElementRank::Field, description.get_name(), visibility),
+Field::Field(std::shared_ptr<Description> description, Visibility visibility)
+    : Field(description, visibility, std::nullopt) {}
+
+Field::Field(std::shared_ptr<Description> description, Visibility visibility, std::optional<QString> destruction)
+    : IClassElement(ElementRank::Field, description->get_name(), visibility),
       description(description),
-      destruction(std::nullopt) {}
+      destruction(destruction) {}
 
 QString Field::get_declaration() const {
-    return description.to_string();
+    return description->to_string();
 }
 
 std::optional<QString> Field::definition(const QString& class_name) const {
@@ -14,8 +17,8 @@ std::optional<QString> Field::definition(const QString& class_name) const {
     return std::nullopt;
 }
 
-Description Field::get_description() const {
-    return description;
+Description* Field::get_description() const {
+    return description.get();
 }
 
 void Field::set_destruction(const std::optional<QString>& destruction) {

@@ -114,7 +114,7 @@ QString Composition::definition() const {
 
 void Composition::add_field(const QString& name, std::shared_ptr<IType> type, std::optional<Visibility> visibility) {
     Visibility vis = visibility.value_or(get_default_visibility());
-    fields.append(std::make_shared<Field>(Description(name, type), vis));
+    fields.append(std::make_shared<Field>(std::make_shared<Description>(name, type), vis));
 }
 
 void Composition::add_method(const QString& name, std::shared_ptr<IType> type, Visibility visibility, MethodType method_type, const QList<Description>& variables) {
@@ -126,7 +126,7 @@ void Composition::add_constructor(Visibility visibility, const QVector<Descripti
 }
 
 void Composition::add_copy_constructor(Visibility visibility) {
-    QVector<Description> field_descriptions;
+    QVector<Description*> field_descriptions;
     for (auto& field : fields) {
         field_descriptions.append(field->get_description());
     }

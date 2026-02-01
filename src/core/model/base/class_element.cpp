@@ -4,6 +4,10 @@ IClassElement::IClassElement(ElementRank rank, const QString& name, Visibility v
     : element_rank(rank), name(name), visibility(vis) {
 }
 
+Visibility IClassElement::get_visibility() const {
+    return visibility;
+}
+
 IClassElement::~IClassElement() {
 }
 

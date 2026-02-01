@@ -1,5 +1,6 @@
 #include <serializers/composition_element_serializers.h>
 #include <serializers/utils/utils.h>
+#include <model/elements/type/regular_type.h>
 
 void CompositionElementSerializers::serialize_method(std::ostream& output_stream, int indentation_counter, const Method *method)
 {
@@ -13,12 +14,24 @@ Method *CompositionElementSerializers::deserialize_method(const QJsonObject json
 
 void CompositionElementSerializers::serialize_field(std::ostream& output_stream, int indentation_counter, const Field *field)
 {
-
+    output_stream << "{\n";
+    SerializeHelpers::write_indented_serialized_field<Description>(output_stream, indentation_counter+1, "description", field->get_description(), &CompositionElementSerializers::serialize_description);
+    SerializeHelpers::write_indented_field<int>(output_stream, indentation_counter+1, "visibility", static_cast<int>(field->get_visibility()));
+    SerializeHelpers::write_indented_string_field(output_stream, indentation_counter+1, "destruction", field->get_destruction().value_or("").toStdString());
+    output_stream << "}";
 }
 
 Field *CompositionElementSerializers::deserialize_field(const QJsonObject json_field)
 {
-
+    Description* description = CompositionElementSerializers::deserialize_description(json_field["description"].toObject());
+    Visibility visibility = static_cast<Visibility>(json_field["visibility"].toInt());
+    QString destruction = json_field["destruction"].toString();
+    if(destruction.isEmpty()) {
+        return new Field(std::make_shared<Description>(*description), visibility);
+    }
+    else {
+        return new Field(std::make_shared<Description>(*description), visibility, destruction);
+    }
 }
 
 void CompositionElementSerializers::serialize_constructor(std::ostream& output_stream, int indentation_counter, const Constructor *constructor)

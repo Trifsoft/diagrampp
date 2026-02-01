@@ -21,6 +21,8 @@ public:
     IClassElement(ElementRank rank, const QString& name, Visibility vis);
     virtual ~IClassElement();
 
+    Visibility get_visibility() const;
+
     virtual QString get_declaration() const = 0;
     virtual std::optional<QString> definition(const QString& class_name) const = 0;
 
