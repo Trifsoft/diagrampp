@@ -28,8 +28,13 @@ private slots:
     void onAddClassClicked();
     void onAddInterfaceClicked();
     void onAddEnumClicked();
+<<<<<<< HEAD
     void onUndo();
     void onRedo();
+=======
+    void onGenerateProjectClicked();
+
+>>>>>>> 126b8c5 (Add GenerateButton)
 private:
 
     Ui::Project *ui;

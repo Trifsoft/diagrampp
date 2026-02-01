@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1280</width>
-    <height>720</height>
+    <height>927</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -297,7 +297,14 @@
          <number>12</number>
         </property>
         <item>
-         <widget class="QCheckBox" name="Linkage">
+         <widget class="QCheckBox" name="removeMode">
+          <property name="text">
+           <string>Remove Mode</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="linkageMode">
           <property name="text">
            <string>Linkage Mode</string>
           </property>
@@ -324,9 +331,9 @@
          </widget>
         </item>
         <item>
-         <widget class="QRadioButton" name="Navigation">
+         <widget class="QRadioButton" name="Realization">
           <property name="text">
-           <string>Navigation</string>
+           <string>Realization</string>
           </property>
          </widget>
         </item>
@@ -412,6 +419,13 @@
            </size>
           </property>
          </spacer>
+        </item>
+        <item>
+         <widget class="QPushButton" name="generate_project">
+          <property name="text">
+           <string>Generate</string>
+          </property>
+         </widget>
         </item>
        </layout>
       </widget>
