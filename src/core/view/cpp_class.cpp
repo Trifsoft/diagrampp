@@ -450,7 +450,7 @@ void CppClass::update_connection_line(Connection& conn){
     QPointF arrowPos = conn.arrow->pos();
     QPointF lineEnd = conn.otherClass->get_bottom_center();
     lineEnd.setX(arrowPos.x());
-    lineEnd.setY(lineEnd.y() + arrow_size);
+    lineEnd.setY(lineEnd.y() + ((conn.type == BranchType::ASSOCIATION) ? 0 : arrow_size));
 
     conn.line->setLine(QLineF(newStart, lineEnd));
 }
@@ -516,7 +516,7 @@ void CppClass::update_connection_arrow(Connection& conn){
 
     QLineF currentLine = conn.line->line();
     QPointF newEnd = conn.arrow->pos();
-    newEnd.setY(newEnd.y() + arrow_size);
+    newEnd.setY(newEnd.y() + ((conn.type == BranchType::ASSOCIATION) ? 0 : arrow_size));
 
     conn.line->setLine(QLineF(currentLine.p1(), newEnd));
 }
