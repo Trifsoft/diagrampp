@@ -360,8 +360,8 @@ void CppClass::add_line_connection(CppClass* target, const BranchType branchType
     endPoint.setY(endPoint.y() + ((branchType == BranchType::ASSOCIATION) ? 0 : arrow_size)); // on bottom of arrow
 
     QGraphicsLineItem* line = new QGraphicsLineItem(QLineF(startPoint, endPoint));
-    QPen pen(Qt::black, 4);
-    if(branchType == BranchType::DEPENDENCY){
+QPen pen(Qt::black, 4);
+    if(branchType == BranchType::DEPENDENCY || branchType == BranchType::REALIZATION){
         pen.setStyle(Qt::DashLine);
     }
     line->setPen(pen);
@@ -410,11 +410,16 @@ QGraphicsPolygonItem* CppClass::get_arrow(const BranchType branchType) const {
         polygon << QPointF(0, 0) << QPointF(-arrow_size/3, arrow_size) << QPointF(arrow_size/3, arrow_size);
         arrow->setBrush(Qt::blue);
         break;
+    case BranchType::REALIZATION:
+        polygon << QPointF(-arrow_size/2, arrow_size) << QPointF(arrow_size/2, arrow_size) << QPointF(0, 0);
+        arrow->setBrush(Qt::white);
+        break;
     case BranchType::ASSOCIATION:
         polygon << QPointF(-arrow_size/2, arrow_size) << QPointF(arrow_size/2, arrow_size) << QPointF(0, 0);
         arrow->setBrush(Qt::white);
         arrow->setPolygon(polygon);
         arrow->setPen(QPen(Qt::white, 2));
+        arrow->setVisible(false);
         return arrow;
     }
 
