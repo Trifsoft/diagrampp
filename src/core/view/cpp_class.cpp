@@ -360,7 +360,7 @@ void CppClass::add_line_connection(CppClass* target, const BranchType branchType
     endPoint.setY(endPoint.y() + ((branchType == BranchType::ASSOCIATION) ? 0 : arrow_size)); // on bottom of arrow
 
     QGraphicsLineItem* line = new QGraphicsLineItem(QLineF(startPoint, endPoint));
-QPen pen(Qt::black, 4);
+    QPen pen(Qt::black, 4);
     if(branchType == BranchType::DEPENDENCY || branchType == BranchType::REALIZATION){
         pen.setStyle(Qt::DashLine);
     }
@@ -536,7 +536,6 @@ void CppClass::remove_link_connection(CppClass* target, BranchType branch_type){
     Connection *source_connection = nullptr, *target_connection = nullptr;
     for(int i = m_connections.size()-1; i >= 0; i--){
         if(m_connections[i].otherClass == target && m_connections[i].type == branch_type){
-            qDebug() << "uso u soruce";
             source_connection = &m_connections[i];
             m_connections.removeAt(i);
             break;

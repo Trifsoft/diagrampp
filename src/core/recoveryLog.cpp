@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include <pwd.h>
 
-recoveryLog::recoveryLog(std::string _file_name) : file_name(_file_name){
+recoveryLog::recoveryLog(const std::string& _file_name) : file_name(_file_name){
     if(std::filesystem::exists(file_name)){
         if(remove(file_name.c_str())){
             qDebug() << "Failed to delete file" << file_name;

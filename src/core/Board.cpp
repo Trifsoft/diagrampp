@@ -264,7 +264,6 @@ void Board::add_item(std::shared_ptr<Composition> node) {   //TODO [Nikola] - iz
 
     connect(item, &CppClass::objectClicked, this, &Board::on_object_clicked);
 
-
     connect(item, &CppClass::add_field_request, this, &Board::on_add_field_requested);
     connect(item, &CppClass::add_method_request, this, &Board::on_add_method_requested);
     connect(item, &CppClass::edit_field_request, this, &Board::on_edit_field_requested);

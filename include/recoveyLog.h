@@ -12,7 +12,7 @@
 class recoveryLog : public QObject{
     Q_OBJECT
 public:
-    recoveryLog(std::string _file_name = "recoveryLog.txt");
+    recoveryLog(const std::string& _file_name = "recoveryLog.txt");
     ~recoveryLog();
 public slots:
     void add_link_operation(SharedNodePtr from, SharedNodePtr to, BranchType BranchType);

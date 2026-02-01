@@ -9,7 +9,7 @@
 #include <QObject>
 
 
-#define DEBUG_MODE 2
+#define DEBUG_MODE 0
 
 class IUMLClassDiagramNode;
 class Composition;
@@ -21,10 +21,6 @@ class DiagramGraph : public QObject {
 public:
     DiagramGraph() = default;
     ~DiagramGraph() = default;
-
-    // should be removed
-    SharedNodePtr first_selected_node = nullptr;
-    SharedNodePtr second_selected_node = nullptr;
 
     void add_node(SharedNodePtr node);
     void remove_node(SharedNodePtr node);
