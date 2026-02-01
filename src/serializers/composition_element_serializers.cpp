@@ -69,16 +69,6 @@ Constructor *CompositionElementSerializers::deserialize_constructor(const QJsonO
 
 }
 
-void CompositionElementSerializers::serialize_destructor(std::ostream& output_stream, int indentation_counter, const Destructor *destructor)
-{
-
-}
-
-Destructor *CompositionElementSerializers::deserialize_destructor(const QJsonObject json_destructor)
-{
-
-}
-
 void CompositionElementSerializers::serialize_description(std::ostream& output_stream, int indentation_counter, const Description* description)
 {
     output_stream << "{\n";
