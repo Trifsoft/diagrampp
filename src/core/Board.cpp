@@ -7,6 +7,8 @@
 #include "src/ui/ui_Board.h"
 #include "model/elements/type/regular_type.h"
 #include "nodefactory.h"
+#include <QFileDialog>
+#include <QDir>
 #include <QMessageBox>
 
 Board::Board(QWidget *parent)
@@ -31,6 +33,8 @@ Board::Board(QWidget *parent)
     connect(diagram, &DiagramGraph::link_added, recovery_log, &recoveryLog::add_link_operation);
     connect(diagram, &DiagramGraph::link_removed, recovery_log, &recoveryLog::remove_link_operation);
     connect(diagram, &DiagramGraph::node_removed, recovery_log, &recoveryLog::remove_node_operation);
+
+    connect(ui->exportPNG, &QPushButton::clicked, this, &Board::exportPNG);
 
     // Connect buttons to slots
     connect(ui->add_class, &QPushButton::clicked, this, &Board::onAddClassClicked);
@@ -272,4 +276,46 @@ void Board::add_item(std::shared_ptr<Composition> node) {   //TODO [Nikola] - iz
     connect(item, &CppClass::add_method_request, this, &Board::on_add_method_requested);
     connect(item, &CppClass::edit_field_request, this, &Board::on_edit_field_requested);
     connect(item, &CppClass::edit_method_request, this, &Board::on_edit_method_requested);
+}
+
+void Board::exportPNG(){
+    QString file_name = QFileDialog::getSaveFileName(
+            this,
+            "Export Diagram as PNG",
+            QDir::homePath() + "/diagram_export.png",
+            "PNG Images (*.png);;All Files (*)"
+        );
+
+    if(file_name.isEmpty()){
+        return;
+    }
+
+    QRectF items_rect = scene->itemsBoundingRect();
+    if(items_rect.isEmpty()){
+        QMessageBox::warning(this, "Export", "No items to export!");
+        return;
+    }
+
+    // margins [item] -> [  item  ]
+    const qreal margin = 50;
+    items_rect.adjust(-margin, -margin, margin, margin);
+
+    QImage image(items_rect.size().toSize(), QImage::Format_ARGB32);
+    image.fill(Qt::white);
+
+    QPainter painter(&image);
+    painter.setRenderHint(QPainter::Antialiasing);
+    painter.setRenderHint(QPainter::TextAntialiasing);
+    painter.setRenderHint(QPainter::SmoothPixmapTransform);
+
+    scene->render(&painter, QRectF(0, 0, image.width(), image.height()),  items_rect);
+    painter.end();
+
+    if(image.save(file_name, "PNG", 100)){
+        QMessageBox::information(this, "Success",
+                                 QString("Diagram exported to:\n%1\n\nSize: %2x%3 pixels")
+                                        .arg(file_name).arg(image.width()).arg(image.height()));
+    }else{
+        QMessageBox::critical(this, "Error", "Failed to save image. Check write permissions.");
+    }
 }

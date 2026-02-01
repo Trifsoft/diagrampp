@@ -416,9 +416,6 @@ QGraphicsPolygonItem* CppClass::get_arrow(const BranchType branchType) const {
         break;
     case BranchType::ASSOCIATION:
         polygon << QPointF(-arrow_size/2, arrow_size) << QPointF(arrow_size/2, arrow_size) << QPointF(0, 0);
-        arrow->setBrush(Qt::white);
-        arrow->setPolygon(polygon);
-        arrow->setPen(QPen(Qt::white, 2));
         arrow->setVisible(false);
         return arrow;
     }
@@ -536,7 +533,6 @@ void CppClass::remove_link_connection(CppClass* target, BranchType branch_type){
     Connection *source_connection = nullptr, *target_connection = nullptr;
     for(int i = m_connections.size()-1; i >= 0; i--){
         if(m_connections[i].otherClass == target && m_connections[i].type == branch_type){
-            qDebug() << "uso u soruce";
             source_connection = &m_connections[i];
             m_connections.removeAt(i);
             break;

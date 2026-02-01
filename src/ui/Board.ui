@@ -421,6 +421,13 @@
          </spacer>
         </item>
         <item>
+         <widget class="QPushButton" name="exportPNG">
+          <property name="text">
+           <string>Export PNG</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="QPushButton" name="generate_project">
           <property name="text">
            <string>Generate</string>
