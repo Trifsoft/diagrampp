@@ -38,48 +38,61 @@ private:
 };
 
 class CppClass : public NodeView {
-Q_OBJECT
-
+    Q_OBJECT
 public:
-    CppClass(Board *board, std::shared_ptr<Composition> composition, QGraphicsItem* parent = nullptr);
+    CppClass(Board *board, std::shared_ptr<Composition> composition, QGraphicsObject* parent = nullptr);
     ~CppClass();
 
     QRectF boundingRect() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
 
     void change_composition(std::function<void(std::shared_ptr<Composition>)> change);
-
-    QPointF getTopCenter() const;
-    QPointF getBottomCenter() const;
-
     void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
 
-    void updateConnections();
-    QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
-    void addPNGConnection(const QString& imagePath, CppClass* target, bool imageOnTarget = true);
-    void removeAllPNGConnections();
+    void addConnectionInfo(QGraphicsLineItem* line, bool isStart);
+    void removeLink(CppClass* target, BranchType branch);
 
+
+    QPointF get_top_center() const;
+    QPointF get_bottom_center() const;
+    void update_connections();
+    void add_line_connection(CppClass* target, const BranchType branch);
+    void remove_link_connection(CppClass* target, const BranchType branch);
+    void set_object_visible(bool visible);
+    void remove_node();
+
+    QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
     virtual Composition* get_uml_class_diagram_node() override;
 
+
 private:
-    struct PNGConnection {
-        QGraphicsPixmapItem* imageItem;
-        CppClass* targetClass;
-        bool imageOnTarget;
-        QString imagePath;
-
-        void updatePosition(CppClass* source);
+    struct Connection {
+        QGraphicsLineItem* line = nullptr;
+        QGraphicsPolygonItem* arrow = nullptr;
+        CppClass* otherClass = nullptr;
+        bool isSource;
+        bool endLine;
+        BranchType type;
+        int offset;
     };
-    void updatePNGConnections();
-    QVector<PNGConnection> m_pngConnections;
+    QList<Connection> m_connections;
 
-    BranchType branch;
+    qreal arrow_size = 15.0;
+    void update_connection_line(Connection& conn);
+    void update_connection_arrow(Connection& conn);
+    void update_all_connections();
+    void update_offsets();
+    void disconnect_all_connections();
+    void remove_connection_to(CppClass* target);
+    QGraphicsPolygonItem* get_arrow(const BranchType branchType) const;
 
     Board* m_board;
     std::shared_ptr<Composition> m_composition;
     int m_width;
     int m_height;
     int m_line_height;
+    int number_of_connecitons = 0;
+    int local_offset = 15;
 
     // Editable text items for now
     QVector<QGraphicsTextItem*> m_textItems;
@@ -106,6 +119,7 @@ signals:
     void add_method_request(Composition* node, std::shared_ptr<Method> method);
     void edit_field_request(Composition* node, std::weak_ptr<Field> old_field, std::shared_ptr<Field> new_field);
     void edit_method_request(Composition* node, std::weak_ptr<Method> old_method,std::shared_ptr<Method> new_method);
+    void objectClicked(SharedNodePtr node);
 
 };
 

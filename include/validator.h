@@ -8,15 +8,27 @@
 
 namespace Validator {
 
-    bool validateDiagram(std::string& errorMessage, NodeView* from, NodeView* to,
-                        BranchType branchType,
-                        std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram);
-    bool checkLinkage(std::string& errorMessage, NodeView* from, NodeView* to);
-    bool validateInheritance(std::string& errorMessage, NodeView* from, NodeView* to, std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram);
-    bool validateOthers(std::string& errorMessage, BranchType branchTye, NodeView* from, NodeView* to, std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram);
-    bool circularity(BranchType branchType, std::set<NodeView*>& stack, NodeView* node ,std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram);
-    bool checkDuplication(std::string& errorMessage, NodeView* child, NodeView* parent, std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram);
 
+    bool validate(std::string& errorMessage, SharedNodePtr from, SharedNodePtr to,
+                        BranchType branchType,
+                        const std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram);
+    bool check_linkage(std::string& errorMessage, SharedNodePtr from, SharedNodePtr to);
+    bool check_multiple_conneciton(SharedNodePtr child, SharedNodePtr parent,
+                                   const std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram);
+    bool validate_inheritance(std::string& errorMessage, SharedNodePtr from, SharedNodePtr to,
+                             const std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram);
+    bool validate_others(std::string& errorMessage, BranchType branchTye, SharedNodePtr from, SharedNodePtr to,
+                        const std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram);
+    bool dfs(SharedNodePtr node, std::unordered_map<SharedNodePtr,bool>& visited,
+             std::unordered_map<SharedNodePtr,bool>& in_stack,
+             const std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram);
+    bool check_cycle(SharedNodePtr start, BranchType branch_type,
+                  const std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram);
+    bool diamond(const std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram);
+    bool detect_diamond(SharedNodePtr start, const std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram);
+    void paths_to_base(SharedNodePtr node,
+                       const std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram,
+                       std::unordered_map<SharedNodePtr, int>& reach_count);
 };
 
 #endif // VALIDATOR_H

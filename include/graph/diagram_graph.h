@@ -6,15 +6,18 @@
 #include <map>
 #include <model/base/branches.h>
 #include <view/node_view.h>
+#include <QObject>
 
-#define DEBUG_MODE 0
+
+#define DEBUG_MODE 2
 
 class IUMLClassDiagramNode;
 class Composition;
 
 using SharedNodePtr = NodeView*;
 
-class DiagramGraph {
+class DiagramGraph : public QObject {
+    Q_OBJECT
 public:
     DiagramGraph() = default;
     ~DiagramGraph() = default;
@@ -29,11 +32,19 @@ public:
     void add_branch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type);
     void remove_branch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type);
 
+    bool connection_exists(SharedNodePtr from, SharedNodePtr to, BranchType branch_type) const;
+
 #if DEBUG_MODE >= 1
     void showDiagram();
 #endif
 
     std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& get_diagram();
+
+signals:
+    void link_added(SharedNodePtr from, SharedNodePtr to, BranchType branch);
+    void link_removed(SharedNodePtr from, SharedNodePtr to, BranchType branch);
+    void node_removed(SharedNodePtr node);
+
 private:
     // disscussion, shared or weak
     std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>> diagram;

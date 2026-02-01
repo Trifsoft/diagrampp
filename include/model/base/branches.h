@@ -4,7 +4,7 @@
 enum class BranchType{
     INHERITANCE,
     ASSOCIATION,
-    NAVIGATION,
+    REALIZATION,
     AGGREGATION,
     COMPOSITION,
     DEPENDENCY

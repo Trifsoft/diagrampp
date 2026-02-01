@@ -16,8 +16,7 @@
 #include <qgraphicsview.h>
 #include <methodeditor.h>
 #include <memory>
-
-
+#include <utility>
 
 // EditableTextItem implementation
 EditableTextItem::EditableTextItem(const QString& text, ItemType type, std::weak_ptr<IClassElement> element_weak, QGraphicsItem* parent)
@@ -95,7 +94,7 @@ void EditableTextItem::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
 }
 
 // CppClass implementation
-CppClass::CppClass(Board* board,std::shared_ptr<Composition> composition, QGraphicsItem* parent)
+CppClass::CppClass(Board* board,std::shared_ptr<Composition> composition, QGraphicsObject* parent)
     : NodeView(parent)
     , m_board(board)
     , m_composition(composition)
@@ -114,18 +113,26 @@ CppClass::CppClass(Board* board,std::shared_ptr<Composition> composition, QGraph
     connect(m_add_button, &QPushButton::clicked, this, &CppClass::on_add_button_clicked);
 
 
+    setAcceptedMouseButtons(Qt::LeftButton | Qt::RightButton);
     updateBoundingRect();
 }
 
-
 CppClass::~CppClass(){
-    for (const PNGConnection& conn : m_pngConnections) {
-        if (conn.imageItem && conn.imageItem->scene()) {
-            conn.imageItem->scene()->removeItem(conn.imageItem);
-            delete conn.imageItem;
+    for(auto& connection : m_connections){
+        if(connection.line){
+            delete connection.line;
+        }
+        if(connection.arrow){
+            delete connection.arrow;
         }
     }
-    m_pngConnections.clear();
+    m_connections.clear();
+    for(auto& text_item : m_textItems){
+        if(text_item){
+            delete text_item;
+        }
+    }
+    m_textItems.clear();
 }
 
 QRectF CppClass::boundingRect() const
@@ -244,6 +251,7 @@ void CppClass::updateTextItems()
         add_text(method->declaration(), y_offset, EditableTextItem::MethodType, method);
         y_offset += m_line_height;
     }
+    update_all_connections();
 }
 
 void CppClass::add_text(const QString text, int y_offset, EditableTextItem::ItemType type, std::weak_ptr<IClassElement> element_weak) {
@@ -321,91 +329,262 @@ void CppClass::edit_method(std::weak_ptr<Method> old_method_weak)
 }
 
 void CppClass::mousePressEvent(QGraphicsSceneMouseEvent* event){
-    if (m_board->linkageMode) {
-        m_composition->Clicked = true;
-        m_board->ValidateAndLink(this);
-    }
-
+    emit objectClicked(this);
     QGraphicsItem::mousePressEvent(event);
 }
 
-QPointF CppClass::getTopCenter() const{
+QPointF CppClass::get_top_center() const{
     QRectF rect = boundingRect();
     QPointF topCenterLocal(rect.width() / 2, 0);
     return mapToScene(topCenterLocal);
 }
 
-QPointF CppClass::getBottomCenter() const{
+QPointF CppClass::get_bottom_center() const{
     QRectF rect = boundingRect();
     QPointF bottomCenterLocal(rect.width() / 2, rect.height());
     return mapToScene(bottomCenterLocal);
 }
 
-void CppClass::PNGConnection::updatePosition(CppClass* source){
-    if(!imageItem || !source || !targetClass){
-        return;
+void CppClass::add_line_connection(CppClass* target, const BranchType branchType){
+    QPointF startPoint = this->get_top_center();
+    QPointF endPoint = target->get_bottom_center();
+
+    int offset = target->number_of_connecitons*local_offset;
+    QGraphicsPolygonItem* arrow = get_arrow(branchType);
+
+    QPointF arrowPos = target->get_bottom_center();
+    arrowPos.setX(arrowPos.x() + offset);
+    arrow->setPos(arrowPos);
+    scene()->addItem(arrow);
+    endPoint = arrowPos;
+    endPoint.setY(endPoint.y() + ((branchType == BranchType::ASSOCIATION) ? 0 : arrow_size)); // on bottom of arrow
+
+    QGraphicsLineItem* line = new QGraphicsLineItem(QLineF(startPoint, endPoint));
+QPen pen(Qt::black, 4);
+    if(branchType == BranchType::DEPENDENCY || branchType == BranchType::REALIZATION){
+        pen.setStyle(Qt::DashLine);
     }
-    QPointF imagePoint = targetClass->getTopCenter();
-    QPointF otherPoint = source->getBottomCenter();
+    line->setPen(pen);
+    scene()->addItem(line);
 
-    imageItem->setPos(imagePoint);
+    Connection sourceConn;
+    sourceConn.line = line;
+    sourceConn.arrow = arrow;
+    sourceConn.otherClass = target;
+    sourceConn.isSource = true;
+    sourceConn.endLine = false;
+    sourceConn.type = branchType;
+    sourceConn.offset = offset;
+    m_connections.append(sourceConn);
 
-    // place center of the picture on class edge
-    QPixmap pixmap = imageItem->pixmap();
-    imageItem->setOffset(-pixmap.width() / 2, -pixmap.height() / 2);
-
-    // rotates to point toward target class
-    QPointF direction = otherPoint - imagePoint;
-    qreal angle = qRadiansToDegrees(qAtan2(direction.y(), direction.x()));
-    imageItem->setRotation(angle);
-
-    // scaling
-    qreal distance = qSqrt(direction.x() * direction.x() + direction.y() * direction.y());
-    qreal scale = qBound(0.5, distance / 200.0, 2.0);
-    imageItem->setScale(scale);
+    Connection targetConn;
+    targetConn.line = line;
+    targetConn.arrow = arrow;
+    targetConn.otherClass = this;
+    targetConn.isSource = false;
+    targetConn.endLine = true;
+    targetConn.type = branchType;
+    targetConn.offset = offset;
+    target->m_connections.append(targetConn);
+    target->number_of_connecitons++;
 }
 
-void CppClass::addPNGConnection(const QString& imagePath, CppClass* target, bool imageOnTarget){
-    if(!target || imagePath.isEmpty()){
-        qDebug() << "addPngConnection";
-        return;
+QGraphicsPolygonItem* CppClass::get_arrow(const BranchType branchType) const {
+    QGraphicsPolygonItem* arrow = new QGraphicsPolygonItem();
+    QPolygonF polygon;
+
+    switch(branchType) {
+    case BranchType::INHERITANCE:
+        polygon << QPointF(-arrow_size/2, arrow_size) << QPointF(arrow_size/2, arrow_size) << QPointF(0, 0);
+        arrow->setBrush(Qt::white);
+        break;
+    case BranchType::COMPOSITION:
+        polygon << QPointF(0, 0) << QPointF(-arrow_size/2, arrow_size/2) << QPointF(0, arrow_size) << QPointF(arrow_size/2, arrow_size/2);
+        arrow->setBrush(Qt::black);
+        break;
+    case BranchType::AGGREGATION:
+        polygon << QPointF(0, 0) << QPointF(-arrow_size/2, arrow_size/2) << QPointF(0, arrow_size) << QPointF(arrow_size/2, arrow_size/2);
+        arrow->setBrush(Qt::white);
+        break;
+    case BranchType::DEPENDENCY:
+        polygon << QPointF(0, 0) << QPointF(-arrow_size/3, arrow_size) << QPointF(arrow_size/3, arrow_size);
+        arrow->setBrush(Qt::blue);
+        break;
+    case BranchType::REALIZATION:
+        polygon << QPointF(-arrow_size/2, arrow_size) << QPointF(arrow_size/2, arrow_size) << QPointF(0, 0);
+        arrow->setBrush(Qt::white);
+        break;
+    case BranchType::ASSOCIATION:
+        polygon << QPointF(-arrow_size/2, arrow_size) << QPointF(arrow_size/2, arrow_size) << QPointF(0, 0);
+        arrow->setBrush(Qt::white);
+        arrow->setPolygon(polygon);
+        arrow->setPen(QPen(Qt::white, 2));
+        arrow->setVisible(false);
+        return arrow;
     }
 
-    QPixmap pixmap(imagePath);
-    if(pixmap.isNull()){
-        qDebug() << "Failed to load PNG:" << imagePath;
-        return;
-    }
-
-    QGraphicsPixmapItem* imageItem = new QGraphicsPixmapItem(pixmap);
-    imageItem->setTransformationMode(Qt::SmoothTransformation);
-    scene()->addItem(imageItem);
-
-    PNGConnection connection;
-    connection.imageItem = imageItem;
-    connection.targetClass = target;
-    connection.imageOnTarget = imageOnTarget;
-    connection.imagePath = imagePath;
-    connection.updatePosition(this);
-    m_pngConnections.append(connection);
-
-    qDebug() << "Added PNG connection from" << m_composition->get_name() << "with image:" << imagePath;
-
+    arrow->setPolygon(polygon);
+    arrow->setPen(QPen(Qt::black, 2));
+    return arrow;
 }
 
-void CppClass::updatePNGConnections(){
-    for(PNGConnection& conn : m_pngConnections){
-        conn.updatePosition(this);
+void CppClass::update_all_connections(){
+    for(Connection& conn : m_connections){
+        if(!conn.line || !conn.otherClass){
+            continue;
+        }
+        if(conn.isSource){
+            update_connection_line(conn);
+        }else{
+            update_connection_arrow(conn);
+        }
     }
 }
 
 
-// called when objects is moved in board
+void CppClass::update_connection_line(Connection& conn){
+    if(!conn.line || !conn.otherClass){
+        return;
+    }
+    QPointF newStart = get_top_center();
+    QPointF arrowPos = conn.arrow->pos();
+    QPointF lineEnd = conn.otherClass->get_bottom_center();
+    lineEnd.setX(arrowPos.x());
+    lineEnd.setY(lineEnd.y() + ((conn.type == BranchType::ASSOCIATION) ? 0 : arrow_size));
+
+    conn.line->setLine(QLineF(newStart, lineEnd));
+}
+
+void CppClass::remove_node(){
+    disconnect_all_connections();
+    if(scene()){
+        scene()->removeItem(this);
+    }
+}
+
+void CppClass::disconnect_all_connections(){
+    for(Connection& conn : m_connections){
+        if(conn.otherClass){
+            conn.otherClass->remove_connection_to(this);
+            if(conn.line && conn.arrow && scene()){
+                scene()->removeItem(conn.line);
+                scene()->removeItem(conn.arrow);
+                delete conn.line;
+                delete conn.arrow;
+            }
+        }
+    }
+    m_connections.clear();
+}
+
+void CppClass::remove_connection_to(CppClass* target){
+    for(int iterator = m_connections.size()-1; iterator >= 0; iterator--){
+        if(m_connections[iterator].otherClass == target){
+            if(m_connections[iterator].isSource == false){
+                this->number_of_connecitons--;
+            }
+            // safe operation because target alreardy freed all allocations
+            m_connections.removeAt(iterator);
+
+            update_offsets();
+            update_all_connections();
+            // because maximum number of connections is one (even different branch types) aren't allowed
+            break;
+        }
+    }
+}
+
+void CppClass::set_object_visible(bool visible){
+    this->setVisible(visible);
+    for(Connection& conn : m_connections){
+        if(conn.line){
+            conn.line->setVisible(visible);
+        }
+        if(conn.arrow){
+            conn.arrow->setVisible(visible);
+        }
+    }
+}
+
+
+void CppClass::update_connection_arrow(Connection& conn){
+    if(!conn.arrow || !conn.line || !conn.otherClass){
+        return;
+    }
+    QPointF arrowPos = get_bottom_center();
+    conn.arrow->setPos(arrowPos + QPointF(conn.offset,0));
+
+    QLineF currentLine = conn.line->line();
+    QPointF newEnd = conn.arrow->pos();
+    newEnd.setY(newEnd.y() + ((conn.type == BranchType::ASSOCIATION) ? 0 : arrow_size));
+
+    conn.line->setLine(QLineF(currentLine.p1(), newEnd));
+}
+
 QVariant CppClass::itemChange(GraphicsItemChange change, const QVariant &value){
     if(change == ItemPositionHasChanged){
-        updatePNGConnections();
+        update_all_connections();
     }
     return QGraphicsItem::itemChange(change, value);
+}
+
+void CppClass::remove_link_connection(CppClass* target, BranchType branch_type){
+    if(!target){
+        return;
+    }
+
+    Connection *source_connection = nullptr, *target_connection = nullptr;
+    for(int i = m_connections.size()-1; i >= 0; i--){
+        if(m_connections[i].otherClass == target && m_connections[i].type == branch_type){
+            qDebug() << "uso u soruce";
+            source_connection = &m_connections[i];
+            m_connections.removeAt(i);
+            break;
+        }
+    }
+    for(int i = target->m_connections.size()-1; i >= 0; i--){
+        if(target->m_connections[i].otherClass == this && target->m_connections[i].type == branch_type){
+            target_connection = &target->m_connections[i];
+            target->m_connections.removeAt(i);
+            break;
+        }
+    }
+
+    if(!source_connection || !target_connection){
+#if DEBUG>=1
+        qDebug() << "failed to find connections";
+#endif
+        return;
+    }
+
+    if(source_connection->isSource == false){
+        std::swap(source_connection, target_connection);
+    }
+
+    // both target and source points to same line and arrow
+    if(source_connection->line){
+        scene()->removeItem(source_connection->line);
+        delete source_connection->line;
+    }
+    if(source_connection->arrow){
+        scene()->removeItem(source_connection->arrow);
+        delete source_connection->arrow;
+    }
+
+    target->number_of_connecitons--;
+    target->update_offsets();
+    target->update_all_connections();
+
+}
+
+void CppClass::update_offsets(){
+    int offset = 0;
+    for(Connection& conn : m_connections){
+        if(conn.isSource == false){
+            conn.offset = offset;
+            offset += local_offset;
+        }
+    }
 }
 
 Composition* CppClass::get_uml_class_diagram_node() {

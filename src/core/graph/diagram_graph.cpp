@@ -8,36 +8,32 @@ void DiagramGraph::add_node(SharedNodePtr node) {
     diagram[node] = {};
 }
 
-void DiagramGraph::remove_node(SharedNodePtr node) {
-    if(diagram.find(node) == diagram.end()){
+void DiagramGraph::remove_node(SharedNodePtr node_to_remove) {
+    if(diagram.find(node_to_remove) == diagram.end()){
         return;
     }
 
-    // erase node as a key
-    diagram.erase(node);
+    diagram.erase(node_to_remove);
 
     // erase all branches linked to node
-    for(auto& it : diagram){
-        auto& neighbours = it.second;
-        for (auto neighbours_it = neighbours.begin(); neighbours_it != neighbours.end(); neighbours_it++){
-            auto& [neighbour, _] = (*neighbours_it);
-            if(neighbour == node){
+    for(auto& node_pair : diagram){
+        auto& neighbours = node_pair.second;
+        auto neighbours_it = neighbours.begin();
+        while(neighbours_it != neighbours.end()){
+            auto& [neighbour_node, _] = (*neighbours_it);
+            // [FILIP] BUG fix (erase will increment iterator)
+            if(neighbour_node == node_to_remove){
                 neighbours_it = neighbours.erase(neighbours_it);
+            }else{
+                neighbours_it++;
             }
         }
     }
+    emit node_removed(node_to_remove);
 }
 
 void DiagramGraph::add_branch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type) {
-    switch(branch_type){
-        case BranchType::ASSOCIATION:// ASSOCIATION -> undirected link
-            add_neighbour(from, to, branch_type);
-            add_neighbour(to, from, branch_type);
-            break;
-        default: // INHERITANCE & NAVIGATION -> directed links
-            add_neighbour(from, to, branch_type);
-            break;
-    }
+    add_neighbour(from, to, branch_type);
 }
 
 void DiagramGraph::remove_neighbour(SharedNodePtr from, SharedNodePtr to, BranchType branch_type){
@@ -52,22 +48,29 @@ void DiagramGraph::remove_neighbour(SharedNodePtr from, SharedNodePtr to, Branch
 
 void DiagramGraph::add_neighbour(SharedNodePtr from, SharedNodePtr to, BranchType branch_type){
     diagram[from].push_back({to, branch_type});
+    emit link_added(from, to, branch_type);
 }
 
 void DiagramGraph::remove_branch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type) {
-    switch(branch_type){
-        case BranchType::ASSOCIATION:// ASSOCIATION -> undirected link
-            remove_neighbour(from, to, branch_type);
-            remove_neighbour(to, from, branch_type);
-            break;
-        default: // INHERITANCE & NAVIGATION -> directed links
-            remove_neighbour(from, to, branch_type);
-            break;
-    }
+    remove_neighbour(from, to, branch_type);
+    emit link_removed(from, to, branch_type);
 }
 
 std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& DiagramGraph::get_diagram(){
     return diagram;
+}
+
+bool DiagramGraph::connection_exists(SharedNodePtr child, SharedNodePtr parent, BranchType branch_type) const {
+    for(auto const& pair : diagram){
+        if(pair.first == child){
+            for(auto const& child_connections : pair.second){
+                if(child_connections.first == parent && child_connections.second == branch_type){
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
 }
 
 #if DEBUG_MODE >=1
