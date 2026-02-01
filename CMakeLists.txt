@@ -139,7 +139,11 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(DiagramPP
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
-        include/image_paths.h
+        include/signal_processor.h
+        src/core/signal_processor.cpp
+        src/core/recoveryLog.cpp
+        include/recoveyLog.h
+
     )
 else()
     add_executable(DiagramPP ${PROJECT_SOURCES})

@@ -11,6 +11,7 @@ MemberDialogBase::MemberDialogBase(QWidget* parent)
 
 void MemberDialogBase::setup_base_ui()
 {
+    setStyleSheet("background-color: black");
     // Main layout
     m_main_layout = new QVBoxLayout(this);
 
