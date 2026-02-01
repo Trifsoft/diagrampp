@@ -52,6 +52,9 @@ namespace CompositionElementSerializers
 
     void serialize_destructor(std::ostream& output_stream, int indentation_counter, const Destructor* destructor);
     Destructor* deserialize_destructor(const QJsonObject json_destructor);
+
+    void serialize_description(std::ostream& output_stream, int indentation_counter, const Description* description);
+    Description* deserialize_description(const QJsonObject json_description);
 };
 
 #endif // COMPOSITION_ELEMENT_SERIALIZERS_H

@@ -1,4 +1,5 @@
 #include <serializers/composition_element_serializers.h>
+#include <serializers/utils/utils.h>
 
 void CompositionElementSerializers::serialize_method(std::ostream& output_stream, int indentation_counter, const Method *method)
 {
@@ -38,4 +39,24 @@ void CompositionElementSerializers::serialize_destructor(std::ostream& output_st
 Destructor *CompositionElementSerializers::deserialize_destructor(const QJsonObject json_destructor)
 {
 
+}
+
+void CompositionElementSerializers::serialize_description(std::ostream& output_stream, int indentation_counter, const Description* description)
+{
+    output_stream << "{\n";
+    SerializeHelpers::write_indented_string_field(output_stream, indentation_counter+1, "name", description->get_name().toStdString());
+    SerializeHelpers::write_indented_string_field(output_stream, indentation_counter+1, "type", description->get_type()->get_name().toStdString()); //TODO izmeniti samo get_type().toStd kad se obrise IType
+    SerializeHelpers::write_indented_field(output_stream, indentation_counter+1, "reference", static_cast<int>(description->get_reference()));
+    SerializeHelpers::write_indented_field(output_stream, indentation_counter+1, "is_const", description->get_is_const());
+    SerializeHelpers::indent(output_stream, indentation_counter);
+    output_stream << "}";
+}
+
+Description* CompositionElementSerializers::deserialize_description(const QJsonObject json_description)
+{
+    QString name = json_description["name"].toString();
+    QString type = json_description["type"].toString();
+    int reference = json_description["reference"].toInt();
+    bool is_const = json_description["is_const"].toBool();
+    return new Description(name, std::make_shared<RegularType>(type), static_cast<Reference>(reference), is_const); //TODO izmeniti type kad se obrise IType
 }
