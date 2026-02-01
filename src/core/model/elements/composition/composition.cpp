@@ -11,6 +11,15 @@ Destructor Composition::get_destructor() const {
     return Destructor(name, fields);
 }
 
+std::shared_ptr<CopyConstructor> Composition::get_copy_constructor() const {
+    if(copy_constructor_visibility.has_value()) {
+        return std::make_shared<CopyConstructor>(name, fields, copy_constructor_visibility.value());
+    }
+    else {
+        return nullptr;
+    }
+}
+
 QVector<IClassElement*> Composition::get_new_code_elements() {
     QVector<IClassElement*> elements;
     for (auto& field : fields) {
@@ -35,6 +44,9 @@ QVector<const IClassElement*> Composition::get_new_code_elements() const {
     }
     for (auto& constructor : constructors) {
         elements.append(constructor.get());
+    }
+    if(copy_constructor_visibility.has_value()) {
+        elements.append(get_copy_constructor().get());
     }
     Destructor* destructor = new Destructor(get_destructor());
     elements.append(destructor);
@@ -126,11 +138,10 @@ void Composition::add_constructor(Visibility visibility, const QVector<Descripti
 }
 
 void Composition::add_copy_constructor(Visibility visibility) {
-    QVector<Description*> field_descriptions;
-    for (auto& field : fields) {
-        field_descriptions.append(field->get_description());
-    }
-    constructors.append(std::make_shared<CopyConstructor>(name, field_descriptions, visibility));
+    copy_constructor_visibility = visibility;
+}
+void Composition::remove_copy_constructor() {
+    copy_constructor_visibility = std::nullopt;
 }
 
 QString Composition::get_name() const {
