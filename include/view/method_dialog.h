@@ -15,7 +15,7 @@ public:
     MethodDialog(const Method& existing_method, QWidget* parent = nullptr);
 
     MethodKind get_method_kind() const;
-    QList<Argument> get_arguments() const;
+    QList<Argument*> get_arguments() const;
     QString get_definition_block() const;
 
     static std::shared_ptr<Method> create_method(QWidget* parent = nullptr);
@@ -30,7 +30,7 @@ protected:
 
 private:
     void populate_from_method(const Method& method);
-    QList<Argument> parse_arguments(const QString& text) const;
+    QList<Argument *> parse_arguments(const QString& text) const;
 
     QComboBox*      m_method_kind_combo;
     QPlainTextEdit* m_arguments_edit;

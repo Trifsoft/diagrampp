@@ -1,6 +1,6 @@
 #include "model/elements/constructor/constructor.h"
 
-Constructor::Constructor(const QString& class_name, const QVector<Argument>& arguments, Visibility visibility)
+Constructor::Constructor(const QString& class_name, const QVector<Argument*>& arguments, Visibility visibility)
     : IClassElement(ElementRank::Constructor, "", visibility),
       class_name(class_name),
       arguments(arguments) {}
@@ -21,6 +21,6 @@ std::optional<QString> Constructor::definition(const QString& class_name) const 
     return class_name + "::" + class_name + "(" + arg_strings.join(", ") + ") : " + get_custom_definition();
 }
 
-QVector<Argument> Constructor::get_arguments() const {
+QVector<Argument*> Constructor::get_arguments() const {
     return arguments;
 }

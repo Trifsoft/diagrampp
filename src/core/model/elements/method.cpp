@@ -1,16 +1,16 @@
 #include "model/elements/method.h"
 
-Method::Method(const QString& name, const QString& return_type, Visibility visibility, MethodKind method_kind, const QList<Argument>& arguments)
+Method::Method(const QString& name, const QString& return_type, Visibility visibility, MethodKind method_kind, const QList<Argument*>& arguments, const QString& definition_block)
     : IClassElement(ElementRank::Method, name, visibility),
       return_type(return_type),
       method_kind(method_kind),
       arguments(arguments),
-      definition_block("") {}
+      definition_block(definition_block) {}
 
 QString Method::get_base_method_declaration() const {
     QStringList var_strings;
     for (const auto& var : arguments) {
-        var_strings.append(var.to_string());
+        var_strings.append(var->to_string());
     }
     return return_type + " " + name + "(" + var_strings.join(", ") + ")";
 }
@@ -35,7 +35,7 @@ std::optional<QString> Method::definition(const QString& class_name) const {
 
     QStringList var_strings;
     for (const auto& var : arguments) {
-        var_strings.append(var.to_string());
+        var_strings.append(var->to_string());
     }
 
     QString def = return_type + " " + class_name + "::" +
@@ -53,7 +53,7 @@ MethodKind Method::get_method_kind() const {
     return method_kind;
 }
 
-QList<Argument> Method::get_arguments() const {
+QList<Argument*> Method::get_arguments() const {
     return arguments;
 }
 

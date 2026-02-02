@@ -216,7 +216,7 @@ void Board::onGenerateClicked(const QString& class_name, NodeType node_type) {
             new_node->add_field("test1", "tip1", Visibility::Protected);
             new_node->add_field("test2", "tip2", Visibility::Private);
             new_node->add_field("test3", "tip3");
-            new_node->add_method("method","void", Visibility::Private, MethodKind::Regular, { Argument("bar", "int") });
+            new_node->add_method("method","void", Visibility::Private, MethodKind::Regular, { new Argument("bar", "int") });
 
 
             add_item(new_node);
@@ -234,7 +234,7 @@ void Board::onGenerateClicked(const QString& class_name, NodeType node_type) {
             new_node->add_field("test1", "tip1", Visibility::Protected);
             new_node->add_field("test2", "tip2", Visibility::Private);
             new_node->add_field("test3", "tip3");
-            new_node->add_method("method","void", Visibility::Private, MethodKind::Regular, { Argument("bar", "int") });
+            new_node->add_method("method","void", Visibility::Private, MethodKind::Regular, { new Argument("bar", "int") });
 
             add_item(new_node);
             break;
@@ -250,7 +250,7 @@ void Board::onGenerateClicked(const QString& class_name, NodeType node_type) {
             new_node->add_field("test1", "tip1", Visibility::Protected);
             new_node->add_field("test2", "tip2", Visibility::Private);
             new_node->add_field("test3", "tip3");
-            new_node->add_method("method","void", Visibility::Private, MethodKind::Regular, { Argument("bar", "int") });
+            new_node->add_method("method","void", Visibility::Private, MethodKind::Regular, { new Argument("bar", "int") });
 
 
             add_item(new_node);

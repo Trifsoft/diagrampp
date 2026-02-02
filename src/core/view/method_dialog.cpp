@@ -53,7 +53,7 @@ void MethodDialog::extra_validate(QString& error) const
     // Validate arguments format
     QString args_text = m_arguments_edit->toPlainText().trimmed();
     if (!args_text.isEmpty()) {
-        QList<Argument> parsed = parse_arguments(args_text);
+        QList<Argument*> parsed = parse_arguments(args_text);
         if (parsed.isEmpty()) {
             error = "Invalid arguments format. Use: type name, type name, ...";
         }
@@ -70,9 +70,9 @@ void MethodDialog::on_method_kind_changed(int index)
     }
 }
 
-QList<Argument> MethodDialog::parse_arguments(const QString& text) const
+QList<Argument*> MethodDialog::parse_arguments(const QString& text) const
 {
-    QList<Argument> result;
+    QList<Argument*> result;
     if (text.trimmed().isEmpty()) {
         return result;
     }
@@ -100,7 +100,7 @@ QList<Argument> MethodDialog::parse_arguments(const QString& text) const
             return {};
         }
 
-        result.append(Argument(arg_name, arg_type));
+        result.append(new Argument(arg_name, arg_type));
     }
 
     return result;
@@ -127,7 +127,7 @@ void MethodDialog::populate_from_method(const Method& method)
     // Set arguments
     QStringList args_list;
     for (const auto& arg : method.get_arguments()) {
-        args_list << QString("%1 %2").arg(arg.get_type(), arg.get_name());
+        args_list << QString("%1 %2").arg(arg->get_type(), arg->get_name());
     }
     m_arguments_edit->setPlainText(args_list.join(", "));
 
@@ -143,7 +143,7 @@ MethodKind MethodDialog::get_method_kind() const
     return static_cast<MethodKind>(m_method_kind_combo->currentData().toInt());
 }
 
-QList<Argument> MethodDialog::get_arguments() const
+QList<Argument*> MethodDialog::get_arguments() const
 {
     return parse_arguments(m_arguments_edit->toPlainText());
 }

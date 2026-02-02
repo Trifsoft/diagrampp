@@ -6,13 +6,15 @@
 void CompositionElementSerializers::serialize_method(std::ostream& output_stream, int indentation_counter, const Method *method)
 {
     output_stream << "{\n";
-    SerializeHelpers::write_indented_serialized_field<Description>(output_stream, indentation_counter+1, "description", method->get_description(), &CompositionElementSerializers::serialize_description);
+    SerializeHelpers::write_indented_string_field(output_stream, indentation_counter+1, "name", method->get_name().toStdString());
+    output_stream << ",\n";
+    SerializeHelpers::write_indented_string_field(output_stream, indentation_counter+1, "type", method->get_return_type().toStdString());
     output_stream << ",\n";
     SerializeHelpers::write_indented_field<int>(output_stream, indentation_counter+1, "visibility", static_cast<int>(method->get_visibility()));
     output_stream << ",\n";
-    SerializeHelpers::write_indented_field<int>(output_stream, indentation_counter+1, "method_type", static_cast<int>(method->get_method_type()));
+    SerializeHelpers::write_indented_field<int>(output_stream, indentation_counter+1, "method_kind", static_cast<int>(method->get_method_kind()));
     output_stream << ",\n";
-    SerializeHelpers::write_indented_serialized_list_field<Description>(output_stream, indentation_counter+1, "variables", method->get_variables(), &CompositionElementSerializers::serialize_description);
+    SerializeHelpers::write_indented_serialized_list_field<Argument>(output_stream, indentation_counter+1, "arguments", method->get_arguments(), &CompositionElementSerializers::serialize_argument);
     output_stream << ",\n";
     SerializeHelpers::write_indented_string_field(output_stream, indentation_counter+1, "definition_block", method->get_definition_block().toStdString());
     output_stream << "\n";
@@ -22,22 +24,25 @@ void CompositionElementSerializers::serialize_method(std::ostream& output_stream
 
 Method *CompositionElementSerializers::deserialize_method(const QJsonObject json_method)
 {
-    Description* description = deserialize_description(json_method["description"].toObject());
+    QString name = json_method["name"].toString();
+    QString type = json_method["type"].toString();
     Visibility visibility = static_cast<Visibility>(json_method["visibility"].toInt());
-    MethodType method_type = static_cast<MethodType>(json_method["method_type"].toInt());
-    QList<Description*> variables;
-    QJsonArray variables_json_array = json_method["variables"].toArray();
+    MethodKind method_type = static_cast<MethodKind>(json_method["method_kind"].toInt());
+    QList<Argument*> arguments;
+    QJsonArray variables_json_array = json_method["arguments"].toArray();
     for(auto element : variables_json_array) {
-        variables.append(deserialize_description(element.toObject()));
+        arguments.append(deserialize_argument(element.toObject()));
     }
     QString definition_block = json_method["definition_block"].toString();
-    return new Method(std::shared_ptr<Description>(description), visibility, method_type, variables, definition_block);
+    return new Method(name, type, visibility, method_type, arguments, definition_block);
 }
 
 void CompositionElementSerializers::serialize_field(std::ostream& output_stream, int indentation_counter, const Field *field)
 {
     output_stream << "{\n";
-    SerializeHelpers::write_indented_serialized_field<Description>(output_stream, indentation_counter+1, "description", field->get_description(), &CompositionElementSerializers::serialize_description);
+    SerializeHelpers::write_indented_string_field(output_stream, indentation_counter+1, "name", field->get_name().toStdString());
+    output_stream << ",\n";
+    SerializeHelpers::write_indented_string_field(output_stream, indentation_counter+1, "type", field->get_type().toStdString());
     output_stream << ",\n";
     SerializeHelpers::write_indented_field<int>(output_stream, indentation_counter+1, "visibility", static_cast<int>(field->get_visibility()));
     output_stream << ",\n";
@@ -49,14 +54,15 @@ void CompositionElementSerializers::serialize_field(std::ostream& output_stream,
 
 Field *CompositionElementSerializers::deserialize_field(const QJsonObject json_field)
 {
-    Description* description = CompositionElementSerializers::deserialize_description(json_field["description"].toObject());
+    QString name = json_field["name"].toString();
+    QString type = json_field["type"].toString();
     Visibility visibility = static_cast<Visibility>(json_field["visibility"].toInt());
     QString destruction = json_field["destruction"].toString();
     if(destruction.isEmpty()) {
-        return new Field(std::shared_ptr<Description>(description), visibility);
+        return new Field(name, type, visibility);
     }
     else {
-        return new Field(std::shared_ptr<Description>(description), visibility, destruction);
+        return new Field(name, type, visibility, destruction);
     }
 }
 
@@ -65,7 +71,7 @@ void CompositionElementSerializers::serialize_constructor(std::ostream& output_s
     output_stream << "{\n";
     SerializeHelpers::write_indented_field<int>(output_stream, indentation_counter+1, "visibility", static_cast<int>(constructor->get_visibility()));
     output_stream << ",\n";
-    SerializeHelpers::write_indented_serialized_list_field<Description>(output_stream, indentation_counter+1, "arguments", constructor->get_arguments(), &CompositionElementSerializers::serialize_description);
+    SerializeHelpers::write_indented_serialized_list_field<Argument>(output_stream, indentation_counter+1, "arguments", constructor->get_arguments(), &CompositionElementSerializers::serialize_argument);
     output_stream << "\n";
     SerializeHelpers::indent(output_stream, indentation_counter);
     output_stream << "}";
@@ -73,34 +79,28 @@ void CompositionElementSerializers::serialize_constructor(std::ostream& output_s
 DefaultConstructor *CompositionElementSerializers::deserialize_constructor(const QJsonObject json_constructor, const QString& class_name)
 {
     Visibility visibility = static_cast<Visibility>(json_constructor["visibility"].toInt());
-    QList<Description*> arguments;
+    QList<Argument*> arguments;
     QJsonArray arguments_json_array = json_constructor["arguments"].toArray();
     for(auto element : arguments_json_array) {
-        arguments.append(deserialize_description(element.toObject()));
+        arguments.append(deserialize_argument(element.toObject()));
     }
     return new DefaultConstructor(class_name, arguments, visibility);
 }
 
-void CompositionElementSerializers::serialize_description(std::ostream& output_stream, int indentation_counter, const Description* description)
+void CompositionElementSerializers::serialize_argument(std::ostream& output_stream, int indentation_counter, const Argument* description)
 {
     output_stream << "{\n";
     SerializeHelpers::write_indented_string_field(output_stream, indentation_counter+1, "name", description->get_name().toStdString());
     output_stream << ",\n";
-    SerializeHelpers::write_indented_string_field(output_stream, indentation_counter+1, "type", description->get_type()->get_name().toStdString()); //TODO izmeniti samo get_type().toStd kad se obrise IType
-    output_stream << ",\n";
-    SerializeHelpers::write_indented_field(output_stream, indentation_counter+1, "reference", static_cast<int>(description->get_reference()));
-    output_stream << ",\n";
-    SerializeHelpers::write_indented_field(output_stream, indentation_counter+1, "is_const", description->get_is_const());
+    SerializeHelpers::write_indented_string_field(output_stream, indentation_counter+1, "type", description->get_type().toStdString());
     output_stream << "\n";
     SerializeHelpers::indent(output_stream, indentation_counter);
     output_stream << "}";
 }
 
-Description* CompositionElementSerializers::deserialize_description(const QJsonObject json_description)
+Argument* CompositionElementSerializers::deserialize_argument(const QJsonObject json_description)
 {
     QString name = json_description["name"].toString();
     QString type = json_description["type"].toString();
-    int reference = json_description["reference"].toInt();
-    bool is_const = json_description["is_const"].toBool();
-    return new Description(name, std::make_shared<RegularType>(type), static_cast<Reference>(reference), is_const); //TODO izmeniti type kad se obrise IType
+    return new Argument(name, type);
 }
