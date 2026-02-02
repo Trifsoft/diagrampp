@@ -80,6 +80,7 @@ std::string recoveryLog::get_username() const {
         return std::string(pw->pw_name);
     }
 #ifdef Q_OS_LINUX
+    // if fails use ENV variables
     char* env_user = getenv("USER");
     if(env_user){
         return std::string(env_user);

@@ -9,6 +9,7 @@
 #include "nodefactory.h"
 #include <QFileDialog>
 #include <QDir>
+#include "image_paths.h"
 #include <QMessageBox>
 
 Board::Board(QWidget *parent)
@@ -123,7 +124,7 @@ void Board::on_object_clicked(CppClass* clicked_object){
 
 #if DEBUG_MODE>=1
     qDebug() << errorMessage;
-    diagram->showDiagram();
+    diagram->show_diagram();
 #endif
 
     first_activated = second_activated = nullptr;
@@ -270,6 +271,9 @@ void Board::add_item(std::shared_ptr<Composition> node) {   //TODO [Nikola] - iz
     diagram->add_node(std::shared_ptr<CppClass>(item));
 
     connect(item, &CppClass::objectClicked, this, &Board::on_object_clicked);
+
+    connect(item, &CppClass::objectClicked, this, &Board::on_object_clicked);
+
 
     connect(item, &CppClass::add_field_request, this, &Board::on_add_field_requested);
     connect(item, &CppClass::add_method_request, this, &Board::on_add_method_requested);

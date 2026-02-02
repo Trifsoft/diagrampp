@@ -114,13 +114,13 @@ bool DiagramGraph::connection_exists(SharedNodePtr start_node, SharedNodePtr end
 }
 
 #if DEBUG_MODE >=1
-void DiagramGraph::showm_diagram(){
+void DiagramGraph::show_diagram(){
     for(auto &value : m_diagram){
         QDebug debug_stream = qDebug();
-        debug_stream << value.first->get_uml_class_m_diagram_node()->get_name() << ":";
+        debug_stream << value.first->get_uml_class_diagram_node()->get_name() << ":";
         std::vector<std::pair<SharedNodePtr, BranchType>>& sequence = value.second;
         for(auto &pairs : sequence){
-            debug_stream << pairs.first->get_uml_class_m_diagram_node()->get_name();
+            debug_stream << pairs.first->get_uml_class_diagram_node()->get_name();
         }
         qDebug() << "----";
     }

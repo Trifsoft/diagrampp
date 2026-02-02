@@ -416,6 +416,9 @@ QGraphicsPolygonItem* CppClass::get_arrow(const BranchType branchType) const {
         break;
     case BranchType::ASSOCIATION:
         polygon << QPointF(-arrow_size/2, arrow_size) << QPointF(arrow_size/2, arrow_size) << QPointF(0, 0);
+        arrow->setBrush(Qt::white);
+        arrow->setPolygon(polygon);
+        arrow->setPen(QPen(Qt::white, 2));
         arrow->setVisible(false);
         return arrow;
     }

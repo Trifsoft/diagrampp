@@ -9,7 +9,7 @@
 #include <QObject>
 
 
-#define DEBUG_MODE 0
+#define DEBUG_MODE 2
 
 class IUMLClassDiagramNode;
 class Composition;
@@ -34,7 +34,7 @@ public:
     bool connection_exists(SharedNodePtr from, SharedNodePtr to, BranchType branch_type) const;
 
 #if DEBUG_MODE >= 1
-    void showDiagram();
+    void show_diagram();
 #endif
 
     std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& get_diagram();

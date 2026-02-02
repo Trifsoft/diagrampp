@@ -46,7 +46,7 @@ namespace Validator {
 
     bool check_multiple_conneciton(SharedNodePtr child, SharedNodePtr parent,
                                    const std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram){
-        auto& value = diagram.at(child);
+        auto value = diagram.at(child);
         int count = 0;
         for(auto& pair : value){
             if(pair.first == parent){
@@ -73,7 +73,7 @@ namespace Validator {
     bool validate_others(std::string& errorMessage, BranchType branchType, SharedNodePtr child, SharedNodePtr parent, const std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram){
         if(branchType == BranchType::COMPOSITION || branchType == BranchType::AGGREGATION){
             if(check_cycle(child, branchType, diagram)){
-                errorMessage = "Connection creates circular problem";
+                errorMessage = "Connection creates circular inheritance problem";
                 return false;
             }
         }
@@ -101,7 +101,7 @@ namespace Validator {
              const std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram){
         in_stack[node] = true;
 
-        auto& it = diagram.at(node);
+        auto it = diagram.at(node);
         for(auto& pair : it){
             if(pair.second == branch_type){
                 if(in_stack[pair.first]){
@@ -129,7 +129,7 @@ namespace Validator {
                         std::unordered_map<SharedNodePtr, int>& reach_count){
 
         reach_count[node]++;
-        auto& it = diagram.at(node);
+        auto it = diagram.at(node);
         for(const auto& [child, branchType] : it){
             if(branchType == BranchType::INHERITANCE){
                 paths_to_base(child, diagram, reach_count);
