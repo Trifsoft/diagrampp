@@ -9,10 +9,10 @@
 namespace NodeSerializers
 {
     void serialize_enum_node(std::ostream& output_stream, int indentation_counter, const CPPEnum* enum_node);
-    CPPEnum* deserialize_enum_node(const QJsonObject json_enum);
+    std::shared_ptr<CPPEnum> deserialize_enum_node(const QJsonObject json_enum);
 
     void serialize_composition_node(std::ostream& output_stream, int indentation_counter, const Composition* composition_node);
-    Composition* deserialize_composition_node(const QJsonObject json_composition);
+    std::shared_ptr<Composition> deserialize_composition_node(const QJsonObject json_composition);
 };
 
 #endif // NODE_SERIALIZERS_H

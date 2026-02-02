@@ -23,7 +23,11 @@ private:
     void call_corresponding_node_serializer(std::ostream& output_stream, IUMLClassDiagramNode* node) const;
     void trim_end(std::string& s) const;
     void write_coords(std::ostream& output_stream, double x, double y);
-    void write_inheritance(std::ostream& output_stream, BranchType branch_type) const;
+    void write_branch_type(std::ostream& output_stream, BranchType branch_type) const;
+
+    std::pair<double, double> deserialize_coords(QJsonObject json_coords) const;
+    BranchType deserialize_branch_type(QJsonValue json_branch_type) const;
+    std::shared_ptr<IUMLClassDiagramNode> deserialize_node(QJsonObject json_node) const;
 public:
     DiagramJsonSerializer(graph_type* diagram_graph);
     ~DiagramJsonSerializer() = default;

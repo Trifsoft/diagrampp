@@ -7,7 +7,7 @@ QString CPPEnum::declaration() const {
 
     QStringList value_strings;
     for (const auto& value : values) {
-        value_strings.append("\t" + value.to_string());
+        value_strings.append("\t" + value->to_string());
     }
 
     decl += value_strings.join(",\n");
@@ -21,14 +21,14 @@ QString CPPEnum::definition() const {
 }
 
 void CPPEnum::add_value(const QString& name, std::optional<int> value) {
-    values.append(CPPEnumValue(name, value));
+    values.append(new CPPEnumValue(name, value));
 }
 
 QString CPPEnum::get_name() const {
     return name;
 }
 
-QVector<CPPEnumValue> CPPEnum::get_values() const {
+QList<CPPEnumValue*> CPPEnum::get_values() const {
     return values;
 }
 

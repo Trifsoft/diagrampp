@@ -64,7 +64,7 @@ void DiagramJsonSerializer::write_coords(std::ostream& output_stream, double x, 
     SerializeHelpers::indent(output_stream, m_indentation_counter); output_stream << '}';
 }
 
-void DiagramJsonSerializer::write_inheritance(std::ostream& output_stream, BranchType branch_type) const {
+void DiagramJsonSerializer::write_branch_type(std::ostream& output_stream, BranchType branch_type) const {
     SerializeHelpers::indent(output_stream, m_indentation_counter);
     switch(branch_type){
         case BranchType::INHERITANCE:
@@ -90,7 +90,6 @@ void DiagramJsonSerializer::write_inheritance(std::ostream& output_stream, Branc
 
 void DiagramJsonSerializer::serialize(std::ostream& output_stream){
     int m_indentation_counter = 0;
-    ;
     output_stream << "[\n";
     ++m_indentation_counter;
     SerializeHelpers::indent(output_stream, m_indentation_counter);
@@ -116,7 +115,7 @@ void DiagramJsonSerializer::serialize(std::ostream& output_stream){
             SerializeHelpers::indent(output_stream, m_indentation_counter); output_stream << "{\n";
             ++m_indentation_counter;
 
-            SerializeHelpers::indent(output_stream, m_indentation_counter); write_inheritance(output_stream, neighbour_it->second); output_stream << ",\n";
+            SerializeHelpers::indent(output_stream, m_indentation_counter); write_branch_type(output_stream, neighbour_it->second); output_stream << ",\n";
 
 
             const auto& neighbour = neighbour_it->first->get_uml_class_diagram_node();
@@ -152,7 +151,59 @@ void DiagramJsonSerializer::serialize(std::ostream& output_stream){
 
 }
 
+std::pair<double, double> DiagramJsonSerializer::deserialize_coords(QJsonObject json_coords) const {
+    return {json_coords["x"].toDouble(), json_coords["y"].toDouble()};
+}
+
+std::shared_ptr<IUMLClassDiagramNode> DiagramJsonSerializer::deserialize_node(QJsonObject json_node) const {
+    if(json_node["label"] == "class" || json_node["label"] == "struct"){
+        return NodeSerializers::deserialize_composition_node(json_node);
+    }else{ // label = enum
+        return NodeSerializers::deserialize_enum_node(json_node);
+    }
+}
+
+BranchType DiagramJsonSerializer::deserialize_branch_type(QJsonValue json_branch_type) const {
+    std::string branch_type = json_branch_type.toString().toStdString();
+    if(branch_type == "inheritance"){
+        return BranchType::INHERITANCE;
+    }else if(branch_type == "association"){
+        return BranchType::ASSOCIATION;
+    }else if(branch_type == "realization"){
+        return BranchType::REALIZATION;
+    }else if(branch_type == "aggregation"){
+        return BranchType::AGGREGATION;
+    }else if(branch_type == "composition"){
+        return BranchType::COMPOSITION;
+    }
+
+    // branch_type == dependency
+    return BranchType::DEPENDENCY;
+}
+
 graph_type* DiagramJsonSerializer::deserialize(QJsonArray json_array){
 
-    return nullptr;
+    for(const auto& json_value : json_array){
+        QJsonObject json_object = json_value.toObject();
+        const auto [x,y] = deserialize_coords(json_object["coords"].toObject());
+        // diagram_coord_map, write them in coord map or something
+        // coords should be passed to board somehow, see comment down bellow
+
+
+        std::shared_ptr<IUMLClassDiagramNode> node = deserialize_node(json_object["node"].toObject());
+        // waiting for model view architecture border line
+
+        QJsonArray neighbours = json_object["neighbours"].toArray();
+        for (const auto& json_neighbour_val : neighbours){
+            const auto& json_neighbour_object = json_neighbour_val.toObject();
+
+            const auto [neighbour_x, neighbour_y] = deserialize_coords(json_object["coords"].toObject());
+            const auto node = deserialize_node(json_neighbour_object["node"].toObject());
+            const auto branch_type = deserialize_branch_type(json_object["branch_type"].toObject());
+
+            // add this to diagram
+        }
+    }
+
+    return m_diagram;
 }

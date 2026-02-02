@@ -33,10 +33,16 @@ namespace SerializeHelpers{
         SerializeHelpers::indent(output_stream, indentation_counter);
         write_with_quotes(output_stream, key);
         output_stream << ": [\n";
-        for(auto element: list) {
+        for(auto& element_it = list.begin(); element_it != list.end();) {
             SerializeHelpers::indent(output_stream, indentation_counter+1);
-            serializer(output_stream, indentation_counter+1, element);
-            output_stream << ",\n";
+            serializer(output_stream, indentation_counter+1, (*element_it));
+
+            if(++element_it == list.end()){
+                output_stream << '\n';
+            }
+            else {
+                output_stream << ",\n";
+            }
         }
         SerializeHelpers::indent(output_stream, indentation_counter);
         output_stream << "]";

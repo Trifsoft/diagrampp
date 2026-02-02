@@ -9,43 +9,63 @@
  * - name
  * - enum values
  */
-void NodeSerializers::serialize_enum_node(std::ostream& output_stream, int indentation_counter, const CPPEnum* enum_node){
-    output_stream<< "{\n";
-    ++indentation_counter;
-    SerializeHelpers::indent(output_stream, indentation_counter); output_stream<< "\"label\": ";  output_stream<< "\"enum\",";
-    SerializeHelpers::indent(output_stream, indentation_counter); output_stream<< "\"name\": "; output_stream<< enum_node->get_name().toStdString() << ",\n";
-    SerializeHelpers::indent(output_stream, indentation_counter); output_stream<< "\"values\": [\n";
-    ++indentation_counter;
 
-    const auto& enum_values =  enum_node->get_values();
-    for(auto enum_value = enum_values.begin(); enum_value != enum_values.end(); ){
-        SerializeHelpers::indent(output_stream, indentation_counter); output_stream<< "{\n";
+
+
+namespace {
+    void serialize_enum_value(std::ostream& output_stream, int indentation_counter, const CPPEnumValue* enum_value){
+        output_stream << "{\n";
         ++indentation_counter;
-        SerializeHelpers::indent(output_stream, indentation_counter); output_stream<< "\"name\": "; output_stream<< enum_value->get_name().toStdString() << ",\n";
+        SerializeHelpers::write_indented_string_field(output_stream, indentation_counter, "name", enum_value->get_name().toStdString());
+        output_stream << ",\n";
 
-        if(enum_value->get_value().has_value()){ // optional value
-            SerializeHelpers::indent(output_stream, indentation_counter); output_stream<< "\"value\": "; output_stream<< enum_value->get_value().value() << "\n";
+
+        if(enum_value->get_value().has_value()){ //  value is optional
+            SerializeHelpers::write_indented_field(output_stream, indentation_counter, "value", enum_value->get_value().value());
+            output_stream << "\n";
         }
         --indentation_counter;
         SerializeHelpers::indent(output_stream, indentation_counter); output_stream<< "}";
-
-        if(++enum_value == enum_values.end()){
-            output_stream<< '\n';
-        }else {
-            output_stream<< ",\n";
-        }
     }
+};
+
+void NodeSerializers::serialize_enum_node(std::ostream& output_stream, int indentation_counter, const CPPEnum* enum_node){
+    output_stream<< "{\n";
+    ++indentation_counter;
+
+    SerializeHelpers::write_indented_string_field(output_stream, indentation_counter, "label", "enum");
+    output_stream << ",\n";
+    SerializeHelpers::write_indented_string_field(output_stream, indentation_counter, "name", enum_node->get_name().toStdString());
+    output_stream << ",\n";
+
+    SerializeHelpers::write_indented_serialized_list_field<CPPEnumValue>(output_stream, indentation_counter, "values", enum_node->get_values(), &serialize_enum_value);
 
     --indentation_counter;
     SerializeHelpers::indent(output_stream, indentation_counter); output_stream<< "]\n";
     --indentation_counter;
     SerializeHelpers::indent(output_stream, indentation_counter); output_stream<< "}";
-
 }
 
-CPPEnum* NodeSerializers::deserialize_enum_node(QJsonObject json_enum) {
+std::shared_ptr<CPPEnum> NodeSerializers::deserialize_enum_node(QJsonObject json_enum) {
+    QString name = json_enum["name"].toString();
 
-    return nullptr;
+    std::shared_ptr<CPPEnum> enum_node = std::make_shared<CPPEnum>(name);
+
+    const auto& json_enum_values = json_enum["values"].toArray();
+    for (const auto& json_value : json_enum_values){
+        const auto& json_enum_value = json_value.toObject();
+        const auto& name = json_enum_value["name"].toString();
+
+        int value;
+        if(json_enum_value.contains("value")){
+            value = json_enum_value["value"].toInt();
+            enum_node->add_value(name, value);
+        }else {
+            enum_node->add_value(name);
+        }
+    }
+
+    return enum_node;
 }
 
 
@@ -123,9 +143,8 @@ void NodeSerializers::serialize_composition_node(std::ostream &output_stream, in
 
 }
 
-Composition* NodeSerializers::deserialize_composition_node(const QJsonObject json_composition)
-{
+std::shared_ptr<Composition> NodeSerializers::deserialize_composition_node(const QJsonObject json_composition){
 
-    return nullptr;
+    ;
 
 }
