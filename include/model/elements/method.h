@@ -18,14 +18,14 @@ class Method : public IClassElement {
 private:
     QString return_type;
     MethodKind method_kind;
-    QList<Argument> arguments;
+    QList<Argument*> arguments;
 
     QString definition_block;
     QString get_base_method_declaration() const;
 
 public:
     // Method(const Argument& description, Visibility visibility, MethodKind method_kind, const QList<Argument>& arguments);
-    Method(const QString& name, const QString& return_type, Visibility visibility, MethodKind method_kind, const QList<Argument>& arguments);
+    Method(const QString& name, const QString& return_type, Visibility visibility, MethodKind method_kind, const QList<Argument*>& arguments, const QString& definition_block = "");
     Method(const Method& other) = default;
 
     QString declaration() const override;
@@ -33,7 +33,7 @@ public:
 
     QString get_return_type() const;
     MethodKind get_method_kind() const;
-    QList<Argument> get_arguments() const;
+    QList<Argument*> get_arguments() const;
     QString get_definition_block() const;
     void set_definition_block(const QString& definition_block);
 };

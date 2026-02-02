@@ -1,4 +1,4 @@
-#include "model/elements/composition/composition.h"
+#include <model/elements/composition/composition.h>
 #include "model/elements/constructor/default_constructor.h"
 #include "model/elements/constructor/copy_constructor.h"
 #include "model/elements/argument.h"
@@ -138,7 +138,7 @@ void Composition::add_field(std::shared_ptr<Field> field){
     fields.append(field);
 }
 
-void Composition::add_method(const QString& name, const QString& type, Visibility visibility, MethodKind method_type, const QList<Argument>& variables) {
+void Composition::add_method(const QString& name, const QString& type, Visibility visibility, MethodKind method_type, const QList<Argument*>& variables) {
     methods.append(std::make_shared<Method>(name, type, visibility, method_type, variables));
 }
 
@@ -147,7 +147,7 @@ void Composition::add_method(std::shared_ptr<Method> method){
 }
 
 
-void Composition::add_constructor(Visibility visibility, const QVector<Argument>& arguments) {
+void Composition::add_constructor(Visibility visibility, const QVector<Argument*>& arguments) {
     constructors.append(std::make_shared<DefaultConstructor>(name, arguments, visibility));
 }
 

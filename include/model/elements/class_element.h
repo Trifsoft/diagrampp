@@ -23,7 +23,6 @@ public:
     IClassElement(ElementRank rank, const QString& name, Visibility vis);
     virtual ~IClassElement();
 
-    virtual QString get_declaration() const = 0;
     const ElementRank get_rank() const;
     const QString get_name() const;
     const Visibility get_visibility() const;
