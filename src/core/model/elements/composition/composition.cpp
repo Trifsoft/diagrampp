@@ -1,7 +1,7 @@
 #include "model/elements/composition/composition.h"
 #include "model/elements/constructor/default_constructor.h"
 #include "model/elements/constructor/copy_constructor.h"
-#include "model/base/description.h"
+#include "model/elements/argument.h"
 #include <algorithm>
 
 Composition::Composition(const QString& name, Visibility visibility, std::optional<std::pair<Visibility, Composition*>> inheritance)
@@ -20,6 +20,8 @@ std::shared_ptr<CopyConstructor> Composition::get_copy_constructor() const {
     }
 }
 
+
+// [REFACTOR] returning references, dangerous if vector gets reallocated !!!
 QVector<IClassElement*> Composition::get_new_code_elements() {
     QVector<IClassElement*> elements;
     for (auto& field : fields) {
@@ -48,6 +50,8 @@ QVector<const IClassElement*> Composition::get_new_code_elements() const {
     if(copy_constructor_visibility.has_value()) {
         elements.append(get_copy_constructor().get());
     }
+
+    // Potential leak?
     Destructor* destructor = new Destructor(get_destructor());
     elements.append(destructor);
     return elements;
@@ -60,7 +64,7 @@ QVector<const IClassElement*> Composition::get_code_elements() const {
         auto inherited_elements = inheritance.value().second->get_code_elements();
         for (auto& elem : inherited_elements) {
             const Method* method = dynamic_cast<const Method*>(elem);
-            if (method && method->get_method_type() != MethodType::Regular) {
+            if (method && method->get_method_kind() != MethodKind::Regular) {
                 elements.append(elem);
             }
         }
@@ -102,7 +106,7 @@ QString Composition::declaration() const {
 
         decl += "\n" + get_declaration(vis) + ":\n";
         for (const auto* elem : elements) {
-            decl += "\t" + elem->get_declaration() + ";\n";
+            decl += "\t" + elem->declaration() + ";\n";
         }
     }
 
@@ -124,16 +128,26 @@ QString Composition::definition() const {
     return definitions.join("\n\n");
 }
 
-void Composition::add_field(const QString& name, std::shared_ptr<IType> type, std::optional<Visibility> visibility) {
+void Composition::add_field(const QString& name, const QString& type, std::optional<Visibility> visibility) {
     Visibility vis = visibility.value_or(get_default_visibility());
-    fields.append(std::make_shared<Field>(std::make_shared<Description>(name, type), vis));
+
+    fields.append(std::make_shared<Field>(name, type, vis));
 }
 
-void Composition::add_method(const QString& name, std::shared_ptr<IType> type, Visibility visibility, MethodType method_type, const QList<Description*>& variables) {
-    methods.append(std::make_shared<Method>(std::make_shared<Description>(name, type), visibility, method_type, variables));
+void Composition::add_field(std::shared_ptr<Field> field){
+    fields.append(field);
 }
 
-void Composition::add_constructor(Visibility visibility, const QList<Description*>& arguments) {
+void Composition::add_method(const QString& name, const QString& type, Visibility visibility, MethodKind method_type, const QList<Argument>& variables) {
+    methods.append(std::make_shared<Method>(name, type, visibility, method_type, variables));
+}
+
+void Composition::add_method(std::shared_ptr<Method> method){
+    methods.append(method);
+}
+
+
+void Composition::add_constructor(Visibility visibility, const QVector<Argument>& arguments) {
     constructors.append(std::make_shared<DefaultConstructor>(name, arguments, visibility));
 }
 

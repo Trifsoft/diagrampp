@@ -31,8 +31,8 @@ set(CORE_HEADERS
     include/graph/diagram_graph.h
     include/model/base/visibility.h
     include/model/base/reference.h
-    include/model/base/class_element.h
-    include/model/base/description.h
+    include/model/elements/argument.h
+    include/model/elements/class_element.h
     include/model/elements/type/type.h
     include/model/elements/type/regular_type.h
     include/model/elements/type/generic_type.h
@@ -60,6 +60,9 @@ set(CORE_HEADERS
     include/model/base/branches.h
     include/model/base/branches.h
     include/view/node_view.h
+    include/view/member_dialog_base.h
+    include/view/field_dialog.h
+    include/view/method_dialog.h
     include/nodefactory.h
     include/methodeditor.h
     include/widget/class_element_text.h
@@ -67,6 +70,8 @@ set(CORE_HEADERS
     include/serializers/node_serializers.h
     include/serializers/composition_element_serializers.h
     include/serializers/utils/utils.h
+    include/signal_processor.h
+    include/recoveyLog.h
 )
 
 set(CORE_SOURCES
@@ -82,8 +87,8 @@ set(CORE_SOURCES
     src/core/graph/diagram_graph.cpp
     src/core/model/base/visibility.cpp
     src/core/model/base/reference.cpp
-    src/core/model/base/class_element.cpp
-    src/core/model/base/description.cpp
+    src/core/model/elements/argument.cpp
+    src/core/model/elements/class_element.cpp
     src/core/model/elements/type/regular_type.cpp
     src/core/model/elements/type/generic_type.cpp
     src/core/model/elements/type/namespace_type.cpp
@@ -110,6 +115,9 @@ set(CORE_SOURCES
     src/commandManager/command_manager.cpp
     src/commandManager/add_node_command.cpp
     src/core/view/node_view.cpp
+    src/core/view/member_dialog_base.cpp
+    src/core/view/field_dialog.cpp
+    src/core/view/method_dialog.cpp
     src/core/nodefactory.cpp
     src/core/methodeditor.cpp
     src/core/widget/class_element_text.cpp
@@ -117,6 +125,8 @@ set(CORE_SOURCES
     src/serializers/node_serializers.cpp
     src/serializers/composition_element_serializers.cpp
     src/serializers/utils/utils.cpp
+    src/core/signal_processor.cpp
+    src/core/recoveryLog.cpp
 )
 
 set(UI_SOURCES

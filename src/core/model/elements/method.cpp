@@ -1,63 +1,60 @@
 #include "model/elements/method.h"
 
-Method::Method(std::shared_ptr<Description> description, Visibility visibility, MethodType method_type, const QList<Description*>& variables, const QString& definition_block)
-    : IClassElement(ElementRank::Method, description->get_name(), visibility),
-      description(description),
-      method_type(method_type),
-      variables(variables),
-      definition_block(definition_block) {}
-Method::~Method()
-{
-    qDeleteAll(variables);
-}
+Method::Method(const QString& name, const QString& return_type, Visibility visibility, MethodKind method_kind, const QList<Argument>& arguments)
+    : IClassElement(ElementRank::Method, name, visibility),
+      return_type(return_type),
+      method_kind(method_kind),
+      arguments(arguments),
+      definition_block("") {}
 
 QString Method::get_base_method_declaration() const {
     QStringList var_strings;
-    for (const auto& var : variables) {
-        var_strings.append(var->to_string());
+    for (const auto& var : arguments) {
+        var_strings.append(var.to_string());
     }
-    return description->to_string() + "(" + var_strings.join(", ") + ")";
+    return return_type + " " + name + "(" + var_strings.join(", ") + ")";
 }
 
-QString Method::get_declaration() const {
+QString Method::declaration() const {
     QString base = get_base_method_declaration();
-    switch (method_type) {
-        case MethodType::Regular:
+    switch (method_kind) {
+        case MethodKind::Regular:
             return base;
-        case MethodType::RegularVirtual:
+        case MethodKind::RegularVirtual:
             return "virtual " + base;
-        case MethodType::PureVirtual:
+        case MethodKind::PureVirtual:
             return "virtual " + base + " = 0";
     }
     return base;
 }
 
 std::optional<QString> Method::definition(const QString& class_name) const {
-    if (method_type == MethodType::PureVirtual) {
+    if (method_kind == MethodKind::PureVirtual) {
         return std::nullopt;
     }
 
     QStringList var_strings;
-    for (const auto& var : variables) {
-        var_strings.append(var->to_string());
+    for (const auto& var : arguments) {
+        var_strings.append(var.to_string());
     }
 
-    QString def = description->get_type()->get_name() + " " + class_name + "::" +
-                  description->get_name() + "(" + var_strings.join(", ") + ") {\n" +
+    QString def = return_type + " " + class_name + "::" +
+                  declaration() + "\n" +
                   definition_block + "\n}";
     return def;
 }
 
-Description* Method::get_description() const {
-    return description.get();
+QString Method::get_return_type() const
+{
+    return return_type;
 }
 
-MethodType Method::get_method_type() const {
-    return method_type;
+MethodKind Method::get_method_kind() const {
+    return method_kind;
 }
 
-QList<Description*> Method::get_variables() const {
-    return variables;
+QList<Argument> Method::get_arguments() const {
+    return arguments;
 }
 
 QString Method::get_definition_block() const {

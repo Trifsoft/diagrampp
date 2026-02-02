@@ -6,6 +6,8 @@
 #include <map>
 #include <model/base/branches.h>
 #include <view/node_view.h>
+#include <QObject>
+
 
 #define DEBUG_MODE 0
 
@@ -15,14 +17,11 @@ class Composition;
 using SharedNodePtr = std::shared_ptr<NodeView>;
 using graph_type = std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>;
 
-class DiagramGraph {
+class DiagramGraph : public QObject {
+    Q_OBJECT
 public:
     DiagramGraph() = default;
     ~DiagramGraph() = default;
-
-    // should be removed
-    SharedNodePtr first_selected_node = nullptr;
-    SharedNodePtr second_selected_node = nullptr;
 
     void add_node(SharedNodePtr node);
     void remove_node(SharedNodePtr node);
@@ -32,11 +31,19 @@ public:
     std::shared_ptr<NodeView> find_pointer_owner(NodeView *node_view);
 
 
+    bool connection_exists(SharedNodePtr from, SharedNodePtr to, BranchType branch_type) const;
+
 #if DEBUG_MODE >= 1
     void showDiagram();
 #endif
 
-    graph_type& get_diagram();
+    std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& get_diagram();
+
+signals:
+    void link_added(SharedNodePtr from, SharedNodePtr to, BranchType branch);
+    void link_removed(SharedNodePtr from, SharedNodePtr to, BranchType branch);
+    void node_removed(SharedNodePtr node);
+
 private:
     // disscussion, shared or weak
     graph_type m_diagram;

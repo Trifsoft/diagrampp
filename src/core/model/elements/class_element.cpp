@@ -1,14 +1,27 @@
-#include "model/base/class_element.h"
+#include "model/elements/class_element.h"
+
 
 IClassElement::IClassElement(ElementRank rank, const QString& name, Visibility vis)
     : element_rank(rank), name(name), visibility(vis) {
 }
 
-Visibility IClassElement::get_visibility() const {
+
+IClassElement::~IClassElement() {
+}
+
+const Visibility IClassElement::get_visibility() const
+{
     return visibility;
 }
 
-IClassElement::~IClassElement() {
+const QString IClassElement::get_name() const
+{
+    return name;
+}
+
+const ElementRank IClassElement::get_rank() const
+{
+    return element_rank;
 }
 
 int IClassElement::compare_to(const IClassElement& other) const {

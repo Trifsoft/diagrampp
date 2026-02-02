@@ -2,7 +2,7 @@
 #define CLASS_ELEMENT_TEXT_H
 
 #include <QGraphicsTextItem>
-#include <model/base/class_element.h>
+#include <model/elements/class_element.h>
 
 class ClassElementText: public QGraphicsTextItem {
     Q_OBJECT

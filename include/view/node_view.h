@@ -4,11 +4,13 @@
 #include <QGraphicsItem>
 #include <model/base/uml_class_diagram_node.h>
 
-class NodeView: public QGraphicsItem {
+class NodeView: public QGraphicsObject{
+    Q_OBJECT
 public:
-    NodeView(QGraphicsItem* parent = nullptr);
+    NodeView(QGraphicsObject* parent = nullptr);
 
     virtual IUMLClassDiagramNode* get_uml_class_diagram_node() = 0;
+
 };
 
 #endif // NODE_VIEW_H
