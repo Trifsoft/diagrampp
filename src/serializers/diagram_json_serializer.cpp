@@ -73,8 +73,8 @@ void DiagramJsonSerializer::write_inheritance(std::ostream& output_stream, Branc
         case BranchType::ASSOCIATION:
             output_stream << "\"branch_type\": " << "\"association\"";
             break;
-        case BranchType::NAVIGATION:
-            output_stream << "\"branch_type\": " << "\"navigation\"";
+        case BranchType::REALIZATION:
+            output_stream << "\"branch_type\": " << "\"realization\"";
             break;
         case BranchType::AGGREGATION:
             output_stream << "\"branch_type\": " << "\"aggregation\"";

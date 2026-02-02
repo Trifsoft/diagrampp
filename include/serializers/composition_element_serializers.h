@@ -4,11 +4,11 @@
 #include <QJsonArray>
 #include <QJsonObject>
 #include <ostream>
-#include <model/base/class_element.h>
 #include <model/elements/field.h>
 #include <model/elements/constructor/default_constructor.h>
 #include <model/elements/destructor.h>
 #include <model/elements/method.h>
+#include <model/elements/argument.h>
 
 
 /*
@@ -49,8 +49,8 @@ namespace CompositionElementSerializers
     void serialize_constructor(std::ostream& output_stream, int indentation_counter, const DefaultConstructor* constructor);
     DefaultConstructor* deserialize_constructor(const QJsonObject json_constructor, const QString& class_name);
 
-    void serialize_description(std::ostream& output_stream, int indentation_counter, const Description* description);
-    Description* deserialize_description(const QJsonObject json_description);
+    void serialize_description(std::ostream& output_stream, int indentation_counter, const Argument* description);
+    Argument* deserialize_description(const QJsonObject json_description);
 };
 
 #endif // COMPOSITION_ELEMENT_SERIALIZERS_H

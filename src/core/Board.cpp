@@ -82,15 +82,15 @@ void Board::onModeClicked(){
     first_activated = second_activated = nullptr;
 }
 
-void Board::on_object_clicked(SharedNodePtr clicked_object){
+void Board::on_object_clicked(CppClass* clicked_object){
     if(!linkageMode && !removeMode){
         return;
     }
     if(!first_activated){
-        first_activated = clicked_object;
+        first_activated = diagram->find_pointer_owner(clicked_object);
         return;
     }
-    second_activated = clicked_object;
+    second_activated = diagram->find_pointer_owner(clicked_object);
 
     if((first_activated == second_activated) && removeMode){
         diagram->remove_node(first_activated);
