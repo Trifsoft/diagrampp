@@ -43,9 +43,10 @@ private slots:
     void onAddEnumClicked();
     void onCheckRadioButtonClicked();
     void onModeClicked();
+    void exportPNG();
+
     void onGenerateClicked(const QString& class_name, NodeType node_type);
     void on_object_clicked(CppClass* clickedClass);
-
 
     void on_add_field_requested(Composition* node, std::shared_ptr<Field> field);
     void on_add_method_requested(Composition* node, std::shared_ptr<Method>  method);
