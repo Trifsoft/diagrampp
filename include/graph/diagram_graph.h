@@ -12,7 +12,7 @@
 class IUMLClassDiagramNode;
 class Composition;
 
-using SharedNodePtr = NodeView*;
+using SharedNodePtr = std::shared_ptr<NodeView>;
 using graph_type = std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>;
 
 class DiagramGraph {
@@ -29,6 +29,8 @@ public:
 
     void add_branch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type);
     void remove_branch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type);
+    std::shared_ptr<NodeView> find_pointer_owner(NodeView *node_view);
+
 
 #if DEBUG_MODE >= 1
     void showDiagram();
@@ -37,7 +39,7 @@ public:
     graph_type& get_diagram();
 private:
     // disscussion, shared or weak
-    graph_type diagram;
+    graph_type m_diagram;
 
     void remove_neighbour(SharedNodePtr from, SharedNodePtr to, BranchType branch_type);
     void add_neighbour(SharedNodePtr from, SharedNodePtr to, BranchType branch_type);
