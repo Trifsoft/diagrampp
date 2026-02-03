@@ -70,7 +70,7 @@ set(CORE_HEADERS
     include/serializers/node_serializers.h
     include/serializers/composition_element_serializers.h
     include/serializers/utils/utils.h
-    include/signal_processor.h
+    include/view/signal_processor.h
     include/recoveyLog.h
 )
 
@@ -125,7 +125,7 @@ set(CORE_SOURCES
     src/serializers/node_serializers.cpp
     src/serializers/composition_element_serializers.cpp
     src/serializers/utils/utils.cpp
-    src/core/signal_processor.cpp
+    src/core/view/signal_processor.cpp
     src/core/recoveryLog.cpp
 )
 

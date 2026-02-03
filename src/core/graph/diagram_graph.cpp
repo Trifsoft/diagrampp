@@ -76,7 +76,6 @@ void DiagramGraph::remove_neighbour(SharedNodePtr from, SharedNodePtr to, Branch
 
 void DiagramGraph::add_neighbour(SharedNodePtr from, SharedNodePtr to, BranchType branch_type){
     m_diagram[from].push_back({to, branch_type});
-    emit link_added(from, to, branch_type);
 
     if(branch_type == BranchType::ASSOCIATION){
         m_diagram[from].push_back({to, branch_type});
@@ -106,9 +105,7 @@ bool DiagramGraph::connection_exists(SharedNodePtr start_node, SharedNodePtr end
     auto start_node_neighbours = start_node_it->second;
     for(auto const& [start_node_neighbour, start_end_branch_type] : start_node_neighbours){
         if(start_node_neighbour == end_node){
-            if(branch_type == start_end_branch_type){
-                return true;
-            }
+            return true;
         }
     }
     return false;

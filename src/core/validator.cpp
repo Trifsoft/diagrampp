@@ -29,10 +29,6 @@ namespace Validator {
         if(!check_linkage(errorMessage, child, parent)){
             return false;
         }
-        if(!check_multiple_conneciton(child, parent, diagram)){
-            errorMessage = "Connection alreardy exsists";
-            return false;
-        }
 
         bool result;
         switch (branchType){
@@ -43,19 +39,6 @@ namespace Validator {
                 result = validate_others(errorMessage, branchType, child, parent, diagram);
         }
         return result;
-    }
-
-    bool check_multiple_conneciton(SharedNodePtr child, SharedNodePtr parent,
-                                   const std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram){
-        auto value = diagram.at(child);
-        int count = 0;
-        for(auto& pair : value){
-            if(pair.first == parent){
-                count++;
-            }
-        }
-        return count >= 2 ? false : true;
-
     }
     bool validate_inheritance(std::string& errorMessage, SharedNodePtr child, SharedNodePtr parent, const std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram){
         //if(isInterface(child) || isAbstract(child))

@@ -2,7 +2,7 @@
 #define BOARD_H
 
 #include "graph/diagram_graph.h"
-#include "signal_processor.h"
+#include "view/signal_processor.h"
 #include "validator.h"
 #include "recoveyLog.h"
 #include <QWidget>

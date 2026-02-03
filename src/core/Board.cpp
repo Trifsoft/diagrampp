@@ -13,7 +13,7 @@
 #include <QMessageBox>
 
 Board::Board(QWidget *parent)
-    : QWidget(parent), ui(new Ui::Board), diagram(new DiagramGraph()), signal_processor(new signalProcessor()),
+    : QWidget(parent), ui(new Ui::Board), diagram(new DiagramGraph()), signal_processor(new signalProcessor(this)),
     recovery_log(new recoveryLog())
 {
     ui->setupUi(this);
@@ -67,13 +67,12 @@ CppClass* Board::get_view_from_node(SharedNodePtr node) {
 Board::~Board()
 {
     delete diagram;
-    delete ui;
-    delete scene;
     delete signal_processor;
     delete recovery_log;
-
     qDeleteAll(views);
     views.clear();
+    delete ui;
+    delete scene;
 }
 
 void Board::onCheckRadioButtonClicked(){
