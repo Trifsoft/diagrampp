@@ -1,4 +1,5 @@
 #include "graph/diagram_graph.h"
+#include <model/elements/composition/composition.h>
 
 void DiagramGraph::add_node(SharedNodePtr node) {
     if(m_diagram.find(node) != m_diagram.end()){
@@ -43,7 +44,7 @@ void DiagramGraph::add_branch(SharedNodePtr from, SharedNodePtr to, BranchType b
 }
 
 
-std::shared_ptr<NodeView> DiagramGraph::find_pointer_owner(NodeView *node_view)
+SharedNodePtr DiagramGraph::find_pointer_owner(Composition* node_view)
 {
     for(auto node : m_diagram){
         if(node.first.get() == node_view){
@@ -92,7 +93,7 @@ void DiagramGraph::remove_branch(SharedNodePtr from, SharedNodePtr to, BranchTyp
     }
 }
 
-std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& DiagramGraph::get_diagram(){
+graph_type& DiagramGraph::get_diagram(){
     return m_diagram;
 }
 
@@ -117,10 +118,10 @@ bool DiagramGraph::connection_exists(SharedNodePtr start_node, SharedNodePtr end
 void DiagramGraph::show_diagram(){
     for(auto &value : m_diagram){
         QDebug debug_stream = qDebug();
-        debug_stream << value.first->get_uml_class_diagram_node()->get_name() << ":";
+        debug_stream << value.first->get_name() << ":";
         std::vector<std::pair<SharedNodePtr, BranchType>>& sequence = value.second;
         for(auto &pairs : sequence){
-            debug_stream << pairs.first->get_uml_class_diagram_node()->get_name();
+            debug_stream << pairs.first->get_name();
         }
         qDebug() << "----";
     }

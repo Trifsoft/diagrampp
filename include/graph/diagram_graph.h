@@ -14,7 +14,7 @@
 class IUMLClassDiagramNode;
 class Composition;
 
-using SharedNodePtr = std::shared_ptr<NodeView>;
+using SharedNodePtr = std::shared_ptr<Composition>;
 using graph_type = std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>;
 
 class DiagramGraph : public QObject {
@@ -28,7 +28,7 @@ public:
 
     void add_branch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type);
     void remove_branch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type);
-    std::shared_ptr<NodeView> find_pointer_owner(NodeView *node_view);
+    SharedNodePtr find_pointer_owner(Composition *node_view);
 
 
     bool connection_exists(SharedNodePtr from, SharedNodePtr to, BranchType branch_type) const;
@@ -37,7 +37,7 @@ public:
     void show_diagram();
 #endif
 
-    std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& get_diagram();
+    graph_type& get_diagram();
 
 signals:
     void link_added(SharedNodePtr from, SharedNodePtr to, BranchType branch);

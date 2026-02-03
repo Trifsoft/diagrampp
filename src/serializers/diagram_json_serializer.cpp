@@ -28,8 +28,8 @@
  *
  */
 
-DiagramJsonSerializer::DiagramJsonSerializer(graph_type* m_diagram_graph) {
-    m_diagram = m_diagram_graph;
+DiagramJsonSerializer::DiagramJsonSerializer(Board* board) {
+    m_board = board;
     m_indentation_counter = 0;
 }
 
@@ -95,8 +95,10 @@ void DiagramJsonSerializer::serialize(std::ostream& output_stream){
     ++m_indentation_counter;
     SerializeHelpers::indent(output_stream, m_indentation_counter);
 
-    for (auto it = m_diagram->begin(); it != m_diagram->end(); ){
-        auto& node_view = it->first;
+    auto m_diagram = m_board->get_diagram()->get_diagram();
+
+    for (auto it = m_diagram.begin(); it != m_diagram.end(); ){
+        auto node_view = m_board->get_view_from_node(it->first);
         output_stream << "{\n";
         ++m_indentation_counter;
 
@@ -105,8 +107,8 @@ void DiagramJsonSerializer::serialize(std::ostream& output_stream){
         output_stream << ",\n";
 
         // 2) node
-        const auto node = node_view->get_uml_class_diagram_node(); // does not return const IUMLClassDiagramNode
-        call_corresponding_node_serializer(output_stream, node);
+        const auto node = node_view; // does not return const IUMLClassDiagramNode
+        call_corresponding_node_serializer(output_stream, it->first.get());
         output_stream << ",\n";
 
         // 3) neighbours (list of <{node, coords}, branch_type}>)
@@ -119,10 +121,10 @@ void DiagramJsonSerializer::serialize(std::ostream& output_stream){
             SerializeHelpers::indent(output_stream, m_indentation_counter); write_inheritance(output_stream, neighbour_it->second); output_stream << ",\n";
 
 
-            const auto& neighbour = neighbour_it->first->get_uml_class_diagram_node();
-            call_corresponding_node_serializer(output_stream, neighbour); output_stream << ",\n";
+            auto neighbour = m_board->get_view_from_node(neighbour_it->first);
+            call_corresponding_node_serializer(output_stream, neighbour_it->first.get()); output_stream << ",\n";
 
-            SerializeHelpers::indent(output_stream, m_indentation_counter); write_coords(output_stream, neighbour_it->first->x(), neighbour_it->first->y()); output_stream << '\n';
+            SerializeHelpers::indent(output_stream, m_indentation_counter); write_coords(output_stream, neighbour->x(), neighbour->y()); output_stream << '\n';
             --m_indentation_counter;
             SerializeHelpers::indent(output_stream, m_indentation_counter); output_stream << "}";
 
@@ -139,7 +141,7 @@ void DiagramJsonSerializer::serialize(std::ostream& output_stream){
         --m_indentation_counter;
         SerializeHelpers::indent(output_stream, m_indentation_counter); output_stream << "}";
 
-        if(++it == m_diagram->end()){
+        if(++it == m_diagram.end()){
             output_stream << '\n';
         }else{
             output_stream << ",\n";
@@ -152,7 +154,7 @@ void DiagramJsonSerializer::serialize(std::ostream& output_stream){
 
 }
 
-graph_type* DiagramJsonSerializer::deserialize(QJsonArray json_array){
+Board* DiagramJsonSerializer::deserialize(QJsonArray json_array){
 
     return nullptr;
 }

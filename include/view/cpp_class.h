@@ -87,7 +87,6 @@ private:
     void remove_connection_to(CppClass* target);
     QGraphicsPolygonItem* get_arrow(const BranchType branchType) const;
 
-    Board* m_board;
     std::shared_ptr<Composition> m_composition;
     int m_width;
     int m_height;
@@ -120,7 +119,7 @@ signals:
     void add_method_request(Composition* node, std::shared_ptr<Method> method);
     void edit_field_request(Composition* node, std::weak_ptr<Field> old_field, std::shared_ptr<Field> new_field);
     void edit_method_request(Composition* node, std::weak_ptr<Method> old_method,std::shared_ptr<Method> new_method);
-    void objectClicked(CppClass* node);
+    void objectClicked(Composition* node);
 
 };
 

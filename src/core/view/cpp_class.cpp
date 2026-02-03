@@ -325,7 +325,7 @@ void CppClass::edit_method(std::weak_ptr<Method> old_method_weak)
 }
 
 void CppClass::mousePressEvent(QGraphicsSceneMouseEvent* event){
-    emit objectClicked(this);
+    emit objectClicked(m_composition.get());
     QGraphicsItem::mousePressEvent(event);
 }
 

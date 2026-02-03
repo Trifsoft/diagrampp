@@ -51,6 +51,19 @@ Board::Board(QWidget *parent)
     connect(ui->removeMode, &QPushButton::clicked, this, &Board::onModeClicked);
 }
 
+DiagramGraph* Board::get_diagram() const {
+    return diagram;
+}
+
+CppClass* Board::get_view_from_node(SharedNodePtr node) {
+    for(auto view : views) {
+        if(view->get_uml_class_diagram_node() == node.get()) {
+            return view;
+        }
+    }
+    return nullptr;
+}
+
 Board::~Board()
 {
     delete diagram;
@@ -58,6 +71,9 @@ Board::~Board()
     delete scene;
     delete signal_processor;
     delete recovery_log;
+
+    qDeleteAll(views);
+    views.clear();
 }
 
 void Board::onCheckRadioButtonClicked(){
@@ -87,7 +103,7 @@ void Board::onModeClicked(){
     first_activated = second_activated = nullptr;
 }
 
-void Board::on_object_clicked(CppClass* clicked_object){
+void Board::on_object_clicked(Composition* clicked_object){
     if(!linkageMode && !removeMode){
         return;
     }
@@ -268,9 +284,8 @@ void Board::add_item(std::shared_ptr<Composition> node) {   //TODO [Nikola] - iz
     CppClass* item = new CppClass(this, node);
     scene->addItem(item);
     //dynamic_cast<CPPStruct*>(item->getClassDiagramNode().get())->parent = item;
-    diagram->add_node(std::shared_ptr<CppClass>(item));
-
-    connect(item, &CppClass::objectClicked, this, &Board::on_object_clicked);
+    diagram->add_node(node);
+    views.append(item);
 
     connect(item, &CppClass::objectClicked, this, &Board::on_object_clicked);
 

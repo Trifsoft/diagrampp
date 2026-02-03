@@ -3,6 +3,7 @@
 #include <QDebug>
 #include <string>
 #include <QString>
+#include <model/elements/composition/composition.h>
 
 
 namespace Validator {
@@ -81,13 +82,13 @@ namespace Validator {
     }
 
     bool check_linkage(std::string& errorMessage, SharedNodePtr first, SharedNodePtr second){
-        auto key = std::make_pair(first->get_uml_class_diagram_node()->get_label(), second->get_uml_class_diagram_node()->get_label());
+        auto key = std::make_pair(first->get_label(), second->get_label());
         auto it = combinations.find(key);
 
         if(it != combinations.end()){
             if(it->second == false){
-                errorMessage = "Can not " + first->get_uml_class_diagram_node()->get_label().toStdString()
-                    + "connect with " + second->get_uml_class_diagram_node()->get_label().toStdString();
+                errorMessage = "Can not " + first->get_label().toStdString()
+                    + "connect with " + second->get_label().toStdString();
             }
             return it->second;
         }

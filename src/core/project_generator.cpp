@@ -2,7 +2,7 @@
 #include "project_generator.h"
 #include "graph/diagram_graph.h"
 #include <unordered_set>
-#include "model/base/uml_class_diagram_node.h"
+#include <model/elements/composition/composition.h>
 #include <fstream>
 #include <filesystem>
 
@@ -39,7 +39,7 @@ namespace { // utlis
     }
 
     bool should_generate_cpp_file(SharedNodePtr node){
-        return !node->get_uml_class_diagram_node()->definition().isEmpty();
+        return !node->definition().isEmpty();
     }
 
     fs::path& append_n_times(fs::path& base_dir, std::vector<std::string>& dirs){
@@ -129,7 +129,7 @@ namespace { // utlis
         auto &nodes = retrieve_diagram_nodes(diagram);
         std::fstream file_stream;
         for (auto& node : nodes){
-            const auto& name = format_file_name(node->get_uml_class_diagram_node()->get_name().toStdString(), notation); // get name of struct/enum/class
+            const auto& name = format_file_name(node->get_name().toStdString(), notation); // get name of struct/enum/class
 
             if(should_generate_cpp_file(node)){ // generate defnitions code for Struct/Class
                 fs::path cpp_file_path = fs::path(root_path);
@@ -137,7 +137,7 @@ namespace { // utlis
                 file_stream.open(cpp_file_path.append(name).append(".cpp"), std::fstream::out);
 
                 if(file_stream.is_open()){
-                    file_stream << node->get_uml_class_diagram_node()->definition().toStdString();
+                    file_stream << node->definition().toStdString();
                     file_stream.close();
                 }else{
                     return ProjectGenerator::GenerationStatusCode::FILE_NOT_CREATED;
@@ -149,7 +149,7 @@ namespace { // utlis
             file_stream.open(hpp_file_path.append(name).append(".hpp"), std::fstream::out);
 
             if(file_stream.is_open()){
-                file_stream << node->get_uml_class_diagram_node()->declaration().toStdString();
+                file_stream << node->declaration().toStdString();
                 file_stream.close();
             }else{
                 return ProjectGenerator::GenerationStatusCode::FILE_NOT_CREATED;
