@@ -106,6 +106,11 @@ CppClass::CppClass(Board* board,std::shared_ptr<Composition> composition, QGraph
 
     setAcceptedMouseButtons(Qt::LeftButton | Qt::RightButton);
 
+    connect(composition.get(), &Composition::added_field, this, &CppClass::added_field);
+    connect(composition.get(), &Composition::added_method, this, &CppClass::added_method);
+    connect(composition.get(), &Composition::added_constructor, this, &CppClass::added_constructor);
+    connect(composition.get(), &Composition::added_copy_constructor, this, &CppClass::added_copy_constructor);
+
     //setup button
     m_add_button = new QPushButton("+");
     m_button_proxy = new QGraphicsProxyWidget(this);
@@ -127,11 +132,7 @@ CppClass::~CppClass(){
         }
     }
     m_connections.clear();
-    for(auto& text_item : m_textItems){
-        if(text_item){
-            delete text_item;
-        }
-    }
+    qDeleteAll(m_textItems);
     m_textItems.clear();
 }
 
@@ -164,9 +165,23 @@ void CppClass::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, 
     painter->drawRect(QRect(0, y_offset, m_width, 1));
 }
 
-void CppClass::change_composition(std::function<void(std::shared_ptr<Composition>)> change)
-{
-    change(m_composition);
+void CppClass::added_field(Field* field) {
+    updateBoundingRect();
+    update();
+}
+void CppClass::added_method(Method* method) {
+    updateBoundingRect();
+    update();
+}
+void CppClass::added_constructor(DefaultConstructor* field) {
+    updateBoundingRect();
+    update();
+}
+void CppClass::added_copy_constructor(Visibility field) {
+    updateBoundingRect();
+    update();
+}
+void CppClass::removed_copy_constructor() {
     updateBoundingRect();
     update();
 }
@@ -207,7 +222,7 @@ void CppClass::updateBoundingRect()
 void CppClass::update_button()
 {
     if (m_button_proxy && m_add_button) {
-        const int margin = 2;
+        const int margin = 0;//2;
         const int button_height = 24;
 
         m_add_button->setFixedSize(m_width-margin, button_height-margin);

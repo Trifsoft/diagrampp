@@ -1,11 +1,12 @@
 #ifndef UML_CLASS_DIAGRAM_NODE_H
 #define UML_CLASS_DIAGRAM_NODE_H
 
+#include <QObject>
 #include <QString>
 
 class CppClass;
 
-class IUMLClassDiagramNode : public std::enable_shared_from_this<IUMLClassDiagramNode> {
+class IUMLClassDiagramNode: public QObject {
 public:
     virtual ~IUMLClassDiagramNode() = default;
 

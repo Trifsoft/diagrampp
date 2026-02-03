@@ -46,7 +46,6 @@ public:
     QRectF boundingRect() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
 
-    void change_composition(std::function<void(std::shared_ptr<Composition>)> change);
     void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
 
     void addConnectionInfo(QGraphicsLineItem* line, bool isStart);
@@ -64,6 +63,12 @@ public:
     QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
     virtual Composition* get_uml_class_diagram_node() override;
 
+public slots:
+    void added_field(Field*);
+    void added_method(Method*);
+    void added_constructor(DefaultConstructor*);
+    void added_copy_constructor(Visibility);
+    void removed_copy_constructor();
 
 private:
     struct Connection {
