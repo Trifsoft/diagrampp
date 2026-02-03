@@ -32,11 +32,7 @@ protected:
     std::optional<Visibility> copy_constructor_visibility;
 
 signals:
-    void added_field(Field*);
-    void added_method(Method*);
-    void added_constructor(DefaultConstructor*);
-    void added_copy_constructor(Visibility);
-    void removed_copy_constructor();
+    void changed();
 
 public:
 
@@ -53,6 +49,7 @@ public:
     QString declaration() const override;
     QString definition() const override;
     QString get_name() const override;
+    void set_name(const QString&);
 
     QVector<const IClassElement*> get_code_elements() const;
     QMap<Visibility, QVector<const IClassElement*>> get_grouped_code_elements() const;

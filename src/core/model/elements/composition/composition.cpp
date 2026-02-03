@@ -136,7 +136,7 @@ void Composition::add_field(const QString& name, const QString& type, std::optio
 
 void Composition::add_field(std::shared_ptr<Field> field){
     fields.append(field);
-    emit added_field(field.get());
+    emit changed();
 }
 
 void Composition::add_method(const QString& name, const QString& type, MethodKind method_type, const QList<Argument*>& variables, std::optional<Visibility> visibility) {
@@ -147,7 +147,7 @@ void Composition::add_method(const QString& name, const QString& type, MethodKin
 
 void Composition::add_method(std::shared_ptr<Method> method){
     methods.append(method);
-    emit added_method(method.get());
+    emit changed();
 }
 
 
@@ -159,19 +159,24 @@ void Composition::add_constructor(const QVector<Argument*>& arguments, std::opti
 
 void Composition::add_constructor(std::shared_ptr<DefaultConstructor> constructor) {
     constructors.append(constructor);
-    emit added_constructor(constructor.get());
+    emit changed();
 }
 
 void Composition::add_copy_constructor(std::optional<Visibility> visibility) {
     Visibility vis = visibility.value_or(get_default_visibility());
     copy_constructor_visibility = visibility;
-    emit added_copy_constructor(vis);
+    emit changed();
 }
 void Composition::remove_copy_constructor() {
     copy_constructor_visibility = std::nullopt;
-    emit removed_copy_constructor();
+    emit changed();
 }
 
 QString Composition::get_name() const {
     return name;
+}
+
+void Composition::set_name(const QString& new_name) {
+    name = new_name;
+    emit changed();
 }

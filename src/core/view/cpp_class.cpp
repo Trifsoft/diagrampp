@@ -106,10 +106,7 @@ CppClass::CppClass(Board* board,std::shared_ptr<Composition> composition, QGraph
 
     setAcceptedMouseButtons(Qt::LeftButton | Qt::RightButton);
 
-    connect(composition.get(), &Composition::added_field, this, &CppClass::added_field);
-    connect(composition.get(), &Composition::added_method, this, &CppClass::added_method);
-    connect(composition.get(), &Composition::added_constructor, this, &CppClass::added_constructor);
-    connect(composition.get(), &Composition::added_copy_constructor, this, &CppClass::added_copy_constructor);
+    connect(composition.get(), &Composition::changed, this, &CppClass::composition_changed);
 
     //setup button
     m_add_button = new QPushButton("+");
@@ -165,23 +162,7 @@ void CppClass::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, 
     painter->drawRect(QRect(0, y_offset, m_width, 1));
 }
 
-void CppClass::added_field(Field* field) {
-    updateBoundingRect();
-    update();
-}
-void CppClass::added_method(Method* method) {
-    updateBoundingRect();
-    update();
-}
-void CppClass::added_constructor(DefaultConstructor* field) {
-    updateBoundingRect();
-    update();
-}
-void CppClass::added_copy_constructor(Visibility field) {
-    updateBoundingRect();
-    update();
-}
-void CppClass::removed_copy_constructor() {
+void CppClass::composition_changed() {
     updateBoundingRect();
     update();
 }

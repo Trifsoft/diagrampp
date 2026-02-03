@@ -64,11 +64,7 @@ public:
     virtual Composition* get_uml_class_diagram_node() override;
 
 public slots:
-    void added_field(Field*);
-    void added_method(Method*);
-    void added_constructor(DefaultConstructor*);
-    void added_copy_constructor(Visibility);
-    void removed_copy_constructor();
+    void composition_changed();
 
 private:
     struct Connection {
