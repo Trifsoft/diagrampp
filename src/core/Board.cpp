@@ -11,7 +11,6 @@
 #include <QDir>
 #include "generate_project_dialog.h"
 #include <QMessageBox>
-#include <validator.h>
 
 Board::Board(QWidget *parent)
     : QWidget(parent), ui(new Ui::Board), diagram(new DiagramGraph()), signal_processor(new signalProcessor(this)),
@@ -105,17 +104,17 @@ void Board::onModeClicked(){
 }
 
 
-void Board::add_node_relationship(SharedNodePtr node, SharedNodePtr neighbour, BranchType branch_type){
-    const bool connection_exists = diagram->connection_exists(node, neighbour, branch_type);
-    if(!connection_exists){
-        std::string error_message;
-        diagram->add_branch(node, neighbour, branch_type);
-        if(!Validator::validate(error_message, node, neighbour, branch_type, diagram->get_diagram())){
-            QMessageBox::warning(this, "Warning", QString::fromStdString(error_message));
-            diagram->remove_branch(node, neighbour, branch_type);
-        }
-    }else {
-        QMessageBox::warning(this, "Warning", "Connection already exists.");
+void Board::add_branch(SharedNodePtr node, SharedNodePtr neighbour, BranchType branch_type){
+    const auto& error_message = diagram->add_branch(node, neighbour, branch_type);
+    if(error_message.has_value()){
+        QMessageBox::warning(this, "Warning", QString::fromStdString(error_message.value()));
+    }
+}
+
+void Board::remove_branch(SharedNodePtr node, SharedNodePtr neighbour, BranchType branch_type){
+    const auto remove_status = diagram->remove_branch(node, neighbour, branch_type);
+    if(!remove_status){
+        QMessageBox::warning(this, "Warning", QString::fromStdString("Connection doesn't exsist"));
     }
 }
 
@@ -137,13 +136,9 @@ void Board::on_object_clicked(Composition* clicked_object){
     }
 
     if((first_activated && second_activated) && linkageMode){
-        add_node_relationship(first_activated, second_activated, branch_type);
+        add_branch(first_activated, second_activated, branch_type);
     }else if((first_activated && second_activated) && removeMode){
-        if(!diagram->connection_exists(first_activated, second_activated, branch_type)){
-            QMessageBox::warning(this, "Warning", QString::fromStdString("Connection doesn't exsist"));
-        }else{
-            diagram->remove_branch(first_activated, second_activated, branch_type);
-        }
+        remove_branch(first_activated, second_activated, branch_type);
     }
 
     #if DEBUG_MODE>=1

@@ -8,7 +8,6 @@
 #include <view/node_view.h>
 #include <QObject>
 
-
 #define DEBUG_MODE 2
 
 class IUMLClassDiagramNode;
@@ -26,12 +25,10 @@ public:
     void add_node(SharedNodePtr node);
     void remove_node(SharedNodePtr node);
 
-    void add_branch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type);
-    void remove_branch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type);
+    std::optional<std::string> add_branch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type);
+    bool remove_branch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type);
+
     SharedNodePtr find_pointer_owner(Composition *node_view);
-
-
-    bool connection_exists(SharedNodePtr from, SharedNodePtr to, BranchType branch_type) const;
 
 #if DEBUG_MODE >= 1
     void show_diagram();
@@ -47,9 +44,9 @@ signals:
 private:
     // disscussion, shared or weak
     graph_type m_diagram;
-
     void remove_neighbour(SharedNodePtr from, SharedNodePtr to, BranchType branch_type);
     void add_neighbour(SharedNodePtr from, SharedNodePtr to, BranchType branch_type);
+    bool connection_exists(SharedNodePtr from, SharedNodePtr to, BranchType branch_type) const;
 };
 
 #endif // DIAGRAM_GRAPH_H
