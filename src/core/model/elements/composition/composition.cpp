@@ -163,7 +163,6 @@ void Composition::add_constructor(std::shared_ptr<DefaultConstructor> constructo
 }
 
 void Composition::add_copy_constructor(std::optional<Visibility> visibility) {
-    Visibility vis = visibility.value_or(get_default_visibility());
     copy_constructor_visibility = visibility;
     emit changed();
 }

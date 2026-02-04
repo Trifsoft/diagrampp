@@ -13,7 +13,7 @@ class CppClass;
 class CPPEnum : public IUMLClassDiagramNode {
 private:
     QString name;
-    QVector<CPPEnumValue> values;
+    QList<CPPEnumValue*> values;
 
 public:
     explicit CPPEnum(const QString& name);
@@ -23,7 +23,7 @@ public:
 
     void add_value(const QString& name, std::optional<int> value = std::nullopt);
     QString get_name() const override;
-    QVector<CPPEnumValue> get_values() const;
+    QList<CPPEnumValue*> get_values() const;
     QString get_label() const override;
 };
 
