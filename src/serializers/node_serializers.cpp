@@ -1,40 +1,13 @@
+#include <model/elements/composition/cpp_class.h>
+#include <model/elements/composition/cpp_struct.h>
 #include <serializers/node_serializers.h>
 #include <serializers/utils/utils.h>
 #include <serializers/composition_element_serializers.h>
 
-
-/*
- * Enum:
- * - label
- * - name
- * - enum values
- */
-
 namespace {
-    void serialize_enum_value(std::ostream& output_stream, int indentation_counter, const CPPEnumValue* enum_value){
-        output_stream << "{\n";
-        ++indentation_counter;
-        SerializeHelpers::write_indented_string_field(output_stream, indentation_counter, "name", enum_value->get_name().toStdString());
-        output_stream << ",\n";
-
-
-        if(enum_value->get_value().has_value()){ //  value is optional
-            SerializeHelpers::write_indented_field(output_stream, indentation_counter, "value", enum_value->get_value().value());
-            output_stream << "\n";
-        }
-        --indentation_counter;
-        SerializeHelpers::indent(output_stream, indentation_counter); output_stream<< "}";
-    }
 
     std::string serialize_visibility_value(const Visibility visibility){
-        switch(visibility){
-        case Visibility::Private:
-            return "private";
-        case Visibility::Protected:
-            return "protected";
-        case Visibility::Public:
-            return "public";
-        }
+        return get_declaration(visibility).toStdString();
     }
 
     Visibility deserialize_visibility_value(const std::string& visibility){
@@ -48,48 +21,9 @@ namespace {
     }
 };
 
-void NodeSerializers::serialize_enum_node(std::ostream& output_stream, int indentation_counter, const CPPEnum* enum_node){
-    output_stream<< "{\n";
-    ++indentation_counter;
-
-    SerializeHelpers::write_indented_string_field(output_stream, indentation_counter, "label", "enum");
-    output_stream << ",\n";
-    SerializeHelpers::write_indented_string_field(output_stream, indentation_counter, "name", enum_node->get_name().toStdString());
-    output_stream << ",\n";
-
-    SerializeHelpers::write_indented_serialized_list_field<CPPEnumValue>(output_stream, indentation_counter, "values", enum_node->get_values(), &serialize_enum_value);
-
-    --indentation_counter;
-    SerializeHelpers::indent(output_stream, indentation_counter); output_stream<< "]\n";
-    --indentation_counter;
-    SerializeHelpers::indent(output_stream, indentation_counter); output_stream<< "}";
-}
-
-std::shared_ptr<CPPEnum> NodeSerializers::deserialize_enum_node(QJsonObject json_enum) {
-    QString name = json_enum["name"].toString();
-
-    std::shared_ptr<CPPEnum> enum_node = std::make_shared<CPPEnum>(name);
-
-    const QJsonArray& json_enum_values = json_enum["values"].toArray();
-    for (const QJsonValue& json_value : json_enum_values){
-        const QJsonObject& json_enum_value = json_value.toObject();
-        const auto& name = json_enum_value["name"].toString();
-
-        int value;
-        if(json_enum_value.contains("value")){
-            value = json_enum_value["value"].toInt();
-            enum_node->add_value(name, value);
-        }else {
-            enum_node->add_value(name);
-        }
-    }
-    return enum_node;
-}
-
-
-
 void NodeSerializers::serialize_composition_node(std::ostream& output_stream, int indentation_counter, const Composition* composition_node)
 {
+    SerializeHelpers::write_with_quotes(output_stream, "node");
     output_stream<< "{\n";
     ++indentation_counter;
 
@@ -99,10 +33,7 @@ void NodeSerializers::serialize_composition_node(std::ostream& output_stream, in
     output_stream << ",\n";
 
 
-    // [TODO] SERIALIZE VISIBILITY & INHERITANCE
-    // implement get methods for visiblity and inheritance in composition
-
-
+    // [TODO] SERIALIZE copy constructor visibility
 
 
     // CONSTRUCTORS
@@ -113,9 +44,11 @@ void NodeSerializers::serialize_composition_node(std::ostream& output_stream, in
 
     SerializeHelpers::write_indented_serialized_list_field<DefaultConstructor>(output_stream, indentation_counter, "constructors", constructors_raw_pointers, &CompositionElementSerializers::serialize_constructor);
 
-    // DESTRUCTOR
-    bool has_destructor = nullptr != composition_node->get_copy_constructor();
-    SerializeHelpers::write_indented_field(output_stream, indentation_counter, "destructor", (has_destructor ? 1 : 0));
+    // COPY CONSTRUCTOR
+    bool has_copy_ctor = nullptr != composition_node->get_copy_constructor();
+    if(has_copy_ctor){
+        SerializeHelpers::write_indented_field(output_stream, indentation_counter, "copy_constructor", 1);
+    }
     output_stream << ",\n";
 
     // FIELDS
@@ -141,18 +74,31 @@ void NodeSerializers::serialize_composition_node(std::ostream& output_stream, in
 
 std::shared_ptr<Composition> NodeSerializers::deserialize_composition_node(const QJsonObject json_composition){
     const auto& name = json_composition["name"].toString();
-    const auto& label = json_composition["lable"].toString();
-
     const auto visibility = deserialize_visibility_value(json_composition["visibility"].toString().toStdString());
 
-    // get inheritance
-    // for object creation:
-    // - name
-    // - visibility
-    // - inheritance
+    Composition* composition_node = nullptr;
+    const auto& label = json_composition["label"].toString();
+    if(label == "class"){
+        composition_node = new CPPClass(name, visibility);
+    }else{ // label == "struct"
+        composition_node = new CPPStruct(name, visibility);
+    }
 
+    const auto& json_fields = json_composition["fields"].toArray();
+    for (const auto& json_field : json_fields){
+        const auto field = CompositionElementSerializers::deserialize_field(json_field.toObject());
+        composition_node->add_field(std::shared_ptr<Field>(field));
+    }
 
-    // rest is through add methods
+    const auto& json_methods = json_composition["methods"].toArray();
+    for (const auto& json_method : json_methods){
+        const auto method = CompositionElementSerializers::deserialize_method(json_method.toObject());
+        composition_node->add_method(std::shared_ptr<Method>(method));
+    }
 
+    if(json_composition.contains("copy_constructor")){
+        composition_node->add_copy_constructor(Visibility::Public);
+    }
 
+    return std::shared_ptr<Composition>(composition_node);
 }
