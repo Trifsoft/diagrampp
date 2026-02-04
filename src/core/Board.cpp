@@ -357,15 +357,14 @@ void Board::on_generate_project(){
         std::string path = dialog.get_selected_path().toStdString();
         ProjectGenerator::FileNameNotation notation = dialog.get_selected_notation();
         ProjectGenerator::ReplaceToggle toggle = dialog.get_selected_toggle();
-        std::string project_dir_name = ui->title->text().toStdString();
-        if(!path.empty()){
-            ProjectGenerator::GenerationStatusCode status = ProjectGenerator::generate(
-                diagram->get_diagram(),
-                path,
-                project_dir_name,
-                notation,
-                toggle
-                );
-        }
+        std::string project_dir_name = dialog.get_project_dir_name().toStdString();
+        ProjectGenerator::GenerationStatusCode status = ProjectGenerator::generate(
+            diagram->get_diagram(),
+            path,
+            project_dir_name,
+            notation,
+            toggle
+            );
+
     }
 }

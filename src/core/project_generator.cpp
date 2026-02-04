@@ -161,7 +161,6 @@ namespace { // utlis
 
 ProjectGenerator::GenerationStatusCode ProjectGenerator::generate(const graph_type& diagram, const std::string& path, std::string& project_dir_name, const ProjectGenerator::FileNameNotation notation, const ProjectGenerator::ReplaceToggle replace_mode){
     namespace fs = std::filesystem;
-
     // ensures project_dir_name is string, NOT path string
     project_dir_name.erase(std::remove(project_dir_name.begin(), project_dir_name.end(), '/'), project_dir_name.end());
     project_dir_name.erase(std::remove(project_dir_name.begin(), project_dir_name.end(), '\\'), project_dir_name.end());

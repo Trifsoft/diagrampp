@@ -31,7 +31,6 @@ target_include_directories()
 add_executable()
 target_link_libraries())";
 
-    // definition goes globally everytime included because of header files. (fixed with inline)
     inline std::map<std::string, std::vector<std::string>> project_hierarchy = {
         {"include", {}},
         {"src", {"core", "utils"}},
