@@ -56,6 +56,8 @@ set(CORE_HEADERS
     include/commandManager/command.h
     include/commandManager/add_node_command.h
     include/commandManager/remove_node_command.h
+    include/commandManager/add_branch_command.h
+    include/commandManager/remove_branch_command.h
     include/project_generator.h
     include/model/base/branches.h
     include/model/base/branches.h
@@ -109,11 +111,10 @@ set(CORE_SOURCES
     src/commandManager/command_manager.cpp
     src/commandManager/add_node_command.cpp
     src/commandManager/remove_node_command.cpp
-    src/commandManager/command_manager.cpp
+    src/commandManager/add_branch_command.cpp
+    src/commandManager/remove_branch_command.cpp
     src/core/project_generator.cpp
     src/core/model/base/branchs.cpp
-    src/commandManager/command_manager.cpp
-    src/commandManager/add_node_command.cpp
     src/core/view/node_view.cpp
     src/core/view/member_dialog_base.cpp
     src/core/view/field_dialog.cpp

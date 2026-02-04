@@ -84,7 +84,6 @@ void DiagramGraph::add_neighbour(SharedNodePtr from, SharedNodePtr to, BranchTyp
 
 void DiagramGraph::remove_branch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type) {
     remove_neighbour(from, to, branch_type);
-    emit link_removed(from, to, branch_type);
 
     if(branch_type == BranchType::ASSOCIATION){
         remove_neighbour(to, from, branch_type);

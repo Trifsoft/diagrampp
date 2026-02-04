@@ -1,5 +1,4 @@
 #include "commandManager/remove_node_command.h"
-#include "model/base/uml_class_diagram_node.h"
 #include <QDebug>
 
 RemoveNodeCommand::RemoveNodeCommand(DiagramGraph* graph, SharedNodePtr node)

@@ -148,7 +148,7 @@ namespace Validator {
             }
         }
 
-        for(SharedNodePtr start : all_nodes){
+        for(const SharedNodePtr& start : all_nodes){
             if (detect_diamond(start, diagram)) {
                 return true;
             }

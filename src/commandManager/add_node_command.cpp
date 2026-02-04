@@ -1,5 +1,4 @@
 #include "commandManager/add_node_command.h"
-#include "model/base/uml_class_diagram_node.h"
 #include <QDebug>
 
 AddNodeCommand::AddNodeCommand(DiagramGraph* graph,
