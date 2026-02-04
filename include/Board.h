@@ -48,6 +48,7 @@ public slots:
 
     void onGenerateClicked(const QString& class_name, NodeType node_type);
     void on_object_clicked(Composition* clickedClass);
+    void on_generate_project();
 
     void on_add_field_requested(Composition* node, std::shared_ptr<Field> field);
     void on_add_method_requested(Composition* node, std::shared_ptr<Method>  method);

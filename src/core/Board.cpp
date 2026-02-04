@@ -9,7 +9,7 @@
 #include "nodefactory.h"
 #include <QFileDialog>
 #include <QDir>
-#include "image_paths.h"
+#include "generate_project_dialog.h"
 #include <QMessageBox>
 
 Board::Board(QWidget *parent)
@@ -36,6 +36,7 @@ Board::Board(QWidget *parent)
     connect(diagram, &DiagramGraph::node_removed, recovery_log, &recoveryLog::remove_node_operation);
 
     connect(ui->exportPNG, &QPushButton::clicked, this, &Board::exportPNG);
+    connect(ui->generate_project, &QPushButton::clicked, this, &Board::on_generate_project);
 
     // Connect buttons to slots
     connect(ui->add_class, &QPushButton::clicked, this, &Board::onAddClassClicked);
@@ -334,5 +335,24 @@ void Board::exportPNG(){
                                         .arg(file_name).arg(image.width()).arg(image.height()));
     }else{
         QMessageBox::critical(this, "Error", "Failed to save image. Check write permissions.");
+    }
+}
+
+void Board::on_generate_project(){
+    generateProjectDialog dialog(this);
+    if(dialog.exec() == QDialog::Accepted){
+        std::string path = dialog.get_selected_path().toStdString();
+        ProjectGenerator::FileNameNotation notation = dialog.get_selected_notation();
+        ProjectGenerator::ReplaceToggle toggle = dialog.get_selected_toggle();
+        std::string project_dir_name = ui->title->text().toStdString();
+        if(!path.empty()){
+            ProjectGenerator::GenerationStatusCode status = ProjectGenerator::generate(
+                diagram->get_diagram(),
+                path,
+                project_dir_name,
+                notation,
+                toggle
+                );
+        }
     }
 }
