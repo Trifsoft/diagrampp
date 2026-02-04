@@ -106,13 +106,13 @@ void Board::onModeClicked(){
 
 
 std::optional<std::string> Board::add_node_relationship(SharedNodePtr node, SharedNodePtr neighbour, BranchType branch_type){
-    auto connection_exists = diagram->connection_exists(first_activated, second_activated, branch_type);
+    auto connection_exists = diagram->connection_exists(node, neighbour, branch_type);
     if(!connection_exists){
         std::string errorMessage;
-        diagram->add_branch(first_activated, second_activated, branch_type);
+        diagram->add_branch(node, neighbour, branch_type);
 
-        if(!Validator::validate(errorMessage, first_activated, second_activated, branch_type, diagram->get_diagram())){
-            diagram->remove_branch(first_activated, second_activated, branch_type);
+        if(!Validator::validate(errorMessage, node, neighbour, branch_type, diagram->get_diagram())){
+            diagram->remove_branch(node, neighbour, branch_type);
             QMessageBox::warning(this, "Warning", QString::fromStdString(errorMessage));
         }
     }else if(connection_exists){
