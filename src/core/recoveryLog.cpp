@@ -5,6 +5,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <pwd.h>
+#include <model/elements/composition/composition.h>
 
 recoveryLog::recoveryLog(const std::string& _file_name) : file_name(_file_name){
     if(std::filesystem::exists(file_name)){
@@ -31,8 +32,8 @@ recoveryLog::~recoveryLog(){
 
 void recoveryLog::add_link_operation(SharedNodePtr from, SharedNodePtr to, BranchType branch_type) {
     qDebug() << log_file.is_open();
-    std::string child = from->get_uml_class_diagram_node()->get_name().toStdString();
-    std::string parent = to->get_uml_class_diagram_node()->get_name().toStdString();
+    std::string child = from->get_name().toStdString();
+    std::string parent = to->get_name().toStdString();
     log_file << std::left
              << "[" << get_current_timestamp() << "]"
              << std::setw(OPERATION_WIDTH) << " [ADD LINK] "
@@ -41,8 +42,8 @@ void recoveryLog::add_link_operation(SharedNodePtr from, SharedNodePtr to, Branc
 }
 
 void recoveryLog::remove_link_operation(SharedNodePtr from, SharedNodePtr to, BranchType branch_type) {
-    std::string child = from->get_uml_class_diagram_node()->get_name().toStdString();
-    std::string parent = to->get_uml_class_diagram_node()->get_name().toStdString();
+    std::string child = from->get_name().toStdString();
+    std::string parent = to->get_name().toStdString();
     log_file << std::left
              << "[" << get_current_timestamp() << "]"
              << std::setw(OPERATION_WIDTH) << " [REMOVE LINK] "
@@ -52,7 +53,7 @@ void recoveryLog::remove_link_operation(SharedNodePtr from, SharedNodePtr to, Br
 }
 
 void recoveryLog::remove_node_operation(SharedNodePtr target) {
-    std::string node = target->get_uml_class_diagram_node()->get_name().toStdString();
+    std::string node = target->get_name().toStdString();
     log_file << "[" << get_current_timestamp() << "]"
              << std::setw(OPERATION_WIDTH) << " [REMOVE NODE] "
              << std::setw(INFO_WIDTH) << node << "\n";

@@ -32,7 +32,6 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
-    delete project;
     delete ui;
 }
 
@@ -69,6 +68,6 @@ void MainWindow::onHelpClicked()
 
 void MainWindow::onExampleClicked()
 {
-    project = new Board();
+    auto project = new Board();
     project->show();
 }

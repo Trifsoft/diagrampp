@@ -2,7 +2,7 @@
 #define BOARD_H
 
 #include "graph/diagram_graph.h"
-#include "signal_processor.h"
+#include "view/signal_processor.h"
 #include "validator.h"
 #include "recoveyLog.h"
 #include <QWidget>
@@ -31,21 +31,23 @@ public:
     Board(QWidget *parent = nullptr);
     ~Board();
 
-    const DiagramGraph* get_diagram() const;
+    DiagramGraph* get_diagram() const;
+    CppClass* get_view_from_node(SharedNodePtr);
 
     BranchType branchType = BranchType::INHERITANCE;
     bool linkageMode = false;
     bool removeMode = false;
 
-private slots:
+public slots:
     void onAddClassClicked();
     void onAddInterfaceClicked();
     void onAddEnumClicked();
     void onCheckRadioButtonClicked();
     void onModeClicked();
-    void onGenerateClicked(const QString& class_name, NodeType node_type);
-    void on_object_clicked(CppClass* clickedClass);
+    void exportPNG();
 
+    void onGenerateClicked(const QString& class_name, NodeType node_type);
+    void on_object_clicked(Composition* clickedClass);
 
     void on_add_field_requested(Composition* node, std::shared_ptr<Field> field);
     void on_add_method_requested(Composition* node, std::shared_ptr<Method>  method);
@@ -53,12 +55,15 @@ private slots:
     void on_edit_method_requested(Composition* node, std::weak_ptr<Method> old_method_weak, std::shared_ptr<Method>  new_method);
 private:
     DiagramGraph *diagram;
+    QList<CppClass*> views;
+
     Ui::Board *ui;
     signalProcessor *signal_processor;
     recoveryLog *recovery_log;
 
     SharedNodePtr first_activated = nullptr;
     SharedNodePtr second_activated = nullptr;
+
     void add_item(std::shared_ptr<Composition> item);
     void openNodeFactory(NodeType node_type);
 };

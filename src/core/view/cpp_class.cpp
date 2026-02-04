@@ -96,7 +96,6 @@ void EditableTextItem::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
 // CppClass implementation
 CppClass::CppClass(Board* board,std::shared_ptr<Composition> composition, QGraphicsObject* parent)
     : NodeView(parent)
-    , m_board(board)
     , m_composition(composition)
 {
     setFlag(QGraphicsItem::ItemIsSelectable, true);
@@ -105,6 +104,8 @@ CppClass::CppClass(Board* board,std::shared_ptr<Composition> composition, QGraph
     setFlag(QGraphicsItem::ItemSendsGeometryChanges, true);
 
     setAcceptedMouseButtons(Qt::LeftButton | Qt::RightButton);
+
+    connect(composition.get(), &Composition::changed, this, &CppClass::composition_changed);
 
     //setup button
     m_add_button = new QPushButton("+");
@@ -127,11 +128,7 @@ CppClass::~CppClass(){
         }
     }
     m_connections.clear();
-    for(auto& text_item : m_textItems){
-        if(text_item){
-            delete text_item;
-        }
-    }
+    qDeleteAll(m_textItems);
     m_textItems.clear();
 }
 
@@ -164,9 +161,7 @@ void CppClass::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, 
     painter->drawRect(QRect(0, y_offset, m_width, 1));
 }
 
-void CppClass::change_composition(std::function<void(std::shared_ptr<Composition>)> change)
-{
-    change(m_composition);
+void CppClass::composition_changed() {
     updateBoundingRect();
     update();
 }
@@ -207,7 +202,7 @@ void CppClass::updateBoundingRect()
 void CppClass::update_button()
 {
     if (m_button_proxy && m_add_button) {
-        const int margin = 2;
+        const int margin = 0;//2;
         const int button_height = 24;
 
         m_add_button->setFixedSize(m_width-margin, button_height-margin);
@@ -329,7 +324,7 @@ void CppClass::edit_method(std::weak_ptr<Method> old_method_weak)
 }
 
 void CppClass::mousePressEvent(QGraphicsSceneMouseEvent* event){
-    emit objectClicked(this);
+    emit objectClicked(m_composition.get());
     QGraphicsItem::mousePressEvent(event);
 }
 

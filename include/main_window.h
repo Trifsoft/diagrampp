@@ -2,7 +2,6 @@
 #define MAIN_WINDOW_H
 
 #include <QWidget>
-#include "Board.h"
 #include <ui_main_window.h>
 
 QT_BEGIN_NAMESPACE
@@ -28,6 +27,5 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    Board* project;
 };
 #endif // MAINWINDOW_H

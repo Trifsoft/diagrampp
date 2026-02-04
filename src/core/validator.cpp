@@ -3,6 +3,7 @@
 #include <QDebug>
 #include <string>
 #include <QString>
+#include <model/elements/composition/composition.h>
 
 
 namespace Validator {
@@ -28,10 +29,6 @@ namespace Validator {
         if(!check_linkage(errorMessage, child, parent)){
             return false;
         }
-        if(!check_multiple_conneciton(child, parent, diagram)){
-            errorMessage = "Connection alreardy exsists";
-            return false;
-        }
 
         bool result;
         switch (branchType){
@@ -42,19 +39,6 @@ namespace Validator {
                 result = validate_others(errorMessage, branchType, child, parent, diagram);
         }
         return result;
-    }
-
-    bool check_multiple_conneciton(SharedNodePtr child, SharedNodePtr parent,
-                                   const std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram){
-        auto& value = diagram.at(child);
-        int count = 0;
-        for(auto& pair : value){
-            if(pair.first == parent){
-                count++;
-            }
-        }
-        return count >= 2 ? false : true;
-
     }
     bool validate_inheritance(std::string& errorMessage, SharedNodePtr child, SharedNodePtr parent, const std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram){
         //if(isInterface(child) || isAbstract(child))
@@ -73,7 +57,7 @@ namespace Validator {
     bool validate_others(std::string& errorMessage, BranchType branchType, SharedNodePtr child, SharedNodePtr parent, const std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram){
         if(branchType == BranchType::COMPOSITION || branchType == BranchType::AGGREGATION){
             if(check_cycle(child, branchType, diagram)){
-                errorMessage = "Connection creates circular problem";
+                errorMessage = "Connection creates circular inheritance problem";
                 return false;
             }
         }
@@ -81,13 +65,13 @@ namespace Validator {
     }
 
     bool check_linkage(std::string& errorMessage, SharedNodePtr first, SharedNodePtr second){
-        auto key = std::make_pair(first->get_uml_class_diagram_node()->get_label(), second->get_uml_class_diagram_node()->get_label());
+        auto key = std::make_pair(first->get_label(), second->get_label());
         auto it = combinations.find(key);
 
         if(it != combinations.end()){
             if(it->second == false){
-                errorMessage = "Can not " + first->get_uml_class_diagram_node()->get_label().toStdString()
-                    + "connect with " + second->get_uml_class_diagram_node()->get_label().toStdString();
+                errorMessage = "Can not " + first->get_label().toStdString()
+                    + "connect with " + second->get_label().toStdString();
             }
             return it->second;
         }
@@ -101,7 +85,7 @@ namespace Validator {
              const std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram){
         in_stack[node] = true;
 
-        auto& it = diagram.at(node);
+        auto it = diagram.at(node);
         for(auto& pair : it){
             if(pair.second == branch_type){
                 if(in_stack[pair.first]){
@@ -129,7 +113,7 @@ namespace Validator {
                         std::unordered_map<SharedNodePtr, int>& reach_count){
 
         reach_count[node]++;
-        auto& it = diagram.at(node);
+        auto it = diagram.at(node);
         for(const auto& [child, branchType] : it){
             if(branchType == BranchType::INHERITANCE){
                 paths_to_base(child, diagram, reach_count);

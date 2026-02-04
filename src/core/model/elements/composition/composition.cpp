@@ -130,34 +130,53 @@ QString Composition::definition() const {
 
 void Composition::add_field(const QString& name, const QString& type, std::optional<Visibility> visibility) {
     Visibility vis = visibility.value_or(get_default_visibility());
-
-    fields.append(std::make_shared<Field>(name, type, vis));
+    auto field = std::make_shared<Field>(name, type, vis);
+    add_field(field);
 }
 
 void Composition::add_field(std::shared_ptr<Field> field){
     fields.append(field);
+    emit changed();
 }
 
-void Composition::add_method(const QString& name, const QString& type, Visibility visibility, MethodKind method_type, const QList<Argument*>& variables) {
-    methods.append(std::make_shared<Method>(name, type, visibility, method_type, variables));
+void Composition::add_method(const QString& name, const QString& type, MethodKind method_type, const QList<Argument*>& variables, std::optional<Visibility> visibility) {
+    Visibility vis = visibility.value_or(get_default_visibility());
+    auto method = std::make_shared<Method>(name, type, vis, method_type, variables);
+    add_method(method);
 }
 
 void Composition::add_method(std::shared_ptr<Method> method){
     methods.append(method);
+    emit changed();
 }
 
 
-void Composition::add_constructor(Visibility visibility, const QVector<Argument*>& arguments) {
-    constructors.append(std::make_shared<DefaultConstructor>(name, arguments, visibility));
+void Composition::add_constructor(const QVector<Argument*>& arguments, std::optional<Visibility> visibility) {
+    Visibility vis = visibility.value_or(get_default_visibility());
+    auto constructor = std::make_shared<DefaultConstructor>(name, arguments, vis);
+    add_constructor(constructor);
 }
 
-void Composition::add_copy_constructor(Visibility visibility) {
+void Composition::add_constructor(std::shared_ptr<DefaultConstructor> constructor) {
+    constructors.append(constructor);
+    emit changed();
+}
+
+void Composition::add_copy_constructor(std::optional<Visibility> visibility) {
+    Visibility vis = visibility.value_or(get_default_visibility());
     copy_constructor_visibility = visibility;
+    emit changed();
 }
 void Composition::remove_copy_constructor() {
     copy_constructor_visibility = std::nullopt;
+    emit changed();
 }
 
 QString Composition::get_name() const {
     return name;
+}
+
+void Composition::set_name(const QString& new_name) {
+    name = new_name;
+    emit changed();
 }
