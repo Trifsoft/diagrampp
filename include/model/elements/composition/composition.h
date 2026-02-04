@@ -62,13 +62,15 @@ public:
     
     void add_constructor(const QVector<Argument*>& arguments, std::optional<Visibility> visibility = std::nullopt);
     void add_constructor(std::shared_ptr<DefaultConstructor>);
+    void inherits(Visibility visibility, Composition* base_node);
+    void break_inheritance();
+    std::optional<std::pair<Visibility, Composition*>> get_inheritance() const;
 
     void add_copy_constructor(std::optional<Visibility> visibility = std::nullopt);
     void remove_copy_constructor();
 
     int get_field_count();
     int get_method_count();
-
 };
 
 #endif // COMPOSITION_H
