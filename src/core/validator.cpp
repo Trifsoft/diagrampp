@@ -1,34 +1,8 @@
-namespace Validator
+#include "validator.h"
 
-    namespace {
-        static const std::map<std::pair<QString, QString>, bool> combinations = {
-            {{"class", "class"}, true},
-            {{"class", "struct"}, true},
-            {{"class", "enum"}, false},
-            {{"struct", "class"}, true},
-            {{"struct", "struct"}, true},
-            {{"struct", "enum"}, false},
-            {{"enum", "class"}, true},
-            {{"enum", "struct"}, true},
-            {{"enum", "enum"}, false}
-        };
+namespace Validator{
 
-        bool check_linkage(std::string& errorMessage, SharedNodePtr first, SharedNodePtr second){
-            auto key = std::make_pair(first->get_uml_class_diagram_node()->get_label(),
-                                      second->get_uml_class_diagram_node()->get_label());
-            auto it = combinations.find(key);
-
-            if(it != combinations.end()){
-                if(!it->second){
-                    errorMessage = "Can not " + first->get_uml_class_diagram_node()->get_label().toStdString()
-                    + " connect with " + second->get_uml_class_diagram_node()->get_label().toStdString();
-                }
-                return it->second;
-            }
-            qDebug() << "Unknown combination";
-            return false;
-        }
-
+    namespace{
         bool check_multiple_connection(SharedNodePtr child, SharedNodePtr parent,
                                        const std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram){
             auto value = diagram.at(child);
@@ -140,15 +114,13 @@ namespace Validator
             }
             return true;
         }
+    }
     bool validate(std::string& errorMessage, SharedNodePtr child,
                   SharedNodePtr parent,
                   BranchType branchType,
                   const std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram){
         if(child == parent){
             errorMessage = "Cannot self connection";
-            return false;
-        }
-        if(!check_linkage(errorMessage, child, parent)){
             return false;
         }
         bool result;
@@ -161,5 +133,4 @@ namespace Validator
         }
         return result;
     }
-
 }
