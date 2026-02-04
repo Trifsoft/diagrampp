@@ -7,11 +7,11 @@
 #include <Board.h>
 
 /*
- * serialize:
+ * serialize function:
  * function is responsible for destructuring diagram into nodes and calling corresponding serializer
  *
  *
- * deserialize:
+ * deserialize function:
  * function is resposible for destructuring json, and serves corresponding deserializer with json array or json object
  *
  */
@@ -28,15 +28,13 @@ private:
 
     std::pair<double, double> deserialize_coords(QJsonObject json_coords) const;
     BranchType deserialize_branch_type(QJsonValue json_branch_type) const;
-    std::shared_ptr<IUMLClassDiagramNode> deserialize_node(QJsonObject json_node) const;
+    std::shared_ptr<Composition> deserialize_node(QJsonObject json_node) const;
 public:
     DiagramJsonSerializer(Board*);
     ~DiagramJsonSerializer() = default;
 
     void serialize(std::ostream& output_stream);
-
-    // @throws invalid argument if input stream is not valid json format
-    Board* deserialize(QJsonArray json_array);
+    void deserialize(QJsonArray json_array);
 };
 
 #endif // DIAGRAM_JSON_SERIALIZER_H

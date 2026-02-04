@@ -9,8 +9,8 @@
 #include "nodefactory.h"
 #include <QFileDialog>
 #include <QDir>
-#include "image_paths.h"
 #include <QMessageBox>
+#include <validator.h>
 
 Board::Board(QWidget *parent)
     : QWidget(parent), ui(new Ui::Board), diagram(new DiagramGraph()), signal_processor(new signalProcessor(this)),
@@ -77,17 +77,17 @@ Board::~Board()
 
 void Board::onCheckRadioButtonClicked(){
     if(ui->Inheritance->isChecked()){
-        branchType = BranchType::INHERITANCE;
+        branch_type = BranchType::INHERITANCE;
     }else if(ui->Association->isChecked()){
-        branchType = BranchType::ASSOCIATION;
+        branch_type = BranchType::ASSOCIATION;
     }else if(ui->Realization->isChecked()){
-        branchType = BranchType::REALIZATION;
+        branch_type = BranchType::REALIZATION;
     }else if(ui->Aggregation->isChecked()){
-        branchType = BranchType::AGGREGATION;
+        branch_type = BranchType::AGGREGATION;
     }else if(ui->Composition->isChecked()){
-        branchType = BranchType::COMPOSITION;
+        branch_type = BranchType::COMPOSITION;
     }else{
-        branchType = BranchType::DEPENDENCY;
+        branch_type = BranchType::DEPENDENCY;
     }
 }
 
@@ -100,6 +100,25 @@ void Board::onModeClicked(){
         linkageMode = removeMode = false;
     }
     first_activated = second_activated = nullptr;
+}
+
+
+std::optional<std::string> Board::add_node_relationship(SharedNodePtr node, SharedNodePtr neighbour, BranchType branch_type){
+    auto connection_exists = diagram->connection_exists(first_activated, second_activated, branch_type);
+    if(!connection_exists){
+        std::string errorMessage;
+        diagram->add_branch(first_activated, second_activated, branch_type);
+
+        if(!Validator::validate(errorMessage, first_activated, second_activated, branch_type, diagram->get_diagram())){
+            diagram->remove_branch(first_activated, second_activated, branch_type);
+            QMessageBox::warning(this, "Warning", QString::fromStdString(errorMessage));
+        }
+    }else if(connection_exists){
+        QMessageBox::warning(this, "Warning", "Connection already exists.");
+    }
+
+    // else
+    return std::nullopt;
 }
 
 void Board::on_object_clicked(Composition* clicked_object){
@@ -118,27 +137,23 @@ void Board::on_object_clicked(Composition* clicked_object){
         return;
     }
 
-    std::string errorMessage;
+    std::optional<std::string> add_error_message;
     if((first_activated && second_activated) && linkageMode){
-        if(!diagram->connection_exists(first_activated, second_activated, branchType)){
-            diagram->add_branch(first_activated, second_activated, branchType);
-            if(!Validator::validate(errorMessage, first_activated, second_activated, branchType, diagram->get_diagram())){
-                diagram->remove_branch(first_activated, second_activated, branchType);
-                QMessageBox::warning(this, "Warning", QString::fromStdString(errorMessage));
-            }
-        }else{
-            QMessageBox::warning(this, "Warning", "Connection already exists.");
+        add_error_message = add_node_relationship(first_activated, second_activated, branch_type);
+        if(add_error_message.has_value()){
+            QMessageBox::warning(this, "Warning", QString::fromStdString(add_error_message.value()));
         }
+
     }else if((first_activated && second_activated) && removeMode){
-        if(!diagram->connection_exists(first_activated, second_activated, branchType)){
+        if(!diagram->connection_exists(first_activated, second_activated, branch_type)){
             QMessageBox::warning(this, "Warning", QString::fromStdString("Connection doesn't exsist"));
         }else{
-            diagram->remove_branch(first_activated, second_activated, branchType);
+            diagram->remove_branch(first_activated, second_activated, branch_type);
         }
     }
 
 #if DEBUG_MODE>=1
-    qDebug() << errorMessage;
+    qDebug() << add_error_message.value();
     diagram->show_diagram();
 #endif
 
@@ -279,8 +294,13 @@ void Board::onGenerateClicked(const QString& class_name, NodeType node_type) {
     }
 
 }
-void Board::add_item(std::shared_ptr<Composition> node) {   //TODO [Nikola] - izmeniti da bude IUMLClassDiagramNode umesto Composition
+void Board::add_item(std::shared_ptr<Composition> node, const double coord_x, const double coord_y) {   //TODO [Nikola] - izmeniti da bude IUMLClassDiagramNode umesto Composition
     CppClass* item = new CppClass(this, node);
+    if(coord_x && coord_y){
+        item->setX(coord_x);
+        item->setY(coord_y);
+    }
+
     scene->addItem(item);
     //dynamic_cast<CPPStruct*>(item->getClassDiagramNode().get())->parent = item;
     diagram->add_node(node);

@@ -3,7 +3,6 @@
 
 #include "graph/diagram_graph.h"
 #include "view/signal_processor.h"
-#include "validator.h"
 #include "recoveyLog.h"
 #include <QWidget>
 #include <QGraphicsScene>
@@ -34,10 +33,12 @@ public:
     DiagramGraph* get_diagram() const;
     CppClass* get_view_from_node(SharedNodePtr);
 
-    BranchType branchType = BranchType::INHERITANCE;
+    BranchType branch_type = BranchType::INHERITANCE;
     bool linkageMode = false;
     bool removeMode = false;
 
+    void add_item(std::shared_ptr<Composition> item, const double coord_x = 0.0, const double coord_y = 0.0);
+    std::optional<std::string> add_node_relationship(SharedNodePtr node, SharedNodePtr neighbour, BranchType branch_type);
 public slots:
     void onAddClassClicked();
     void onAddInterfaceClicked();
@@ -64,7 +65,6 @@ private:
     SharedNodePtr first_activated = nullptr;
     SharedNodePtr second_activated = nullptr;
 
-    void add_item(std::shared_ptr<Composition> item);
     void openNodeFactory(NodeType node_type);
 };
 #endif // BOARD_H

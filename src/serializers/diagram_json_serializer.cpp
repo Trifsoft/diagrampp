@@ -5,7 +5,7 @@
 
 /*
  * rules:
- * 1) every function is obligated to respect indentation, and print its content inside {} or []
+ * 1) every serialize function is obligated to respect indentation, and print its content inside {} or []
  * 2) no function print new line at the end at passed output_stream, last char should be } or ]
  * 3) DiagramJsonSerializer json is reponsible for printing new lines, commas, and brackets between whole sections(one object or array in json)
  *
@@ -157,12 +157,8 @@ std::pair<double, double> DiagramJsonSerializer::deserialize_coords(QJsonObject 
     return {json_coords["x"].toDouble(), json_coords["y"].toDouble()};
 }
 
-std::shared_ptr<IUMLClassDiagramNode> DiagramJsonSerializer::deserialize_node(QJsonObject json_node) const {
-    if(json_node["label"] == "class" || json_node["label"] == "struct"){
+std::shared_ptr<Composition> DiagramJsonSerializer::deserialize_node(QJsonObject json_node) const {
         return NodeSerializers::deserialize_composition_node(json_node);
-    }else{ // label = enum
-        return NodeSerializers::deserialize_enum_node(json_node);
-    }
 }
 
 BranchType DiagramJsonSerializer::deserialize_branch_type(QJsonValue json_branch_type) const {
@@ -183,47 +179,23 @@ BranchType DiagramJsonSerializer::deserialize_branch_type(QJsonValue json_branch
     return BranchType::DEPENDENCY;
 }
 
-graph_type* DiagramJsonSerializer::deserialize(QJsonArray json_array){
-
-Board* DiagramJsonSerializer::deserialize(QJsonArray json_array){
-
-
+void DiagramJsonSerializer::deserialize(QJsonArray json_array){
     for(const auto& json_value : json_array){
         QJsonObject json_object = json_value.toObject();
         const auto [x,y] = deserialize_coords(json_object["coords"].toObject());
-        // diagram_coord_map, write them in coord map or something
-        // coords should be passed to board somehow, see comment down bellow
 
-
-        std::shared_ptr<IUMLClassDiagramNode> node = deserialize_node(json_object["node"].toObject());
-        // waiting for model view architecture border line
+        std::shared_ptr<Composition> node = deserialize_node(json_object["node"].toObject());
+        m_board->add_item(node, x, y);
 
         const QJsonArray& neighbours = json_object["neighbours"].toArray();
         for (const auto& json_neighbour_val : neighbours){
             const auto& json_neighbour_object = json_neighbour_val.toObject();
 
             const auto [neighbour_x, neighbour_y] = deserialize_coords(json_object["coords"].toObject());
-            const auto node = deserialize_node(json_neighbour_object["node"].toObject());
+            const auto neighbour_node = deserialize_node(json_neighbour_object["node"].toObject());
             const auto branch_type = deserialize_branch_type(json_object["branch_type"].toObject());
 
-
-
-
-            // add this to diagram
-            std::string errorMessage;
-
-            if(!m_diagram->connection_exists(node, , branchType)){
-                m_diagram->add_branch(node, neighbour_node, branchType);
-                if(!Validator::validate(errorMessage, first_activated, second_activated, branchType, diagram->get_diagram())){
-                    diagram->remove_branch(first_activated, second_activated, branchType);
-                    QMessageBox::warning(this, "Warning", QString::fromStdString(errorMessage));
-                }
-            }else{
-                QMessageBox::warning(this, "Warning", "Connection already exists.");
-            }
+            m_board->add_node_relationship(node, neighbour_node, branch_type);
         }
-
     }
-
-    return m_diagram;
 }
