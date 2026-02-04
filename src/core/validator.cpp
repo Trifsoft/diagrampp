@@ -1,6 +1,5 @@
-namespace Validator {
+namespace Validator
 
-// Privatne funkcije u anonimnom namespace
     namespace {
         static const std::map<std::pair<QString, QString>, bool> combinations = {
             {{"class", "class"}, true},
