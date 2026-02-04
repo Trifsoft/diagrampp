@@ -38,7 +38,7 @@ public:
     bool removeMode = false;
 
     void add_item(std::shared_ptr<Composition> item, const double coord_x = 0.0, const double coord_y = 0.0);
-    std::optional<std::string> add_node_relationship(SharedNodePtr node, SharedNodePtr neighbour, BranchType branch_type);
+    void add_node_relationship(SharedNodePtr node, SharedNodePtr neighbour, BranchType branch_type);
 public slots:
     void onAddClassClicked();
     void onAddInterfaceClicked();

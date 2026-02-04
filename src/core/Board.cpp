@@ -105,23 +105,20 @@ void Board::onModeClicked(){
 }
 
 
-std::optional<std::string> Board::add_node_relationship(SharedNodePtr node, SharedNodePtr neighbour, BranchType branch_type){
-    auto connection_exists = diagram->connection_exists(node, neighbour, branch_type);
+void Board::add_node_relationship(SharedNodePtr node, SharedNodePtr neighbour, BranchType branch_type){
+    const bool connection_exists = diagram->connection_exists(node, neighbour, branch_type);
     if(!connection_exists){
-        std::string errorMessage;
+        std::string error_message;
         diagram->add_branch(node, neighbour, branch_type);
-
-        if(!Validator::validate(errorMessage, node, neighbour, branch_type, diagram->get_diagram())){
+        if(!Validator::validate(error_message, node, neighbour, branch_type, diagram->get_diagram())){
+            QMessageBox::warning(this, "Warning", QString::fromStdString(error_message));
             diagram->remove_branch(node, neighbour, branch_type);
-            QMessageBox::warning(this, "Warning", QString::fromStdString(errorMessage));
         }
-    }else if(connection_exists){
+    }else {
         QMessageBox::warning(this, "Warning", "Connection already exists.");
     }
-
-    // else
-    return std::nullopt;
 }
+
 
 void Board::on_object_clicked(Composition* clicked_object){
     if(!linkageMode && !removeMode){
@@ -139,13 +136,8 @@ void Board::on_object_clicked(Composition* clicked_object){
         return;
     }
 
-    std::optional<std::string> add_error_message;
     if((first_activated && second_activated) && linkageMode){
-        add_error_message = add_node_relationship(first_activated, second_activated, branch_type);
-        if(add_error_message.has_value()){
-            QMessageBox::warning(this, "Warning", QString::fromStdString(add_error_message.value()));
-        }
-
+        add_node_relationship(first_activated, second_activated, branch_type);
     }else if((first_activated && second_activated) && removeMode){
         if(!diagram->connection_exists(first_activated, second_activated, branch_type)){
             QMessageBox::warning(this, "Warning", QString::fromStdString("Connection doesn't exsist"));
@@ -154,12 +146,12 @@ void Board::on_object_clicked(Composition* clicked_object){
         }
     }
 
-#if DEBUG_MODE>=1
-    qDebug() << add_error_message.value();
-    diagram->show_diagram();
-#endif
+    #if DEBUG_MODE>=1
+        qDebug() << "";
+        diagram->show_diagram();
+    #endif
 
-    first_activated = second_activated = nullptr;
+        first_activated = second_activated = nullptr;
 }
 
 void Board::onAddClassClicked()     { openNodeFactory(NodeType::Class);  }
