@@ -28,9 +28,9 @@
  *
  */
 
-DiagramJsonSerializer::DiagramJsonSerializer(graph_type* m_diagram_graph) {
-    m_diagram = m_diagram_graph;
-    m_indentation_counter = 0;
+DiagramJsonSerializer::DiagramJsonSerializer(DiagramGraph* m_diagram_graph) : m_diagram_graph(m_diagram_graph), m_indentation_counter(0)
+{
+
 }
 
 void DiagramJsonSerializer::call_corresponding_node_serializer(std::ostream& output_stream, IUMLClassDiagramNode* node) const {
@@ -193,7 +193,7 @@ graph_type* DiagramJsonSerializer::deserialize(QJsonArray json_array){
         std::shared_ptr<IUMLClassDiagramNode> node = deserialize_node(json_object["node"].toObject());
         // waiting for model view architecture border line
 
-        QJsonArray neighbours = json_object["neighbours"].toArray();
+        const QJsonArray& neighbours = json_object["neighbours"].toArray();
         for (const auto& json_neighbour_val : neighbours){
             const auto& json_neighbour_object = json_neighbour_val.toObject();
 
@@ -201,8 +201,23 @@ graph_type* DiagramJsonSerializer::deserialize(QJsonArray json_array){
             const auto node = deserialize_node(json_neighbour_object["node"].toObject());
             const auto branch_type = deserialize_branch_type(json_object["branch_type"].toObject());
 
+
+
+
             // add this to diagram
+            std::string errorMessage;
+
+            if(!m_diagram->connection_exists(node, , branchType)){
+                m_diagram->add_branch(node, neighbour_node, branchType);
+                if(!Validator::validate(errorMessage, first_activated, second_activated, branchType, diagram->get_diagram())){
+                    diagram->remove_branch(first_activated, second_activated, branchType);
+                    QMessageBox::warning(this, "Warning", QString::fromStdString(errorMessage));
+                }
+            }else{
+                QMessageBox::warning(this, "Warning", "Connection already exists.");
+            }
         }
+
     }
 
     return m_diagram;

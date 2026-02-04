@@ -4,7 +4,7 @@
 #include <ostream>
 #include <graph/diagram_graph.h>
 #include <QJsonArray>
-
+#include <Board.h>
 /*
  * serialize:
  * function is responsible for destructuring diagram into nodes and calling corresponding serializer
@@ -18,7 +18,7 @@
 class DiagramJsonSerializer{
 private:
     int m_indentation_counter;
-    graph_type* m_diagram;
+    DiagramGraph* m_diagram_graph;
 
     void call_corresponding_node_serializer(std::ostream& output_stream, IUMLClassDiagramNode* node) const;
     void trim_end(std::string& s) const;
@@ -29,7 +29,7 @@ private:
     BranchType deserialize_branch_type(QJsonValue json_branch_type) const;
     std::shared_ptr<IUMLClassDiagramNode> deserialize_node(QJsonObject json_node) const;
 public:
-    DiagramJsonSerializer(graph_type* diagram_graph);
+    DiagramJsonSerializer(Board* board, DiagramGraph* diagram_graph);
     ~DiagramJsonSerializer() = default;
 
     void serialize(std::ostream& output_stream);
