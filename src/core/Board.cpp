@@ -417,6 +417,8 @@ void Board::on_generate_project(){
                 err_message = "";
             }
             QMessageBox::warning(this, "Warning", err_message);
+        }else{
+            QMessageBox::information(this, "Success", "Project is generated on path: \n" + QString::fromStdString(path));
         }
     }
 }
