@@ -2,7 +2,6 @@
 #include "view/cpp_class.h"
 #include "model/elements/composition/cpp_struct.h"
 #include "model/elements/composition/cpp_class.h"
-#include "model/elements/composition/cpp_enum.h"
 #include <QGraphicsView>
 #include "src/ui/ui_Board.h"
 #include "model/elements/type/regular_type.h"

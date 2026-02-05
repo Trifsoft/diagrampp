@@ -1,7 +1,6 @@
 #include "view/cpp_class.h"
 #include "model/elements/composition/composition.h"
 #include "model/elements/composition/cpp_class.h"
-#include "model/elements/composition/cpp_enum.h"
 #include "model/elements/composition/cpp_struct.h"
 #include "view/field_dialog.h"
 #include "view/method_dialog.h"

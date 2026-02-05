@@ -41,8 +41,6 @@ set(CORE_HEADERS
     include/model/elements/field.h
     include/model/elements/method.h
     include/model/elements/destructor.h
-    include/model/elements/cpp_enum_value.h
-    include/model/elements/composition/cpp_enum.h
     include/model/elements/composition/cpp_class.h
     include/model/elements/composition/cpp_struct.h
     include/model/elements/composition/composition.h
@@ -95,8 +93,6 @@ set(CORE_SOURCES
     src/core/model/elements/field.cpp
     src/core/model/elements/method.cpp
     src/core/model/elements/destructor.cpp
-    src/core/model/elements/cpp_enum_value.cpp
-    src/core/model/elements/composition/cpp_enum.cpp
     src/core/model/elements/composition/cpp_class.cpp
     src/core/model/elements/composition/cpp_struct.cpp
     src/core/model/elements/composition/composition.cpp
