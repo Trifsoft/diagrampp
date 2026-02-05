@@ -42,7 +42,7 @@ void DiagramJsonSerializer::trim_end(std::string& s) const {
 }
 
 void DiagramJsonSerializer::write_coords(std::ostream& output_stream, double x, double y){
-    SerializeHelpers::indent(output_stream, m_indentation_counter); output_stream << "\"coords\": {\n";
+    SerializeHelpers::write_with_quotes(output_stream, "coords"); output_stream << "{\n";
     ++m_indentation_counter;
 
     SerializeHelpers::write_indented_field(output_stream, m_indentation_counter, "x", x);
