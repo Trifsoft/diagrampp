@@ -95,11 +95,12 @@ void DiagramJsonSerializer::serialize_neighbours(std::ostream& output_stream, co
 void DiagramJsonSerializer::serialize(std::ostream& output_stream){
     output_stream << "[\n";
     ++m_indentation_counter;
-    SerializeHelpers::indent(output_stream, m_indentation_counter);
 
     auto m_diagram = m_board->get_diagram()->get_diagram();
 
     for (auto it = m_diagram.begin(); it != m_diagram.end(); ){
+        SerializeHelpers::indent(output_stream, m_indentation_counter);
+        ++m_indentation_counter;
         auto node_view = m_board->get_view_from_node(it->first);
         output_stream << "{\n";
 
