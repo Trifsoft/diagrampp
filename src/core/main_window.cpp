@@ -38,17 +38,17 @@ MainWindow::~MainWindow()
 
 void MainWindow::onNewProjectClicked()
 {
-    bool ok;
-    QString project_name = QInputDialog::getText(
-        this,
-        "Project Name",
-        "Enter project name:",
-        QLineEdit::Normal,
-        "",
-        &ok
+    QInputDialog dialog(this);
+    dialog.setWindowTitle("Project Name");
+    dialog.setLabelText("Enter project name:");
+    dialog.setTextValue("");
+    dialog.setStyleSheet(
+        "QInputDialog QPushButton { background-color: #2c3e50; color: white; border-radius: 4px; padding: 6px 12px; }"
+        "QInputDialog QPushButton:hover { background-color: #34495e; }"
     );
-    if(ok && !project_name.isEmpty()) {
-        auto project = new Board(project_name);
+
+    if (dialog.exec() == QDialog::Accepted && !dialog.textValue().isEmpty()) {
+        auto project = new Board(dialog.textValue());
         project->show();
     }
 }
