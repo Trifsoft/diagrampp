@@ -67,5 +67,6 @@ private:
 
     void add_item(std::shared_ptr<Composition> item);
     void openNodeFactory(NodeType node_type);
+    void set_project_name();
 };
 #endif // BOARD_H

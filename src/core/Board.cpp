@@ -9,6 +9,7 @@
 #include "nodefactory.h"
 #include <QFileDialog>
 #include <QDir>
+#include <QInputDialog>
 #include "generate_project_dialog.h"
 #include <QMessageBox>
 
@@ -20,11 +21,14 @@ Board::Board(QWidget *parent)
 
     setAttribute(Qt::WA_DeleteOnClose);
 
+
     scene = new QGraphicsScene(this);
     ui->board->setScene(scene);
     ui->board->setStyleSheet("background-color: white");
     ui->side_menu->setStyleSheet("background-color: #2c3e50;");
     ui->linkageMode->setChecked(false);
+
+    set_project_name();
 
     // signals for GUI
     connect(diagram, &DiagramGraph::link_added, signal_processor, &signalProcessor::add_link_process);
@@ -50,6 +54,21 @@ Board::Board(QWidget *parent)
     connect(ui->Dependency, &QPushButton::clicked, this, &Board::onCheckRadioButtonClicked);
     connect(ui->linkageMode, &QPushButton::clicked, this, &Board::onModeClicked);
     connect(ui->removeMode, &QPushButton::clicked, this, &Board::onModeClicked);
+}
+
+void Board::set_project_name(){
+    bool ok;
+    QString project_name = QInputDialog::getText(
+        this,
+        "Project Name",
+        "Enter project name:",
+        QLineEdit::Normal,
+        "MyProject",
+        &ok
+        );
+    if(ok && !project_name.isEmpty()){
+        ui->title->setText(project_name);
+    }
 }
 
 DiagramGraph* Board::get_diagram() const {
