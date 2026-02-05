@@ -35,7 +35,7 @@ void DiagramGraph::remove_node(SharedNodePtr node_to_remove) {
     emit node_removed(node_to_remove);
 }
 
-std::optional<std::string> DiagramGraph::add_branch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type) {
+bool DiagramGraph::add_branch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type, std::string& error_message) {
     if(!connection_exists(from, to, branch_type)){
         if(branch_type == BranchType::INHERITANCE){
             from->inherits(Visibility::Public, to.get());
@@ -46,15 +46,15 @@ std::optional<std::string> DiagramGraph::add_branch(SharedNodePtr from, SharedNo
         add_neighbour(from, to, branch_type);
         emit link_added(from, to, branch_type);
 
-        std::string error_message;
         if(!Validator::validate(error_message, from, to, branch_type, m_diagram)){
             this->remove_branch(from, to, branch_type);
-            return error_message;
+            return false;
         }
     }else {
-        return "Connection already exists.";
+        error_message = "Connection already exists.";
+        return false;
     }
-    return std::nullopt;
+    return true;
 }
 
 

@@ -112,9 +112,9 @@ void Board::onModeClicked(){
 
 
 void Board::add_branch(SharedNodePtr node, SharedNodePtr neighbour, BranchType branch_type){
-    const auto& error_message = diagram->add_branch(node, neighbour, branch_type);
-    if(error_message.has_value()){
-        QMessageBox::warning(this, "Warning", QString::fromStdString(error_message.value()));
+    std::string error_message;
+    if(!diagram->add_branch(node, neighbour, branch_type, error_message)){
+        QMessageBox::warning(this, "Warning", QString::fromStdString(error_message));
     }
 }
 
