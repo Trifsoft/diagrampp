@@ -2,6 +2,12 @@
 #include "ui_main_window.h"
 #include "new_project.h"
 #include "Board.h"
+#include "serializers/diagram_json_serializer.h"
+#include <QFileDialog>
+#include <QFile>
+#include <QJsonDocument>
+#include <QJsonArray>
+#include <QMessageBox>
 
 MainWindow::MainWindow(QWidget *parent)
     : QWidget(parent)
@@ -44,10 +50,46 @@ void MainWindow::onNewProjectClicked()
 
 void MainWindow::onImportProjectClicked()
 {
-    QWidget *w = new QWidget();
-    w->setWindowTitle("Import Project");
-    w->resize(400, 200);
-    w->show();
+    QString filePath = QFileDialog::getOpenFileName(
+        this,
+        "Import Project",
+        QString(),
+        "JSON Files (*.json)"
+    );
+
+    if (filePath.isEmpty()) {
+        return;
+    }
+
+    QFile file(filePath);
+    if (!file.open(QIODevice::ReadOnly)) {
+        QMessageBox::warning(this, "Error", "Could not open file: " + filePath);
+        return;
+    }
+
+    QByteArray jsonData = file.readAll();
+    file.close();
+
+    QJsonParseError parseError;
+    QJsonDocument jsonDoc = QJsonDocument::fromJson(jsonData, &parseError);
+
+    if (parseError.error != QJsonParseError::NoError) {
+        QMessageBox::warning(this, "Error", "Failed to parse JSON: " + parseError.errorString());
+        return;
+    }
+
+    if (!jsonDoc.isArray()) {
+        QMessageBox::warning(this, "Error", "Invalid JSON format: expected array");
+        return;
+    }
+
+    Board* board = new Board();
+    board->setAttribute(Qt::WA_DeleteOnClose);
+
+    DiagramJsonSerializer serializer(board);
+    serializer.deserialize(jsonDoc.array());
+
+    board->show();
 }
 
 void MainWindow::onHistoryClicked()
