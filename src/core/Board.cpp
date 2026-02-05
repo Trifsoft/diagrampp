@@ -6,21 +6,23 @@
 #include <QGraphicsView>
 #include "src/ui/ui_Board.h"
 #include "model/elements/type/regular_type.h"
-#include "nodefactory.h"
 #include <QFileDialog>
 #include <QDir>
+#include <QInputDialog>
 #include "generate_project_dialog.h"
 #include <QMessageBox>
 #include <fstream>
 #include "serializers/diagram_json_serializer.h"
 
-Board::Board(QWidget *parent)
+Board::Board(const QString& project_name, QWidget *parent)
     : QWidget(parent), ui(new Ui::Board), diagram(new DiagramGraph()), signal_processor(new signalProcessor(this)),
     recovery_log(new recoveryLog())
 {
     ui->setupUi(this);
 
     setAttribute(Qt::WA_DeleteOnClose);
+
+    ui->title->setText(project_name);
 
     scene = new QGraphicsScene(this);
     ui->board->setScene(scene);
@@ -222,11 +224,25 @@ void Board::on_edit_method_requested(Composition *node, std::weak_ptr<Method> ol
 
 
 void Board::openNodeFactory(NodeType node_type) {
+    QString label;
+    switch (node_type) {
+        case NodeType::Class:  label = "class"; break;
+        case NodeType::Struct: label = "struct"; break;
+        case NodeType::Enum:   label = "enum class"; break;
+    }
 
-    // [FIX] Probably a leak
-    NodeFactory* node_factory = new NodeFactory(node_type);
-    connect(node_factory, &NodeFactory::generateClicked, this, &Board::onGenerateClicked);
-    node_factory->show();
+    QInputDialog dialog(this);
+    dialog.setWindowTitle("Create new " + label);
+    dialog.setLabelText("Enter " + label + " name:");
+    dialog.setTextValue("");
+    dialog.setStyleSheet(
+        "QInputDialog QPushButton { background-color: #2c3e50; color: white; border-radius: 4px; padding: 6px 12px; }"
+        "QInputDialog QPushButton:hover { background-color: #34495e; }"
+    );
+
+    if (dialog.exec() == QDialog::Accepted && !dialog.textValue().isEmpty()) {
+        onGenerateClicked(dialog.textValue(), node_type);
+    }
 }
 
 void Board::onGenerateClicked(const QString& class_name, NodeType node_type) {
@@ -300,6 +316,8 @@ void Board::add_item(std::shared_ptr<Composition> node, const double coord_x, co
 
     connect(item, &CppClass::objectClicked, this, &Board::on_object_clicked);
 
+    connect(item, &CppClass::add_field_request, recovery_log, &recoveryLog::add_field_operation);
+    connect(item, &CppClass::add_method_request, recovery_log, &recoveryLog::add_method_operation);
 
     connect(item, &CppClass::add_field_request, this, &Board::on_add_field_requested);
     connect(item, &CppClass::add_method_request, this, &Board::on_add_method_requested);

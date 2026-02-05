@@ -30,35 +30,101 @@ recoveryLog::~recoveryLog(){
     }
 }
 
+void recoveryLog::add_field_operation(Composition* node, std::shared_ptr<Field> field) {
+    if(!log_file.is_open()) return;
+    std::string node_name = node->get_name().toStdString();
+    std::string field_name = field->get_field_name().toStdString();
+    std::string field_type = field->get_type().toStdString();
+    std::string destructor = field->get_destruction().value_or("N/A").toStdString();
+
+    log_file << std::left
+             << "[" << get_current_timestamp() << "] "
+             << std::setw(OPERATION_WIDTH) << "[ADD FIELD] "
+             << std::setw(25) << ("Node: " + node_name)
+             << " | "
+             << "Field: " << field_name
+             << " (Type: " << field_type
+             << ", Destructor: " << destructor << ")\n";
+
+    log_file.flush();
+}
+void recoveryLog::add_method_operation(Composition* node, std::shared_ptr<Method> method) {
+    if(!log_file.is_open()) return;
+
+    std::string node_name = node->get_name().toStdString();
+    std::string return_type = method->get_return_type().toStdString();
+
+    std::stringstream args_stream;
+    auto arguments = method->get_arguments();
+    if(arguments.empty()) {
+        args_stream << "none";
+    } else {
+        for(size_t i = 0; i < arguments.size(); ++i) {
+            args_stream << arguments[i]->get_name().toStdString()
+            << ": " << arguments[i]->get_type().toStdString();
+            if(i < arguments.size() - 1) args_stream << ", ";
+        }
+    }
+
+    log_file << std::left
+             << "[" << get_current_timestamp() << "] "
+             << std::setw(OPERATION_WIDTH) << "[ADD METHOD] "
+             << std::setw(25) << ("Node: " + node_name)
+             << " | "
+             << "Return: " << return_type
+             << ", Args: [" << args_stream.str() << "]\n";
+
+    log_file.flush();
+}
+
+
 void recoveryLog::add_link_operation(SharedNodePtr from, SharedNodePtr to, BranchType branch_type) {
-    qDebug() << log_file.is_open();
+    if(!log_file.is_open()) return;
+
     std::string child = from->get_name().toStdString();
     std::string parent = to->get_name().toStdString();
+    std::string relation = branch_to_string(branch_type);
+
     log_file << std::left
-             << "[" << get_current_timestamp() << "]"
-             << std::setw(OPERATION_WIDTH) << " [ADD LINK] "
-             << std::setw(INFO_WIDTH) << (child + " → " + branch_to_string(branch_type) + " " + parent ) << "\n";
+             << "[" << get_current_timestamp() << "] "
+             << std::setw(OPERATION_WIDTH) << "[ADD LINK] "
+             << std::setw(20) << child
+             << " --> "
+             << parent
+             << " (" << relation << ")\n";
+
     log_file.flush();
 }
 
 void recoveryLog::remove_link_operation(SharedNodePtr from, SharedNodePtr to, BranchType branch_type) {
+    if(!log_file.is_open()) return;
+
     std::string child = from->get_name().toStdString();
     std::string parent = to->get_name().toStdString();
-    log_file << std::left
-             << "[" << get_current_timestamp() << "]"
-             << std::setw(OPERATION_WIDTH) << " [REMOVE LINK] "
-             << std::setw(INFO_WIDTH) << (child + " → " + branch_to_string(branch_type) + " " + parent ) << "\n";
-    log_file.flush();
+    std::string relation = branch_to_string(branch_type);
 
+    log_file << std::left
+             << "[" << get_current_timestamp() << "] "
+             << std::setw(OPERATION_WIDTH) << "[REMOVE LINK] "
+             << std::setw(20) << child
+             << " -X-> "
+             << parent
+             << " (" << relation << ")\n";
+
+    log_file.flush();
 }
 
 void recoveryLog::remove_node_operation(SharedNodePtr target) {
-    std::string node = target->get_name().toStdString();
-    log_file << "[" << get_current_timestamp() << "]"
-             << std::setw(OPERATION_WIDTH) << " [REMOVE NODE] "
-             << std::setw(INFO_WIDTH) << node << "\n";
-    log_file.flush();
+    if(!log_file.is_open()) return;
 
+    std::string node = target->get_name().toStdString();
+
+    log_file << std::left
+             << "[" << get_current_timestamp() << "] "
+             << std::setw(OPERATION_WIDTH) << "[REMOVE NODE] "
+             << "[X] " << node << " removed from composition\n";
+
+    log_file.flush();
 }
 
 std::string recoveryLog::get_current_timestamp() const {

@@ -3,6 +3,7 @@
 Field::Field(QString name, QString type, Visibility visibility, std::optional<QString> destruction)
     : IClassElement(ElementRank::Field, name, visibility),
       type(type),
+      m_name(name),
       destruction(destruction) {}
 
 QString Field::declaration() const {
@@ -27,6 +28,10 @@ void Field::set_destruction(const QString& destruction) {
 QString Field::get_type() const
 {
     return type;
+}
+
+QString Field::get_field_name() const{
+    return m_name;
 }
 
 std::optional<QString> Field::get_destruction() const {

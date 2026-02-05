@@ -63,7 +63,6 @@ set(CORE_HEADERS
     include/view/member_dialog_base.h
     include/view/field_dialog.h
     include/view/method_dialog.h
-    include/nodefactory.h
     include/methodeditor.h
     include/widget/class_element_text.h
     include/serializers/diagram_json_serializer.h
@@ -118,7 +117,6 @@ set(CORE_SOURCES
     src/core/view/member_dialog_base.cpp
     src/core/view/field_dialog.cpp
     src/core/view/method_dialog.cpp
-    src/core/nodefactory.cpp
     src/core/methodeditor.cpp
     src/core/widget/class_element_text.cpp
     src/serializers/diagram_json_serializer.cpp
@@ -132,7 +130,6 @@ set(CORE_SOURCES
 set(UI_SOURCES
     src/ui/main_window.ui
     src/ui/Board.ui
-    src/ui/nodefactory.ui
     src/ui/methodeditor.ui
 )
 

@@ -9,6 +9,7 @@
 #include <QJsonArray>
 #include <QMessageBox>
 #include <QFileInfo>
+#include <QInputDialog>
 
 namespace {
     QString title_from_file(const QFile& file) {
@@ -51,9 +52,19 @@ MainWindow::~MainWindow()
 
 void MainWindow::onNewProjectClicked()
 {
-    NewProject *w = new NewProject();
-    w->setAttribute(Qt::WA_DeleteOnClose);
-    w->show();
+    QInputDialog dialog(this);
+    dialog.setWindowTitle("Project Name");
+    dialog.setLabelText("Enter project name:");
+    dialog.setTextValue("");
+    dialog.setStyleSheet(
+        "QInputDialog QPushButton { background-color: #2c3e50; color: white; border-radius: 4px; padding: 6px 12px; }"
+        "QInputDialog QPushButton:hover { background-color: #34495e; }"
+    );
+
+    if (dialog.exec() == QDialog::Accepted && !dialog.textValue().isEmpty()) {
+        auto project = new Board(dialog.textValue());
+        project->show();
+    }
 }
 
 void MainWindow::onImportProjectClicked()

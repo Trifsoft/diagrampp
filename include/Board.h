@@ -8,7 +8,6 @@
 #include <QGraphicsScene>
 #include <model/elements/field.h>
 #include <model/elements/method.h>
-#include <nodefactory.h>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -20,6 +19,12 @@ class signalProcessor;
 class DiagramGraph;
 class IClassElement;
 
+enum class NodeType {
+    Class,
+    Struct,
+    Enum
+};
+
 class Board : public QWidget
 {
     QGraphicsScene* scene;
@@ -27,7 +32,7 @@ class Board : public QWidget
     Q_OBJECT
 
 public:
-    Board(QWidget *parent = nullptr);
+    Board(const QString& project_name = "Project name", QWidget *parent = nullptr);
     ~Board();
 
     DiagramGraph* get_diagram() const;
@@ -51,7 +56,6 @@ public slots:
     void exportPNG();
     void exportJSON();
 
-    void onGenerateClicked(const QString& class_name, NodeType node_type);
     void on_object_clicked(Composition* clickedClass);
     void on_generate_project();
 
@@ -71,5 +75,7 @@ private:
     SharedNodePtr second_activated = nullptr;
 
     void openNodeFactory(NodeType node_type);
+
+    void onGenerateClicked(const QString& class_name, NodeType node_type);
 };
 #endif // BOARD_H
