@@ -24,7 +24,7 @@ public:
     void add_node(SharedNodePtr node);
     void remove_node(SharedNodePtr node);
 
-    std::optional<std::string> add_branch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type);
+    bool add_branch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type, std::string& error_message);
     bool remove_branch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type);
 
     SharedNodePtr find_pointer_owner(Composition *node_view);
