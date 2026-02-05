@@ -11,6 +11,13 @@
 #include <model/elements/method.h>
 #include <nodefactory.h>
 
+
+#include "commandManager/command_manager.h"
+#include "commandManager/add_node_command.h"
+#include "commandManager/remove_node_with_branches_command.h"
+#include "commandManager/add_branch_command.h"
+#include "commandManager/remove_branch_command.h"
+
 QT_BEGIN_NAMESPACE
 namespace Ui {
 class Board;
@@ -54,7 +61,9 @@ public slots:
     void on_edit_field_requested(Composition* node, std::weak_ptr<Field> old_field_weak, std::shared_ptr<Field>  new_field);
     void on_edit_method_requested(Composition* node, std::weak_ptr<Method> old_method_weak, std::shared_ptr<Method>  new_method);
 private:
+
     DiagramGraph *diagram;
+    CommandManager m_command_manager;
     QList<CppClass*> views;
 
     Ui::Board *ui;
@@ -64,6 +73,7 @@ private:
     SharedNodePtr first_activated = nullptr;
     SharedNodePtr second_activated = nullptr;
 
+    void setup_actions();
     void add_item(std::shared_ptr<Composition> item);
     void openNodeFactory(NodeType node_type);
 };

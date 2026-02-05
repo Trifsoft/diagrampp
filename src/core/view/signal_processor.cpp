@@ -24,3 +24,9 @@ void signalProcessor::remove_node_process(SharedNodePtr target) const {
     node->remove_node();
 }
 
+void signalProcessor::add_node_process(SharedNodePtr target) const {
+    auto node = m_board->get_view_from_node(target);
+    if(node)
+        node->add_node();
+}
+

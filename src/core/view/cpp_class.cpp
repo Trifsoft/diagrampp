@@ -61,8 +61,6 @@ void EditableTextItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
     } else {
         qDebug() << "Parent not found";
     }
-
-
 }
 
 void EditableTextItem::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
@@ -112,7 +110,6 @@ CppClass::CppClass(Board* board,std::shared_ptr<Composition> composition, QGraph
     m_button_proxy = new QGraphicsProxyWidget(this);
     m_button_proxy->setWidget(m_add_button);
     connect(m_add_button, &QPushButton::clicked, this, &CppClass::on_add_button_clicked);
-
 
     setAcceptedMouseButtons(Qt::LeftButton | Qt::RightButton);
     updateBoundingRect();
@@ -450,11 +447,18 @@ void CppClass::update_connection_line(Connection& conn){
     conn.line->setLine(QLineF(newStart, lineEnd));
 }
 
+
 void CppClass::remove_node(){
     disconnect_all_connections();
     if(scene()){
-        scene()->removeItem(this);
+        //scene()->removeItem(this);
     }
+    //[HACK] because of connections, instead of removing and adding node again just hide it and show it again
+    this->setVisible(false);
+}
+void CppClass::add_node(){
+    //[HACK] same as in remove node
+    this->setVisible(true);
 }
 
 void CppClass::disconnect_all_connections(){

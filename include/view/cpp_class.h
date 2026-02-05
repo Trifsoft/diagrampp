@@ -49,8 +49,6 @@ public:
     void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
 
     void addConnectionInfo(QGraphicsLineItem* line, bool isStart);
-    void removeLink(CppClass* target, BranchType branch);
-
 
     QPointF get_top_center() const;
     QPointF get_bottom_center() const;
@@ -59,6 +57,8 @@ public:
     void remove_link_connection(CppClass* target, const BranchType branch);
     void set_object_visible(bool visible);
     void remove_node();
+    void add_node();
+
 
     QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
     virtual Composition* get_uml_class_diagram_node() override;
@@ -111,7 +111,7 @@ private:
     QPushButton* m_add_button;
     QGraphicsProxyWidget* m_button_proxy;
     void on_add_button_clicked();
-    
+
     friend class EditableTextItem;
 
 signals:

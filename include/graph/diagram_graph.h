@@ -20,11 +20,18 @@ using graph_type = std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, 
 class DiagramGraph : public QObject {
     Q_OBJECT
 public:
+    struct BranchEdge {
+        SharedNodePtr from;
+        SharedNodePtr to;
+        BranchType branch_type;
+    };
+
     DiagramGraph() = default;
     ~DiagramGraph() = default;
 
     void add_node(SharedNodePtr node);
     void remove_node(SharedNodePtr node);
+    std::vector<BranchEdge> get_branches_for_node(SharedNodePtr node) const;
 
     void add_branch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type);
     void remove_branch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type);
@@ -43,6 +50,7 @@ signals:
     void link_added(SharedNodePtr from, SharedNodePtr to, BranchType branch);
     void link_removed(SharedNodePtr from, SharedNodePtr to, BranchType branch);
     void node_removed(SharedNodePtr node);
+    void node_added(SharedNodePtr node);
 
 private:
     // disscussion, shared or weak

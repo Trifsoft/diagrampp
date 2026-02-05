@@ -54,8 +54,10 @@ set(CORE_HEADERS
     include/validator.h
     include/commandManager/command_manager.h
     include/commandManager/command.h
+    include/commandManager/composite_command.h
     include/commandManager/add_node_command.h
     include/commandManager/remove_node_command.h
+    include/commandManager/remove_node_with_branches_command.h
     include/commandManager/add_branch_command.h
     include/commandManager/remove_branch_command.h
     include/project_generator.h
@@ -109,8 +111,10 @@ set(CORE_SOURCES
     src/core/model/base/uml_class_diagram_node.cpp
     src/core/view/cpp_class.cpp
     src/commandManager/command_manager.cpp
+    src/commandManager/composite_command.cpp
     src/commandManager/add_node_command.cpp
     src/commandManager/remove_node_command.cpp
+    src/commandManager/remove_node_with_branches_command.cpp
     src/commandManager/add_branch_command.cpp
     src/commandManager/remove_branch_command.cpp
     src/core/project_generator.cpp

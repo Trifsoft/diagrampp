@@ -1,5 +1,7 @@
 #include "graph/diagram_graph.h"
 #include <model/elements/composition/composition.h>
+#include <set>
+#include <tuple>
 
 void DiagramGraph::add_node(SharedNodePtr node) {
     if(m_diagram.find(node) != m_diagram.end()){
@@ -7,6 +9,7 @@ void DiagramGraph::add_node(SharedNodePtr node) {
     }
 
     m_diagram[node] = {};
+    emit node_added(node);
 }
 
 void DiagramGraph::remove_node(SharedNodePtr node_to_remove) {
@@ -32,15 +35,32 @@ void DiagramGraph::remove_node(SharedNodePtr node_to_remove) {
     emit node_removed(node_to_remove);
 }
 
+std::vector<DiagramGraph::BranchEdge> DiagramGraph::get_branches_for_node(SharedNodePtr node) const {
+    std::vector<BranchEdge> branches;
+    if(!node){
+        return branches;
+    }
+
+    // find all branches where node is either from or to node
+    for(const auto& [from_node, neighbours] : m_diagram){
+        for(const auto& [to_node, branch_type] : neighbours){
+            if(from_node == node || to_node == node){
+                branches.push_back({from_node, to_node, branch_type});
+            }
+        }
+    }
+
+    return branches;
+}
+
 void DiagramGraph::add_branch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type) {
     add_neighbour(from, to, branch_type);
-    emit link_added(from, to, branch_type);
 
     if(branch_type == BranchType::ASSOCIATION){ // ASOCCIATION is undirected
         add_neighbour(to, from, branch_type);
     }
 
-    return ;
+    emit link_added(from, to, branch_type);
 }
 
 
@@ -83,12 +103,16 @@ void DiagramGraph::add_neighbour(SharedNodePtr from, SharedNodePtr to, BranchTyp
 }
 
 void DiagramGraph::remove_branch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type) {
+    if(!connection_exists(from, to, branch_type)){
+        return;
+    }
+    
     remove_neighbour(from, to, branch_type);
 
     if(branch_type == BranchType::ASSOCIATION){
         remove_neighbour(to, from, branch_type);
-        emit link_removed(to, from, branch_type);
     }
+    emit link_removed(to, from, branch_type);
 }
 
 graph_type& DiagramGraph::get_diagram(){
@@ -96,6 +120,10 @@ graph_type& DiagramGraph::get_diagram(){
 }
 
 bool DiagramGraph::connection_exists(SharedNodePtr start_node, SharedNodePtr end_node, BranchType branch_type) const {
+    if(!start_node || !end_node){
+        return false;
+    }
+    
     auto start_node_it = m_diagram.find(start_node);
     if(start_node_it == m_diagram.end()){
         return false;

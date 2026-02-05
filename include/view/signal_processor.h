@@ -19,6 +19,7 @@ public slots:
     void add_link_process(SharedNodePtr from, SharedNodePtr to, BranchType branch) const;
     void remove_link_process(SharedNodePtr from, SharedNodePtr to, BranchType branch) const;
     void remove_node_process(SharedNodePtr node) const;
+    void add_node_process(SharedNodePtr target) const;
 private:
     Board* m_board;
 };

@@ -12,6 +12,8 @@
 #include "image_paths.h"
 #include <QMessageBox>
 
+#include <commandManager/command_manager.h>
+
 Board::Board(QWidget *parent)
     : QWidget(parent), ui(new Ui::Board), diagram(new DiagramGraph()), signal_processor(new signalProcessor(this)),
     recovery_log(new recoveryLog())
@@ -29,6 +31,7 @@ Board::Board(QWidget *parent)
     // signals for GUI
     connect(diagram, &DiagramGraph::link_added, signal_processor, &signalProcessor::add_link_process);
     connect(diagram, &DiagramGraph::link_removed, signal_processor, &signalProcessor::remove_link_process);
+    connect(diagram, &DiagramGraph::node_added, signal_processor, &signalProcessor::add_node_process);
     connect(diagram, &DiagramGraph::node_removed, signal_processor, &signalProcessor::remove_node_process);
     // signals for log file
     connect(diagram, &DiagramGraph::link_added, recovery_log, &recoveryLog::add_link_operation);
@@ -49,20 +52,45 @@ Board::Board(QWidget *parent)
     connect(ui->Dependency, &QPushButton::clicked, this, &Board::onCheckRadioButtonClicked);
     connect(ui->linkageMode, &QPushButton::clicked, this, &Board::onModeClicked);
     connect(ui->removeMode, &QPushButton::clicked, this, &Board::onModeClicked);
+
+    setup_actions();
+}
+
+void Board::setup_actions(){
+    auto undoAction = new QAction("Undo", this);
+    undoAction->setShortcut(QKeySequence::Undo);
+
+    connect(undoAction, &QAction::triggered,
+            this, [this]() {
+                m_command_manager.undo();
+            });
+
+    addAction(undoAction);
+
+    auto redoAction = new QAction("Redo", this);
+    redoAction->setShortcut(QKeySequence::Redo);
+
+    connect(redoAction, &QAction::triggered,
+            this, [this]() {
+                m_command_manager.redo();
+            });
+
+    addAction(redoAction);
+
 }
 
 DiagramGraph* Board::get_diagram() const {
     return diagram;
 }
 
-CppClass* Board::get_view_from_node(SharedNodePtr node) {
-    for(auto view : views) {
-        if(view->get_uml_class_diagram_node() == node.get()) {
-            return view;
+    CppClass* Board::get_view_from_node(SharedNodePtr node) {
+        for(auto view : views) {
+            if(view->get_uml_class_diagram_node() == node.get()) {
+                return view;
+            }
         }
+        return nullptr;
     }
-    return nullptr;
-}
 
 Board::~Board()
 {
@@ -113,7 +141,10 @@ void Board::on_object_clicked(Composition* clicked_object){
     second_activated = diagram->find_pointer_owner(clicked_object);
 
     if((first_activated == second_activated) && removeMode){
-        diagram->remove_node(first_activated);
+        //Removing node using command manager
+        auto new_remove_node_command = std::make_shared<RemoveNodeWithBranchesCommand>(get_diagram(), first_activated);
+        m_command_manager.execute(new_remove_node_command);
+
         first_activated = second_activated = nullptr;
         return;
     }
@@ -121,9 +152,18 @@ void Board::on_object_clicked(Composition* clicked_object){
     std::string errorMessage;
     if((first_activated && second_activated) && linkageMode){
         if(!diagram->connection_exists(first_activated, second_activated, branchType)){
-            diagram->add_branch(first_activated, second_activated, branchType);
+            // Adding branch using command manager
+            auto new_add_branch_command = std::make_shared<AddBranchCommand>(
+                    get_diagram(), first_activated, second_activated, branchType
+                );
+            m_command_manager.execute(new_add_branch_command);
+
             if(!Validator::validate(errorMessage, first_activated, second_activated, branchType, diagram->get_diagram())){
-                diagram->remove_branch(first_activated, second_activated, branchType);
+                // Removing branch using command manager
+                auto new_remove_branch_command = std::make_shared<RemoveBranchCommand>(
+                    get_diagram(), first_activated, second_activated, branchType);
+                m_command_manager.execute(new_remove_branch_command);
+
                 QMessageBox::warning(this, "Warning", QString::fromStdString(errorMessage));
             }
         }else{
@@ -133,7 +173,10 @@ void Board::on_object_clicked(Composition* clicked_object){
         if(!diagram->connection_exists(first_activated, second_activated, branchType)){
             QMessageBox::warning(this, "Warning", QString::fromStdString("Connection doesn't exsist"));
         }else{
-            diagram->remove_branch(first_activated, second_activated, branchType);
+            // Removing branch using command manager
+            auto new_remove_branch_command = std::make_shared<RemoveBranchCommand>(
+                get_diagram(), first_activated, second_activated, branchType);
+            m_command_manager.execute(new_remove_branch_command);
         }
     }
 
@@ -242,7 +285,13 @@ void Board::add_item(std::shared_ptr<Composition> node) {   //TODO [Nikola] - iz
     CppClass* item = new CppClass(this, node);
     scene->addItem(item);
     //dynamic_cast<CPPStruct*>(item->getClassDiagramNode().get())->parent = item;
-    diagram->add_node(node);
+    //diagram->add_node(node);
+
+    // Adding Node using command manager
+    auto new_add_node_command = std::make_shared<AddNodeCommand>(get_diagram(), node);
+    m_command_manager.execute(new_add_node_command);
+
+
     views.append(item);
 
     connect(item, &CppClass::objectClicked, this, &Board::on_object_clicked);
