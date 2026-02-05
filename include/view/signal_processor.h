@@ -2,7 +2,7 @@
 #define SIGNAL_PROCESSOR_H
 
 #include "graph/diagram_graph.h"
-#include "view/cpp_class.h"
+#include "view/cpp_class_view.h"
 #include "Board.h"
 #include "model/base/branches.h"
 #include <QObject>

@@ -1,6 +1,8 @@
 #include "graph/diagram_graph.h"
 #include <model/elements/composition/composition.h>
 #include <validator.h>
+#include <QDebug>
+
 
 void DiagramGraph::add_node(SharedNodePtr node) {
     if(m_diagram.find(node) != m_diagram.end()){
@@ -133,11 +135,10 @@ bool DiagramGraph::connection_exists(SharedNodePtr start_node, SharedNodePtr end
 #if DEBUG_MODE >=1
 void DiagramGraph::show_diagram(){
     for(auto &value : m_diagram){
-        QDebug debug_stream = qDebug();
-        debug_stream << value.first->get_name() << ":";
+        qDebug() << value.first->get_name() << ":";
         std::vector<std::pair<SharedNodePtr, BranchType>>& sequence = value.second;
         for(auto &pairs : sequence){
-            debug_stream << pairs.first->get_name();
+            qDebug() << pairs.first->get_name();
         }
         qDebug() << "----";
     }

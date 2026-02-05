@@ -22,6 +22,7 @@ private:
 
     QString definition_block;
     QString get_base_method_declaration() const;
+    QString get_call() const;
 
 public:
     // Method(const Argument& description, Visibility visibility, MethodKind method_kind, const QList<Argument>& arguments);

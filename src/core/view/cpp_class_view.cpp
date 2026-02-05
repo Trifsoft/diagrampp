@@ -1,7 +1,6 @@
-#include "view/cpp_class.h"
+#include "view/cpp_class_view.h"
 #include "model/elements/composition/composition.h"
 #include "model/elements/composition/cpp_class.h"
-#include "model/elements/composition/cpp_enum.h"
 #include "model/elements/composition/cpp_struct.h"
 #include "view/field_dialog.h"
 #include "view/method_dialog.h"
@@ -38,8 +37,8 @@ void EditableTextItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
         return; // Can't edit title this way
     }
     
-    // Find parent CppClass
-    CppClass* parent = dynamic_cast<CppClass*>(this->parentItem());
+    // Find parent CppClassView
+    CppClassView* parent = dynamic_cast<CppClassView*>(this->parentItem());
 
     
     if (parent) {
@@ -69,8 +68,8 @@ void EditableTextItem::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
 {
     Q_UNUSED(event);
 
-    // Find parent CppClass
-    CppClass* parent = dynamic_cast<CppClass*>(this->parentItem());
+    // Find parent CppClassView
+    CppClassView* parent = dynamic_cast<CppClassView*>(this->parentItem());
     if(!parent){
         qDebug() << "Parent not found";
         return;
@@ -93,9 +92,9 @@ void EditableTextItem::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
 
 }
 
-// CppClass implementation
-CppClass::CppClass(Board* board,std::shared_ptr<Composition> composition, QGraphicsObject* parent)
-    : NodeView(parent)
+// CppClassView implementation
+CppClassView::CppClassView(std::shared_ptr<Composition> composition, QGraphicsObject* parent)
+    : QGraphicsObject(parent)
     , m_composition(composition)
 {
     setFlag(QGraphicsItem::ItemIsSelectable, true);
@@ -105,20 +104,20 @@ CppClass::CppClass(Board* board,std::shared_ptr<Composition> composition, QGraph
 
     setAcceptedMouseButtons(Qt::LeftButton | Qt::RightButton);
 
-    connect(composition.get(), &Composition::changed, this, &CppClass::composition_changed);
+    connect(composition.get(), &Composition::changed, this, &CppClassView::composition_changed);
 
     //setup button
     m_add_button = new QPushButton("+");
     m_button_proxy = new QGraphicsProxyWidget(this);
     m_button_proxy->setWidget(m_add_button);
-    connect(m_add_button, &QPushButton::clicked, this, &CppClass::on_add_button_clicked);
+    connect(m_add_button, &QPushButton::clicked, this, &CppClassView::on_add_button_clicked);
 
 
     setAcceptedMouseButtons(Qt::LeftButton | Qt::RightButton);
     updateBoundingRect();
 }
 
-CppClass::~CppClass(){
+CppClassView::~CppClassView(){
     for(auto& connection : m_connections){
         if(connection.line){
             delete connection.line;
@@ -132,41 +131,45 @@ CppClass::~CppClass(){
     m_textItems.clear();
 }
 
-QRectF CppClass::boundingRect() const
+QRectF CppClassView::boundingRect() const
 {
     return QRect(0,0,m_width,m_height);
 }
 
-void CppClass::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
+void CppClassView::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
 {
     Q_UNUSED(option);
     Q_UNUSED(widget);
 
     auto bounding_rect = boundingRect();
-
-    painter->fillRect(bounding_rect, Qt::black);
-    painter->drawRect(bounding_rect);
+    painter->fillRect(bounding_rect, QColor("#2b2b2b"));
 
 
     auto y_offset = m_line_height;
     if(!m_composition->fields.isEmpty()) {
+        painter->setPen(QPen(QColor("#404040"), 1));  // tamna siva
         painter->drawRect(QRect(0, y_offset, m_width, 1));
+
         y_offset += 1 + m_line_height * m_composition->fields.count();
     }
     if(!m_composition->methods.isEmpty()) {
+        painter->setPen(QPen(QColor("#404040"), 1));  // tamna siva
         painter->drawRect(QRect(0, y_offset, m_width, 1));
+
         y_offset += 1 + m_line_height * m_composition->methods.count();
     }
 
+    painter->setPen(QPen(QColor("#404040"), 1));  // tamna siva
     painter->drawRect(QRect(0, y_offset, m_width, 1));
+
 }
 
-void CppClass::composition_changed() {
+void CppClassView::composition_changed() {
     updateBoundingRect();
     update();
 }
 
-void CppClass::updateBoundingRect()
+void CppClassView::updateBoundingRect()
 {
     prepareGeometryChange();
 
@@ -199,7 +202,7 @@ void CppClass::updateBoundingRect()
     update_button();
 }
 
-void CppClass::update_button()
+void CppClassView::update_button()
 {
     if (m_button_proxy && m_add_button) {
         const int margin = 0;//2;
@@ -211,7 +214,7 @@ void CppClass::update_button()
 }
 
 //[TODO] verovatno postoji bolje resenje od iscrtavanja i brisanja svaki put
-void CppClass::updateTextItems()
+void CppClassView::updateTextItems()
 {
     // Clear old items
     qDeleteAll(m_textItems);
@@ -249,7 +252,7 @@ void CppClass::updateTextItems()
     update_all_connections();
 }
 
-void CppClass::add_text(const QString text, int y_offset, EditableTextItem::ItemType type, std::weak_ptr<IClassElement> element_weak) {
+void CppClassView::add_text(const QString text, int y_offset, EditableTextItem::ItemType type, std::weak_ptr<IClassElement> element_weak) {
     auto* item = new EditableTextItem(text, type, element_weak, this);
     item->setPos(0, y_offset);
     item->setTextWidth(m_width);
@@ -258,7 +261,7 @@ void CppClass::add_text(const QString text, int y_offset, EditableTextItem::Item
     m_textItems.append(item);
 }
 
-void CppClass::on_add_button_clicked()
+void CppClassView::on_add_button_clicked()
 {
     qDebug() << "Button clicked";
 
@@ -278,7 +281,7 @@ void CppClass::on_add_button_clicked()
 
 }
 
-void CppClass::add_new_field(){
+void CppClassView::add_new_field(){
 
     auto new_field = FieldDialog::create_field(scene()->views().first());
     if (new_field) {
@@ -288,7 +291,7 @@ void CppClass::add_new_field(){
     }
 }
 
-void CppClass::add_new_method(){
+void CppClassView::add_new_method(){
     auto new_method = MethodDialog::create_method(scene()->views().first());
     if (new_method) {
         emit  add_method_request(m_composition.get(), new_method);
@@ -297,7 +300,7 @@ void CppClass::add_new_method(){
     }
 }
 
-void CppClass::edit_field(std::weak_ptr<Field> old_field_weak)
+void CppClassView::edit_field(std::weak_ptr<Field> old_field_weak)
 {
     if(auto old_field = old_field_weak.lock()){
 
@@ -310,7 +313,7 @@ void CppClass::edit_field(std::weak_ptr<Field> old_field_weak)
     }
 }
 
-void CppClass::edit_method(std::weak_ptr<Method> old_method_weak)
+void CppClassView::edit_method(std::weak_ptr<Method> old_method_weak)
 {
      if(auto old_method = old_method_weak.lock()){
 
@@ -323,24 +326,24 @@ void CppClass::edit_method(std::weak_ptr<Method> old_method_weak)
     }
 }
 
-void CppClass::mousePressEvent(QGraphicsSceneMouseEvent* event){
+void CppClassView::mousePressEvent(QGraphicsSceneMouseEvent* event){
     emit objectClicked(m_composition.get());
     QGraphicsItem::mousePressEvent(event);
 }
 
-QPointF CppClass::get_top_center() const{
+QPointF CppClassView::get_top_center() const{
     QRectF rect = boundingRect();
     QPointF topCenterLocal(rect.width() / 2, 0);
     return mapToScene(topCenterLocal);
 }
 
-QPointF CppClass::get_bottom_center() const{
+QPointF CppClassView::get_bottom_center() const{
     QRectF rect = boundingRect();
     QPointF bottomCenterLocal(rect.width() / 2, rect.height());
     return mapToScene(bottomCenterLocal);
 }
 
-void CppClass::add_line_connection(CppClass* target, const BranchType branchType){
+void CppClassView::add_line_connection(CppClassView* target, const BranchType branchType){
     QPointF startPoint = this->get_top_center();
     QPointF endPoint = target->get_bottom_center();
 
@@ -355,7 +358,7 @@ void CppClass::add_line_connection(CppClass* target, const BranchType branchType
     endPoint.setY(endPoint.y() + ((branchType == BranchType::ASSOCIATION) ? 0 : arrow_size)); // on bottom of arrow
 
     QGraphicsLineItem* line = new QGraphicsLineItem(QLineF(startPoint, endPoint));
-    QPen pen(Qt::black, 4);
+    QPen pen(Qt::gray, 4);
     if(branchType == BranchType::DEPENDENCY || branchType == BranchType::REALIZATION){
         pen.setStyle(Qt::DashLine);
     }
@@ -384,7 +387,7 @@ void CppClass::add_line_connection(CppClass* target, const BranchType branchType
     target->number_of_connecitons++;
 }
 
-QGraphicsPolygonItem* CppClass::get_arrow(const BranchType branchType) const {
+QGraphicsPolygonItem* CppClassView::get_arrow(const BranchType branchType) const {
     QGraphicsPolygonItem* arrow = new QGraphicsPolygonItem();
     QPolygonF polygon;
 
@@ -423,7 +426,7 @@ QGraphicsPolygonItem* CppClass::get_arrow(const BranchType branchType) const {
     return arrow;
 }
 
-void CppClass::update_all_connections(){
+void CppClassView::update_all_connections(){
     for(Connection& conn : m_connections){
         if(!conn.line || !conn.otherClass){
             continue;
@@ -437,7 +440,7 @@ void CppClass::update_all_connections(){
 }
 
 
-void CppClass::update_connection_line(Connection& conn){
+void CppClassView::update_connection_line(Connection& conn){
     if(!conn.line || !conn.otherClass){
         return;
     }
@@ -450,14 +453,14 @@ void CppClass::update_connection_line(Connection& conn){
     conn.line->setLine(QLineF(newStart, lineEnd));
 }
 
-void CppClass::remove_node(){
+void CppClassView::remove_node(){
     disconnect_all_connections();
     if(scene()){
         scene()->removeItem(this);
     }
 }
 
-void CppClass::disconnect_all_connections(){
+void CppClassView::disconnect_all_connections(){
     for(Connection& conn : m_connections){
         if(conn.otherClass){
             conn.otherClass->remove_connection_to(this);
@@ -472,7 +475,7 @@ void CppClass::disconnect_all_connections(){
     m_connections.clear();
 }
 
-void CppClass::remove_connection_to(CppClass* target){
+void CppClassView::remove_connection_to(CppClassView* target){
     for(int iterator = m_connections.size()-1; iterator >= 0; iterator--){
         if(m_connections[iterator].otherClass == target){
             if(m_connections[iterator].isSource == false){
@@ -489,7 +492,7 @@ void CppClass::remove_connection_to(CppClass* target){
     }
 }
 
-void CppClass::set_object_visible(bool visible){
+void CppClassView::set_object_visible(bool visible){
     this->setVisible(visible);
     for(Connection& conn : m_connections){
         if(conn.line){
@@ -502,7 +505,7 @@ void CppClass::set_object_visible(bool visible){
 }
 
 
-void CppClass::update_connection_arrow(Connection& conn){
+void CppClassView::update_connection_arrow(Connection& conn){
     if(!conn.arrow || !conn.line || !conn.otherClass){
         return;
     }
@@ -516,14 +519,14 @@ void CppClass::update_connection_arrow(Connection& conn){
     conn.line->setLine(QLineF(currentLine.p1(), newEnd));
 }
 
-QVariant CppClass::itemChange(GraphicsItemChange change, const QVariant &value){
+QVariant CppClassView::itemChange(GraphicsItemChange change, const QVariant &value){
     if(change == ItemPositionHasChanged){
         update_all_connections();
     }
     return QGraphicsItem::itemChange(change, value);
 }
 
-void CppClass::remove_link_connection(CppClass* target, BranchType branch_type){
+void CppClassView::remove_link_connection(CppClassView* target, BranchType branch_type){
     if(!target){
         return;
     }
@@ -571,7 +574,7 @@ void CppClass::remove_link_connection(CppClass* target, BranchType branch_type){
 
 }
 
-void CppClass::update_offsets(){
+void CppClassView::update_offsets(){
     int offset = 0;
     for(Connection& conn : m_connections){
         if(conn.isSource == false){
@@ -581,7 +584,7 @@ void CppClass::update_offsets(){
     }
 }
 
-Composition* CppClass::get_uml_class_diagram_node() {
+Composition* CppClassView::get_uml_class_diagram_node() {
     return m_composition.get();
 }
 

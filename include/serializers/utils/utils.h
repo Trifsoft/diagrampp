@@ -24,7 +24,7 @@ namespace SerializeHelpers{
         write_with_quotes(output_stream, key);
         output_stream << ": ";
 
-        serializer(output_stream, indentation_counter+1, value);
+        serializer(output_stream, indentation_counter, value);
 
     }
 

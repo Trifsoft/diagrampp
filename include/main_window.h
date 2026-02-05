@@ -21,9 +21,6 @@ public:
 private slots:
     void onNewProjectClicked();
     void onImportProjectClicked();
-    void onHistoryClicked();
-    void onHelpClicked();
-    void onExampleClicked();
 
 private:
     Ui::MainWindow *ui;

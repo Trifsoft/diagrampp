@@ -4,14 +4,13 @@
 #include <QObject>
 #include <QString>
 
-class CppClass;
+class CppClassView;
 
 class IUMLClassDiagramNode: public QObject {
 public:
     virtual ~IUMLClassDiagramNode() = default;
 
     virtual QString get_name() const = 0;
-    virtual QString get_label() const = 0;
     virtual QString declaration() const = 0;
     virtual QString definition() const = 0;
 

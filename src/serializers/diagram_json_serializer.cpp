@@ -42,7 +42,8 @@ void DiagramJsonSerializer::trim_end(std::string& s) const {
 }
 
 void DiagramJsonSerializer::write_coords(std::ostream& output_stream, double x, double y){
-    SerializeHelpers::indent(output_stream, m_indentation_counter); output_stream << "\"coords\": {\n";
+    SerializeHelpers::indent(output_stream, m_indentation_counter);
+    SerializeHelpers::write_with_quotes(output_stream, "coords"); output_stream << ": {\n";
     ++m_indentation_counter;
 
     SerializeHelpers::write_indented_field(output_stream, m_indentation_counter, "x", x);
@@ -60,7 +61,9 @@ void DiagramJsonSerializer::write_branch_type(std::ostream& output_stream, Branc
 }
 
 void DiagramJsonSerializer::serialize_neighbours(std::ostream& output_stream, const std::vector<std::pair<SharedNodePtr, BranchType>>& neighbours){
+    SerializeHelpers::indent(output_stream, m_indentation_counter);
     SerializeHelpers::write_with_quotes(output_stream, "neighbours");
+    output_stream << ": ";
     output_stream << "[\n";
     ++m_indentation_counter;
 
@@ -71,18 +74,17 @@ void DiagramJsonSerializer::serialize_neighbours(std::ostream& output_stream, co
         write_branch_type(output_stream, neighbour_it->second);
         output_stream << ",\n";
 
-        auto neighbour = m_board->get_view_from_node(neighbour_it->first);
-        NodeSerializers::serialize_composition_node(output_stream, m_indentation_counter, neighbour_it->first.get());
+        SerializeHelpers::write_indented_serialized_field<Composition>(output_stream, m_indentation_counter, "node", neighbour_it->first.get(), NodeSerializers::serialize_composition_node);
         output_stream << ",\n";
 
+        auto neighbour = m_board->get_view_from_node(neighbour_it->first);
         write_coords(output_stream, neighbour->x(), neighbour->y()); output_stream << '\n';
-        --m_indentation_counter;
-        SerializeHelpers::indent(output_stream, m_indentation_counter); output_stream << "}";
 
+        --m_indentation_counter;
         if(++neighbour_it == neighbours.end()){
-            output_stream << '\n';
+            output_stream << "}\n";
         }else {
-            output_stream << ",\n";
+            output_stream << "},\n";
         }
     }
 
@@ -93,21 +95,22 @@ void DiagramJsonSerializer::serialize_neighbours(std::ostream& output_stream, co
 void DiagramJsonSerializer::serialize(std::ostream& output_stream){
     output_stream << "[\n";
     ++m_indentation_counter;
-    SerializeHelpers::indent(output_stream, m_indentation_counter);
 
     auto m_diagram = m_board->get_diagram()->get_diagram();
 
     for (auto it = m_diagram.begin(); it != m_diagram.end(); ){
         auto node_view = m_board->get_view_from_node(it->first);
-        output_stream << "{\n";
+
+        SerializeHelpers::indent(output_stream, m_indentation_counter);
         ++m_indentation_counter;
+        output_stream << "{\n";
 
         // 1) coords
         write_coords(output_stream, node_view->x(), node_view->y());
         output_stream << ",\n";
 
         // 2) node
-        NodeSerializers::serialize_composition_node(output_stream, m_indentation_counter, it->first.get());
+        SerializeHelpers::write_indented_serialized_field<Composition>(output_stream, m_indentation_counter, "node", it->first.get(), &NodeSerializers::serialize_composition_node);
         output_stream << ",\n";
 
         // 3) neighbours (list of <{node, coords}, branch_type}>)
@@ -134,22 +137,31 @@ std::pair<double, double> DiagramJsonSerializer::deserialize_coords(QJsonObject 
 }
 
 void DiagramJsonSerializer::deserialize(QJsonArray json_array){
+    std::map<std::tuple<QString, double, double>, bool> node_created;
+
     for(const auto& json_value : json_array){
         QJsonObject json_object = json_value.toObject();
         const auto [x,y] = deserialize_coords(json_object["coords"].toObject());
-
         std::shared_ptr<Composition> node = NodeSerializers::deserialize_composition_node(json_object["node"].toObject());
-        m_board->add_item(node, x, y);
+        if(!node_created[{node.get()->get_name(), x, y}]){
+            node_created[std::make_tuple(node.get()->get_name(), x, y)] = true;
+            m_board->add_item(node, x, y);
+        }
+
 
         const QJsonArray& neighbours = json_object["neighbours"].toArray();
         for (const auto& json_neighbour_val : neighbours){
             const auto& json_neighbour_object = json_neighbour_val.toObject();
 
-            const auto [neighbour_x, neighbour_y] = deserialize_coords(json_object["coords"].toObject());
+            const auto [neighbour_x, neighbour_y] = deserialize_coords(json_neighbour_object["coords"].toObject());
             const auto neighbour_node = NodeSerializers::deserialize_composition_node(json_neighbour_object["node"].toObject());
-            const auto branch_type = get_branch_type_from_string(json_object["branch_type"].toString().toStdString());
+            if(!node_created[{neighbour_node.get()->get_name(), neighbour_x, neighbour_y}]){
+                m_board->add_item(neighbour_node, neighbour_x, neighbour_y);
+                node_created[{neighbour_node.get()->get_name(), neighbour_x, neighbour_y}] = true;
+            }
 
-            m_board->add_node_relationship(node, neighbour_node, branch_type);
+            const auto branch_type = get_branch_type_from_string(json_neighbour_object["branch_type"].toString().toStdString());
+            m_board->add_branch(node, neighbour_node, branch_type);
         }
     }
 }
