@@ -6,7 +6,7 @@
 #include <QString>
 #include <optional>
 
-class CppClass;
+class CppClassView;
 
 
 class CPPStruct : public Composition {

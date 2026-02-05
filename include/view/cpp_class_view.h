@@ -34,11 +34,11 @@ private:
     std::weak_ptr<IClassElement> m_element_weak;
 };
 
-class CppClass: public QGraphicsObject {
+class CppClassView: public QGraphicsObject {
     Q_OBJECT
 public:
-    CppClass(std::shared_ptr<Composition> composition, QGraphicsObject* parent = nullptr);
-    ~CppClass();
+    CppClassView(std::shared_ptr<Composition> composition, QGraphicsObject* parent = nullptr);
+    ~CppClassView();
 
     QRectF boundingRect() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
@@ -46,14 +46,14 @@ public:
     void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
 
     void addConnectionInfo(QGraphicsLineItem* line, bool isStart);
-    void removeLink(CppClass* target, BranchType branch);
+    void removeLink(CppClassView* target, BranchType branch);
 
 
     QPointF get_top_center() const;
     QPointF get_bottom_center() const;
     void update_connections();
-    void add_line_connection(CppClass* target, const BranchType branch);
-    void remove_link_connection(CppClass* target, const BranchType branch);
+    void add_line_connection(CppClassView* target, const BranchType branch);
+    void remove_link_connection(CppClassView* target, const BranchType branch);
     void set_object_visible(bool visible);
     void remove_node();
 
@@ -67,7 +67,7 @@ private:
     struct Connection {
         QGraphicsLineItem* line = nullptr;
         QGraphicsPolygonItem* arrow = nullptr;
-        CppClass* otherClass = nullptr;
+        CppClassView* otherClass = nullptr;
         bool isSource;
         bool endLine;
         BranchType type;
@@ -81,7 +81,7 @@ private:
     void update_all_connections();
     void update_offsets();
     void disconnect_all_connections();
-    void remove_connection_to(CppClass* target);
+    void remove_connection_to(CppClassView* target);
     QGraphicsPolygonItem* get_arrow(const BranchType branchType) const;
 
     std::shared_ptr<Composition> m_composition;

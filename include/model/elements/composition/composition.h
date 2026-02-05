@@ -15,7 +15,7 @@
 #include <optional>
 #include <memory>
 
-class CppClass;
+class CppClassView;
 
 class Composition: public QObject {
     Q_OBJECT
