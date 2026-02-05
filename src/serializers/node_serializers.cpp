@@ -23,7 +23,6 @@ namespace {
 
 void NodeSerializers::serialize_composition_node(std::ostream& output_stream, int indentation_counter, const Composition* composition_node)
 {
-    SerializeHelpers::write_with_quotes(output_stream, "node");
     output_stream<< "{\n";
     ++indentation_counter;
 
@@ -62,10 +61,10 @@ void NodeSerializers::serialize_composition_node(std::ostream& output_stream, in
 
     // METHODS
     QList<Method*> methods_raw_pointers = {};
-    for (auto tmp : composition_node->fields){
-        fields_raw_pointers.append(tmp.get());
+    for (auto tmp : composition_node->methods){
+        methods_raw_pointers.append(tmp.get());
     }
-    SerializeHelpers::write_indented_serialized_list_field<Method>(output_stream, indentation_counter, "method", methods_raw_pointers, &CompositionElementSerializers::serialize_method);
+    SerializeHelpers::write_indented_serialized_list_field<Method>(output_stream, indentation_counter, "methods", methods_raw_pointers, &CompositionElementSerializers::serialize_method);
     output_stream << '\n';
 
     --indentation_counter;

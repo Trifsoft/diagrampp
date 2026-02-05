@@ -60,7 +60,9 @@ void DiagramJsonSerializer::write_branch_type(std::ostream& output_stream, Branc
 }
 
 void DiagramJsonSerializer::serialize_neighbours(std::ostream& output_stream, const std::vector<std::pair<SharedNodePtr, BranchType>>& neighbours){
+    SerializeHelpers::indent(output_stream, m_indentation_counter);
     SerializeHelpers::write_with_quotes(output_stream, "neighbours");
+    output_stream << ": ";
     output_stream << "[\n";
     ++m_indentation_counter;
 
@@ -100,14 +102,13 @@ void DiagramJsonSerializer::serialize(std::ostream& output_stream){
     for (auto it = m_diagram.begin(); it != m_diagram.end(); ){
         auto node_view = m_board->get_view_from_node(it->first);
         output_stream << "{\n";
-        ++m_indentation_counter;
 
         // 1) coords
         write_coords(output_stream, node_view->x(), node_view->y());
         output_stream << ",\n";
 
         // 2) node
-        NodeSerializers::serialize_composition_node(output_stream, m_indentation_counter, it->first.get());
+        SerializeHelpers::write_indented_serialized_field<Composition>(output_stream, m_indentation_counter, "node", it->first.get(), &NodeSerializers::serialize_composition_node);
         output_stream << ",\n";
 
         // 3) neighbours (list of <{node, coords}, branch_type}>)
