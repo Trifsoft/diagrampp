@@ -42,15 +42,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(ui->pbImport, &QPushButton::clicked,
             this, &MainWindow::onImportProjectClicked);
-
-    connect(ui->pbHistory, &QPushButton::clicked,
-            this, &MainWindow::onHistoryClicked);
-
-    connect(ui->pbHelp, &QPushButton::clicked,
-            this, &MainWindow::onHelpClicked);
-
-    connect(ui->pbExample, &QPushButton::clicked,
-            this, &MainWindow::onExampleClicked);
 }
 
 MainWindow::~MainWindow()
@@ -108,26 +99,4 @@ void MainWindow::onImportProjectClicked()
     board->set_title(title);
 
     board->show();
-}
-
-void MainWindow::onHistoryClicked()
-{
-    QWidget *w = new QWidget();
-    w->setWindowTitle("History");
-    w->resize(400, 200);
-    w->show();
-}
-
-void MainWindow::onHelpClicked()
-{
-    QWidget *w = new QWidget();
-    w->setWindowTitle("Help");
-    w->resize(400, 200);
-    w->show();
-}
-
-void MainWindow::onExampleClicked()
-{
-    auto project = new Board();
-    project->show();
 }
