@@ -9,7 +9,6 @@
 #include <QGraphicsScene>
 #include <model/elements/field.h>
 #include <model/elements/method.h>
-#include <nodefactory.h>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -20,6 +19,12 @@ QT_END_NAMESPACE
 class signalProcessor;
 class DiagramGraph;
 class IClassElement;
+
+enum class NodeType {
+    Class,
+    Struct,
+    Enum
+};
 
 class Board : public QWidget
 {
@@ -46,7 +51,6 @@ public slots:
     void onModeClicked();
     void exportPNG();
 
-    void onGenerateClicked(const QString& class_name, NodeType node_type);
     void on_object_clicked(Composition* clickedClass);
     void on_generate_project();
 
@@ -67,5 +71,7 @@ private:
 
     void add_item(std::shared_ptr<Composition> item);
     void openNodeFactory(NodeType node_type);
+
+    void onGenerateClicked(const QString& class_name, NodeType node_type);
 };
 #endif // BOARD_H
