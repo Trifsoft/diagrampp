@@ -2,7 +2,6 @@
 #define BOARD_H
 
 #include "graph/diagram_graph.h"
-#include "view/signal_processor.h"
 #include "recoveyLog.h"
 #include <QWidget>
 #include <QGraphicsScene>
@@ -47,6 +46,10 @@ public:
     void remove_branch(SharedNodePtr node, SharedNodePtr neighbour, BranchType branch_type);
 
     void set_title(const QString&);
+signals:
+    void link_added(CppClassView* child, CppClassView* parent, BranchType branch) const;
+    void link_removed(CppClassView* child, CppClassView* parent, BranchType branch) const;
+    void node_removed(CppClassView* node) const;
 public slots:
     void onAddClassClicked();
     void onAddStructClicked();
@@ -62,12 +65,15 @@ public slots:
     void on_add_method_requested(Composition* node, std::shared_ptr<Method>  method);
     void on_edit_field_requested(Composition* node, std::weak_ptr<Field> old_field_weak, std::shared_ptr<Field>  new_field);
     void on_edit_method_requested(Composition* node, std::weak_ptr<Method> old_method_weak, std::shared_ptr<Method>  new_method);
+
+    void on_link_added(SharedNodePtr from, SharedNodePtr to, BranchType branch);
+    void on_link_removed(SharedNodePtr from, SharedNodePtr to, BranchType branch);
+    void on_node_removed(SharedNodePtr node);
 private:
     DiagramGraph *diagram;
     QList<CppClassView*> views;
 
     Ui::Board *ui;
-    signalProcessor *signal_processor;
     recoveryLog *recovery_log;
 
     SharedNodePtr first_activated = nullptr;

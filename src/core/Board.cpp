@@ -12,9 +12,10 @@
 #include <QMessageBox>
 #include <fstream>
 #include "serializers/diagram_json_serializer.h"
+#include <view/signal_processor.h>
 
 Board::Board(const QString& project_name, QWidget *parent)
-    : QWidget(parent), ui(new Ui::Board), diagram(new DiagramGraph()), signal_processor(new signalProcessor(this)),
+    : QWidget(parent), ui(new Ui::Board), diagram(new DiagramGraph()),
     recovery_log(new recoveryLog())
 {
     ui->setupUi(this);
@@ -33,10 +34,15 @@ Board::Board(const QString& project_name, QWidget *parent)
 
     ui->linkageMode->setChecked(false);
 
+    // signals for connecting graph with GUI
+    connect(diagram, &DiagramGraph::link_added, this, &Board::on_link_added);
+    connect(diagram, &DiagramGraph::link_removed, this, &Board::on_link_removed);
+    connect(diagram, &DiagramGraph::node_removed, this, &Board::on_node_removed);
     // signals for GUI
-    connect(diagram, &DiagramGraph::link_added, signal_processor, &signalProcessor::add_link_process);
-    connect(diagram, &DiagramGraph::link_removed, signal_processor, &signalProcessor::remove_link_process);
-    connect(diagram, &DiagramGraph::node_removed, signal_processor, &signalProcessor::remove_node_process);
+    connect(this, &Board::link_added, &signalProcessor::instance(), &signalProcessor::add_link_process);
+    connect(this, &Board::link_removed, &signalProcessor::instance(), &signalProcessor::remove_link_process);
+    connect(this, &Board::node_removed, &signalProcessor::instance(), &signalProcessor::remove_node_process);
+
     // signals for log file
     connect(diagram, &DiagramGraph::link_added, recovery_log, &recoveryLog::add_link_operation);
     connect(diagram, &DiagramGraph::link_removed, recovery_log, &recoveryLog::remove_link_operation);
@@ -75,7 +81,6 @@ CppClassView* Board::get_view_from_node(SharedNodePtr node) {
 Board::~Board()
 {
     delete diagram;
-    delete signal_processor;
     delete recovery_log;
     qDeleteAll(views);
     views.clear();
@@ -408,4 +413,22 @@ QString& Board::get_file_name() {
     title.remove(QRegularExpression("^_+|_+$"));
     file_name = title;
     return file_name;
+}
+
+
+void Board::on_link_added(SharedNodePtr from, SharedNodePtr to, BranchType branch) {
+    auto child = get_view_from_node(from);
+    auto parent = get_view_from_node(to);
+    emit link_added(child, parent, branch);
+}
+
+void Board::on_link_removed(SharedNodePtr from, SharedNodePtr to, BranchType branch) {
+    auto child = get_view_from_node(from);
+    auto parent = get_view_from_node(to);
+    emit link_removed(child, parent, branch);
+}
+
+void Board::on_node_removed(SharedNodePtr target) {
+    auto node = get_view_from_node(target);
+    emit node_removed(node);
 }

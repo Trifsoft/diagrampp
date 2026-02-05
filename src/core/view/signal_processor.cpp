@@ -1,26 +1,20 @@
 #include "view/signal_processor.h"
 
-signalProcessor::signalProcessor(Board* board) : m_board(board) {}
+signalProcessor::signalProcessor() {}
 
-
-void signalProcessor::add_link_process(SharedNodePtr from, SharedNodePtr to, BranchType branch) const {
-    auto child = m_board->get_view_from_node(from);
-    auto parent = m_board->get_view_from_node(to);
+void signalProcessor::add_link_process(CppClassView* child, CppClassView* parent, BranchType branch) const {
     if(child && parent){
         child->add_line_connection(parent, branch);
     }
 }
 
-void signalProcessor::remove_link_process(SharedNodePtr from, SharedNodePtr to, BranchType branch) const {
-    auto child = m_board->get_view_from_node(from);
-    auto parent = m_board->get_view_from_node(to);
+void signalProcessor::remove_link_process(CppClassView* child, CppClassView* parent, BranchType branch) const {
     if(child && parent){
         child->remove_link_connection(parent, branch);
     }
 }
 
-void signalProcessor::remove_node_process(SharedNodePtr target) const {
-    auto node = m_board->get_view_from_node(target);
+void signalProcessor::remove_node_process(CppClassView* node) const {
     node->remove_node();
 }
 
