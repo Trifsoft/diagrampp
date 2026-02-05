@@ -164,8 +164,7 @@ void Composition::add_constructor(std::shared_ptr<DefaultConstructor> constructo
 
 void Composition::inherits(Visibility visibility, Composition* base_node)
 {
-    inheritance->first = visibility;
-    inheritance->second = base_node;
+    inheritance = {visibility, base_node};
 }
 
 void Composition::break_inheritance()
