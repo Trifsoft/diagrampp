@@ -59,6 +59,15 @@ void MainWindow::onNewProjectClicked()
     dialog.setStyleSheet(
         "QInputDialog QPushButton { background-color: #2c3e50; color: white; border-radius: 4px; padding: 6px 12px; }"
         "QInputDialog QPushButton:hover { background-color: #34495e; }"
+        "QInputDialog QLabel { "
+        "  color: #2b2b2b; "
+        "} "
+        "QInputDialog QLineEdit { "
+        "  background-color: #2b2b2b; "
+        "  color: #ffffff; "
+        "  border: 1px solid #3a3a3a; "
+        "  padding: 4px; "
+        "} "
     );
 
     if (dialog.exec() == QDialog::Accepted && !dialog.textValue().isEmpty()) {
