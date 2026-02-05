@@ -376,8 +376,6 @@ void CppClassView::add_line_connection(CppClassView* target, const BranchType br
     m_connections.append(sourceConn);
 
     Connection targetConn;
-    targetConn.line = line;
-    targetConn.arrow = arrow;
     targetConn.otherClass = this;
     targetConn.isSource = false;
     targetConn.endLine = true;
