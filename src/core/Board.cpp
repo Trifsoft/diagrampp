@@ -366,5 +366,29 @@ void Board::on_generate_project(){
             toggle
             );
 
+        if(status != ProjectGenerator::GenerationStatusCode::OK){
+            QString err_message;
+            switch (status)
+            {
+            case ProjectGenerator::GenerationStatusCode::EXISTING_PROJECT_DIR_ON_PATH:
+                err_message = "Directory with a given name already exists on path. Choose a different name or replace it.";
+                break;
+            case ProjectGenerator::GenerationStatusCode::PERMISSION_DENIED:
+                err_message = "Permission denied.";
+                break;
+            case ProjectGenerator::GenerationStatusCode::NO_MEMORY_SPACE:
+                err_message = "No enough memory on the disc.";
+                break;
+            case ProjectGenerator::GenerationStatusCode::FILE_NOT_CREATED:
+                err_message = "Error while generating file.";
+                break;
+            case ProjectGenerator::GenerationStatusCode::NO_SUCH_DIR:
+                err_message = "The selected path does not exist. Please choose an existing directory.";
+                break;
+            defaul:
+                err_message = "";
+            }
+            QMessageBox::warning(this, "Warning", err_message);
+        }
     }
 }

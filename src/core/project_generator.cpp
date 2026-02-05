@@ -134,8 +134,11 @@ namespace { // utlis
             if(should_generate_cpp_file(node)){ // generate defnitions code for Struct/Class
                 fs::path cpp_file_path = fs::path(root_path);
                 cpp_file_path = append_n_times(cpp_file_path, ProjectGenerator::file_location["cpp"]);
-                file_stream.open(cpp_file_path.append(name).append(".cpp"), std::fstream::out);
+                file_stream.open(cpp_file_path.append(name+".cpp"), std::fstream::out);
 
+                fs::permissions(root_path, fs::perms::all, fs::perm_options::add);
+                // debugged: problem with permission, file is not created on given path
+                // if is never evaluated as true -> files are not created
                 if(file_stream.is_open()){
                     file_stream << node->definition().toStdString();
                     file_stream.close();
@@ -146,7 +149,7 @@ namespace { // utlis
 
             fs::path hpp_file_path = fs::path(root_path);
             hpp_file_path = append_n_times(hpp_file_path, ProjectGenerator::file_location["hpp"]);
-            file_stream.open(hpp_file_path.append(name).append(".hpp"), std::fstream::out);
+            file_stream.open(hpp_file_path.append(name+".hpp"), std::fstream::out);
 
             if(file_stream.is_open()){
                 file_stream << node->declaration().toStdString();
