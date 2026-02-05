@@ -17,11 +17,13 @@ public:
     QString get_selected_path() const;
     ProjectGenerator::FileNameNotation get_selected_notation() const;
     ProjectGenerator::ReplaceToggle get_selected_toggle() const;
+    QString get_project_dir_name() const;
 
 private slots:
     void browse_directory();
 
 private:
+    QLineEdit *project_name_edit = nullptr;
     QLineEdit *path_edit;
     QPushButton *browse_button;
     QRadioButton *camel_case_radio;
