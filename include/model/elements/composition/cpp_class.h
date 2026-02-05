@@ -6,7 +6,7 @@
 #include <QString>
 #include <optional>
 
-class CppClass;
+class CppClassView;
 
 class CPPClass : public Composition {
 protected:

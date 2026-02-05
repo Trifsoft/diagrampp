@@ -8,7 +8,7 @@
 #include <QGraphicsScene>
 #include <model/elements/field.h>
 #include <model/elements/method.h>
-#include "view/cpp_class.h"
+#include "view/cpp_class_view.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -36,7 +36,7 @@ public:
     ~Board();
 
     DiagramGraph* get_diagram() const;
-    CppClass* get_view_from_node(SharedNodePtr);
+    CppClassView* get_view_from_node(SharedNodePtr);
 
     BranchType branch_type = BranchType::INHERITANCE;
     bool linkageMode = false;
@@ -64,7 +64,7 @@ public slots:
     void on_edit_method_requested(Composition* node, std::weak_ptr<Method> old_method_weak, std::shared_ptr<Method>  new_method);
 private:
     DiagramGraph *diagram;
-    QList<CppClass*> views;
+    QList<CppClassView*> views;
 
     Ui::Board *ui;
     signalProcessor *signal_processor;

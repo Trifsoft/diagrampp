@@ -1,5 +1,5 @@
 #include "Board.h"
-#include "view/cpp_class.h"
+#include "view/cpp_class_view.h"
 #include "model/elements/composition/cpp_struct.h"
 #include "model/elements/composition/cpp_class.h"
 #include <QGraphicsView>
@@ -63,7 +63,7 @@ DiagramGraph* Board::get_diagram() const {
     return diagram;
 }
 
-CppClass* Board::get_view_from_node(SharedNodePtr node) {
+CppClassView* Board::get_view_from_node(SharedNodePtr node) {
     for(auto view : views) {
         if(view->get_uml_class_diagram_node() == node.get()) {
             return view;
@@ -180,11 +180,11 @@ void Board::on_add_method_requested(Composition *node, std::shared_ptr<Method> m
 }
 
 // void Board::add_item(std::shared_ptr<Composition> node) {   //TODO [Nikola] - izmeniti da bude IUMLClassDiagramNode umesto Composition
-//     CppClass* item = new CppClass(this, node);
+//     CppClassView* item = new CppClassView(this, node);
 //     scene->addItem(item);
 //     diagram->add_node(item);
 
-//     connect(item, &CppClass::objectClicked, this, &Board::on_object_clicked);
+//     connect(item, &CppClassView::objectClicked, this, &Board::on_object_clicked);
 // }
 
 
@@ -259,7 +259,7 @@ void Board::onGenerateClicked(const QString& class_name, NodeType node_type) {
 
 }
 void Board::add_item(std::shared_ptr<Composition> node, const double coord_x, const double coord_y) {
-    CppClass* item = new CppClass(node);
+    CppClassView* item = new CppClassView(node);
     if(coord_x && coord_y){
         item->setX(coord_x);
         item->setY(coord_y);
@@ -269,15 +269,15 @@ void Board::add_item(std::shared_ptr<Composition> node, const double coord_x, co
     diagram->add_node(node);
     views.append(item);
 
-    connect(item, &CppClass::objectClicked, this, &Board::on_object_clicked);
+    connect(item, &CppClassView::objectClicked, this, &Board::on_object_clicked);
 
-    connect(item, &CppClass::add_field_request, recovery_log, &recoveryLog::add_field_operation);
-    connect(item, &CppClass::add_method_request, recovery_log, &recoveryLog::add_method_operation);
+    connect(item, &CppClassView::add_field_request, recovery_log, &recoveryLog::add_field_operation);
+    connect(item, &CppClassView::add_method_request, recovery_log, &recoveryLog::add_method_operation);
 
-    connect(item, &CppClass::add_field_request, this, &Board::on_add_field_requested);
-    connect(item, &CppClass::add_method_request, this, &Board::on_add_method_requested);
-    connect(item, &CppClass::edit_field_request, this, &Board::on_edit_field_requested);
-    connect(item, &CppClass::edit_method_request, this, &Board::on_edit_method_requested);
+    connect(item, &CppClassView::add_field_request, this, &Board::on_add_field_requested);
+    connect(item, &CppClassView::add_method_request, this, &Board::on_add_method_requested);
+    connect(item, &CppClassView::edit_field_request, this, &Board::on_edit_field_requested);
+    connect(item, &CppClassView::edit_method_request, this, &Board::on_edit_method_requested);
 }
 
 void Board::exportPNG(){

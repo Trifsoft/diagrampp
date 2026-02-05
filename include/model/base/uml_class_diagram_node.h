@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QString>
 
-class CppClass;
+class CppClassView;
 
 class IUMLClassDiagramNode: public QObject {
 public:
