@@ -371,7 +371,7 @@ void Board::exportJSON() {
     QString filePath = QFileDialog::getSaveFileName(
         this,
         "Export Diagram as JSON",
-        QDir::homePath() + "/diagram_export.json",
+        QDir::homePath() + "/" + get_file_name() + ".json",
         "JSON Files (*.json)"
     );
 
@@ -441,4 +441,14 @@ void Board::on_generate_project(){
 
 void Board::set_title(const QString& title) {
     ui->title->setText(title);
+}
+
+QString& Board::get_file_name() {
+    static QString file_name;
+    QString title = ui->title->text().trimmed();
+    title = title.toLower();
+    title.replace(QRegularExpression("\\s+"), "_");
+    title.remove(QRegularExpression("^_+|_+$"));
+    file_name = title;
+    return file_name;
 }

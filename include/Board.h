@@ -77,5 +77,7 @@ private:
     void openNodeFactory(NodeType node_type);
 
     void onGenerateClicked(const QString& class_name, NodeType node_type);
+
+    QString& get_file_name();
 };
 #endif // BOARD_H
