@@ -10,8 +10,8 @@ class RemoveNodeWithBranchesCommand : public Command
 public:
     RemoveNodeWithBranchesCommand(DiagramGraph* graph, SharedNodePtr node);
 
-    void execute() override;
-    void undo() override;
+    bool execute() override;
+    bool undo() override;
 
 private:
     void build_commands();

@@ -13,10 +13,7 @@
 
 
 #include "commandManager/command_manager.h"
-#include "commandManager/add_node_command.h"
-#include "commandManager/remove_node_with_branches_command.h"
-#include "commandManager/add_branch_command.h"
-#include "commandManager/remove_branch_command.h"
+
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -76,5 +73,10 @@ private:
     void setup_actions();
     void add_item(std::shared_ptr<Composition> item);
     void openNodeFactory(NodeType node_type);
+
+    void execute_add_node(SharedNodePtr node);
+    void execute_remove_node_with_branches(SharedNodePtr node);
+    void execute_add_branch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type);
+    void execute_remove_branch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type);
 };
 #endif // BOARD_H

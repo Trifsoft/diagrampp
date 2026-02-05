@@ -7,20 +7,24 @@ AddNodeCommand::AddNodeCommand(DiagramGraph* graph,
 {
 }
 
-void AddNodeCommand::execute()
+bool AddNodeCommand::execute()
 {
     if (!m_node_added && m_node && m_graph) {
         m_graph->add_node(m_node);
         m_node_added = true;
         qDebug() << "Command EXECUTE: Node dodat na scenu";
+        return true;
     }
+    return false;
 }
 
-void AddNodeCommand::undo()
+bool AddNodeCommand::undo()
 {
     if (m_node_added && m_node && m_graph) {
-        m_graph->remove_node(m_node);  // Implementirano: uklanja node sa scene
+        m_graph->remove_node(m_node);
         m_node_added = false;
         qDebug() << "Command UNDO: Node uklonjen sa scene";
+        return true;
     }
+    return false;
 }

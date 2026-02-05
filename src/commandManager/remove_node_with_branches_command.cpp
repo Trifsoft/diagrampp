@@ -29,28 +29,32 @@ void RemoveNodeWithBranchesCommand::build_commands()
     m_built = true;
 }
 
-void RemoveNodeWithBranchesCommand::execute()
+bool RemoveNodeWithBranchesCommand::execute()
 {
     if (m_executed) {
-        return;
+        return false;
     }
 
     if (!m_built) {
         build_commands();
     }
 
-    if (m_composite) {
-        m_composite->execute();
+    if (m_composite && m_composite->execute()) {
         m_executed = true;
+        return true;
     }
+    return false;
 }
 
-void RemoveNodeWithBranchesCommand::undo()
+bool RemoveNodeWithBranchesCommand::undo()
 {
     if (!m_executed || !m_composite) {
-        return;
+        return false;
     }
 
-    m_composite->undo();
-    m_executed = false;
+    if (m_composite->undo()) {
+        m_executed = false;
+        return true;
+    }
+    return false;
 }

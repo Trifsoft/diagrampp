@@ -13,6 +13,10 @@
 #include <QMessageBox>
 
 #include <commandManager/command_manager.h>
+#include "commandManager/add_node_command.h"
+#include "commandManager/remove_node_with_branches_command.h"
+#include "commandManager/add_branch_command.h"
+#include "commandManager/remove_branch_command.h"
 
 Board::Board(QWidget *parent)
     : QWidget(parent), ui(new Ui::Board), diagram(new DiagramGraph()), signal_processor(new signalProcessor(this)),
@@ -130,6 +134,30 @@ void Board::onModeClicked(){
     first_activated = second_activated = nullptr;
 }
 
+void Board::execute_add_node(SharedNodePtr node)
+{
+    auto cmd = std::make_shared<AddNodeCommand>(diagram, node);
+    m_command_manager.execute(cmd);
+}
+
+void Board::execute_remove_node_with_branches(SharedNodePtr node)
+{
+    auto cmd = std::make_shared<RemoveNodeWithBranchesCommand>(diagram, node);
+    m_command_manager.execute(cmd);
+}
+
+void Board::execute_add_branch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type)
+{
+    auto cmd = std::make_shared<AddBranchCommand>(diagram, from, to, branch_type);
+    m_command_manager.execute(cmd);
+}
+
+void Board::execute_remove_branch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type)
+{
+    auto cmd = std::make_shared<RemoveBranchCommand>(diagram, from, to, branch_type);
+    m_command_manager.execute(cmd);
+}
+
 void Board::on_object_clicked(Composition* clicked_object){
     if(!linkageMode && !removeMode){
         return;
@@ -141,10 +169,7 @@ void Board::on_object_clicked(Composition* clicked_object){
     second_activated = diagram->find_pointer_owner(clicked_object);
 
     if((first_activated == second_activated) && removeMode){
-        //Removing node using command manager
-        auto new_remove_node_command = std::make_shared<RemoveNodeWithBranchesCommand>(get_diagram(), first_activated);
-        m_command_manager.execute(new_remove_node_command);
-
+        execute_remove_node_with_branches(first_activated);
         first_activated = second_activated = nullptr;
         return;
     }
@@ -152,18 +177,10 @@ void Board::on_object_clicked(Composition* clicked_object){
     std::string errorMessage;
     if((first_activated && second_activated) && linkageMode){
         if(!diagram->connection_exists(first_activated, second_activated, branchType)){
-            // Adding branch using command manager
-            auto new_add_branch_command = std::make_shared<AddBranchCommand>(
-                    get_diagram(), first_activated, second_activated, branchType
-                );
-            m_command_manager.execute(new_add_branch_command);
+            execute_add_branch(first_activated, second_activated, branchType);
 
             if(!Validator::validate(errorMessage, first_activated, second_activated, branchType, diagram->get_diagram())){
-                // Removing branch using command manager
-                auto new_remove_branch_command = std::make_shared<RemoveBranchCommand>(
-                    get_diagram(), first_activated, second_activated, branchType);
-                m_command_manager.execute(new_remove_branch_command);
-
+                execute_remove_branch(first_activated, second_activated, branchType);
                 QMessageBox::warning(this, "Warning", QString::fromStdString(errorMessage));
             }
         }else{
@@ -173,10 +190,7 @@ void Board::on_object_clicked(Composition* clicked_object){
         if(!diagram->connection_exists(first_activated, second_activated, branchType)){
             QMessageBox::warning(this, "Warning", QString::fromStdString("Connection doesn't exsist"));
         }else{
-            // Removing branch using command manager
-            auto new_remove_branch_command = std::make_shared<RemoveBranchCommand>(
-                get_diagram(), first_activated, second_activated, branchType);
-            m_command_manager.execute(new_remove_branch_command);
+            execute_remove_branch(first_activated, second_activated, branchType);
         }
     }
 
@@ -284,13 +298,8 @@ void Board::onGenerateClicked(const QString& class_name, NodeType node_type) {
 void Board::add_item(std::shared_ptr<Composition> node) {   //TODO [Nikola] - izmeniti da bude IUMLClassDiagramNode umesto Composition
     CppClass* item = new CppClass(this, node);
     scene->addItem(item);
-    //dynamic_cast<CPPStruct*>(item->getClassDiagramNode().get())->parent = item;
-    //diagram->add_node(node);
 
-    // Adding Node using command manager
-    auto new_add_node_command = std::make_shared<AddNodeCommand>(get_diagram(), node);
-    m_command_manager.execute(new_add_node_command);
-
+    execute_add_node(node);
 
     views.append(item);
 

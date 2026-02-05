@@ -7,21 +7,29 @@ void CompositeCommand::add_command(const std::shared_ptr<Command>& command)
     }
 }
 
-void CompositeCommand::execute()
+bool CompositeCommand::execute()
 {
+    bool all_succeeded = true;
     for (const auto& command : m_commands) {
         if (command) {
-            command->execute();
+            if (!command->execute()) {
+                all_succeeded = false;
+            }
         }
     }
+    return all_succeeded && !m_commands.isEmpty();
 }
 
-void CompositeCommand::undo()
+bool CompositeCommand::undo()
 {
+    bool all_succeeded = true;
     for (int i = m_commands.size() - 1; i >= 0; --i) {
         auto& command = m_commands[i];
         if (command) {
-            command->undo();
+            if (!command->undo()) {
+                all_succeeded = false;
+            }
         }
     }
+    return all_succeeded && !m_commands.isEmpty();
 }

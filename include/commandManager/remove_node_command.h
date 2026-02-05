@@ -12,8 +12,8 @@ public:
     RemoveNodeCommand(DiagramGraph* graph,
                    SharedNodePtr node);
 
-    void execute() override;
-    void undo() override;
+    bool execute() override;
+    bool undo() override;
 
 private:
     DiagramGraph* m_graph;

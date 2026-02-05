@@ -10,20 +10,24 @@ AddBranchCommand::AddBranchCommand(DiagramGraph* graph,
 {
 }
 
-void AddBranchCommand::execute()
+bool AddBranchCommand::execute()
 {
     if (!m_branch_added && m_from && m_to && m_graph) {
         m_graph->add_branch(m_from, m_to, m_branch_type);
         m_branch_added = true;
         qDebug() << "Command EXECUTE: Branch dodat na scenu";
+        return true;
     }
+    return false;
 }
 
-void AddBranchCommand::undo()
+bool AddBranchCommand::undo()
 {
     if (m_branch_added && m_from && m_to && m_graph) {
         m_graph->remove_branch(m_from, m_to, m_branch_type);
         m_branch_added = false;
         qDebug() << "Command UNDO: Branch uklonjen sa scene";
+        return true;
     }
+    return false;
 }

@@ -12,8 +12,8 @@ public:
 
     void add_command(const std::shared_ptr<Command>& command);
 
-    void execute() override;
-    void undo() override;
+    bool execute() override;
+    bool undo() override;
 
 private:
     QVector<std::shared_ptr<Command>> m_commands;

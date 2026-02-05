@@ -3,8 +3,7 @@
 
 void CommandManager::execute(std::shared_ptr<Command> command)
 {
-    if (command) {
-        command->execute();
+    if (command && command->execute()) {
         m_undo_stack.push_back(command);
         m_redo_stack.clear();
     }

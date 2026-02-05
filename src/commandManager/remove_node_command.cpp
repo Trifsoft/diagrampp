@@ -6,20 +6,24 @@ RemoveNodeCommand::RemoveNodeCommand(DiagramGraph* graph, SharedNodePtr node)
 {
 }
 
-void RemoveNodeCommand::execute()
+bool RemoveNodeCommand::execute()
 {
     if (!m_node_removed && m_node && m_graph) {
-        m_graph->remove_node(m_node);  //uklanja node
+        m_graph->remove_node(m_node);
         m_node_removed = true;
         qDebug() << "Command EXECUTE: Node uklonjen sa scene";
+        return true;
     }
+    return false;
 }
 
-void RemoveNodeCommand::undo()
+bool RemoveNodeCommand::undo()
 {
     if (m_node_removed && m_node && m_graph) {
-        m_graph->add_node(m_node);  //vraca node nazad
+        m_graph->add_node(m_node);
         m_node_removed = false;
         qDebug() << "Command UNDO: Node vracen na scenu";
+        return true;
     }
+    return false;
 }
