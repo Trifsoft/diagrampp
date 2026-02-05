@@ -149,7 +149,7 @@ void DiagramJsonSerializer::deserialize(QJsonArray json_array){
             const auto neighbour_node = NodeSerializers::deserialize_composition_node(json_neighbour_object["node"].toObject());
             const auto branch_type = get_branch_type_from_string(json_object["branch_type"].toString().toStdString());
 
-            m_board->add_node_relationship(node, neighbour_node, branch_type);
+            m_board->add_branch(node, neighbour_node, branch_type);
         }
     }
 }
