@@ -8,6 +8,7 @@
 #include <QGraphicsScene>
 #include <model/elements/field.h>
 #include <model/elements/method.h>
+#include "view/cpp_class.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {

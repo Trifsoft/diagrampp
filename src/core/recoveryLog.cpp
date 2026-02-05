@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <pwd.h>
 #include <model/elements/composition/composition.h>
+#include <QDebug>
 
 recoveryLog::recoveryLog(const std::string& _file_name) : file_name(_file_name){
     if(std::filesystem::exists(file_name)){

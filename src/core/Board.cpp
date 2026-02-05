@@ -301,15 +301,14 @@ void Board::onGenerateClicked(const QString& class_name, NodeType node_type) {
     }
 
 }
-void Board::add_item(std::shared_ptr<Composition> node, const double coord_x, const double coord_y) {   //TODO [Nikola] - izmeniti da bude IUMLClassDiagramNode umesto Composition
-    CppClass* item = new CppClass(this, node);
+void Board::add_item(std::shared_ptr<Composition> node, const double coord_x, const double coord_y) {
+    CppClass* item = new CppClass(node);
     if(coord_x && coord_y){
         item->setX(coord_x);
         item->setY(coord_y);
     }
 
     scene->addItem(item);
-    //dynamic_cast<CPPStruct*>(item->getClassDiagramNode().get())->parent = item;
     diagram->add_node(node);
     views.append(item);
 

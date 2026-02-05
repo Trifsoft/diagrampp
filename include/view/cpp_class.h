@@ -2,12 +2,10 @@
 #define _CPP_CLASS_H
 
 #include <functional>
-#include <view/node_view.h>
 #include <QGraphicsTextItem>
 #include <QVector>
 #include <QPushButton>
 #include <QGraphicsProxyWidget>
-#include "Board.h"
 #include <QGraphicsSceneMouseEvent>
 #include <model/elements/composition/composition.h>
 #include "model/base/branches.h"
@@ -16,7 +14,6 @@
 #include <model/elements/method.h>
 
 class DiagramGraph;
-class Board;
 
 // Custom text item to track field/method info
 class EditableTextItem : public QGraphicsTextItem {
@@ -37,10 +34,10 @@ private:
     std::weak_ptr<IClassElement> m_element_weak;
 };
 
-class CppClass : public NodeView {
+class CppClass: public QGraphicsObject {
     Q_OBJECT
 public:
-    CppClass(Board *board, std::shared_ptr<Composition> composition, QGraphicsObject* parent = nullptr);
+    CppClass(std::shared_ptr<Composition> composition, QGraphicsObject* parent = nullptr);
     ~CppClass();
 
     QRectF boundingRect() const override;
@@ -61,7 +58,7 @@ public:
     void remove_node();
 
     QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
-    virtual Composition* get_uml_class_diagram_node() override;
+    Composition* get_uml_class_diagram_node();
 
 public slots:
     void composition_changed();

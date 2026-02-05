@@ -5,7 +5,6 @@
 #include <utility>
 #include <map>
 #include <model/base/branches.h>
-#include <view/node_view.h>
 #include <QObject>
 
 #define DEBUG_MODE 2

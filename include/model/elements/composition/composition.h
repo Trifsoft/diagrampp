@@ -17,7 +17,7 @@
 
 class CppClass;
 
-class Composition : public IUMLClassDiagramNode {
+class Composition: public QObject {
     Q_OBJECT
 protected:
     QString name;
@@ -46,9 +46,10 @@ public:
     Composition(const QString& name, Visibility visibility, std::optional<std::pair<Visibility, Composition*>> inheritance = std::nullopt);
     virtual ~Composition() = default;
 
-    QString declaration() const override;
-    QString definition() const override;
-    QString get_name() const override;
+    virtual QString get_label() const = 0;
+    QString declaration() const;
+    QString definition() const;
+    QString get_name() const;
     void set_name(const QString&);
 
     QVector<const IClassElement*> get_code_elements() const;

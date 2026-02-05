@@ -93,8 +93,8 @@ void EditableTextItem::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
 }
 
 // CppClass implementation
-CppClass::CppClass(Board* board,std::shared_ptr<Composition> composition, QGraphicsObject* parent)
-    : NodeView(parent)
+CppClass::CppClass(std::shared_ptr<Composition> composition, QGraphicsObject* parent)
+    : QGraphicsObject(parent)
     , m_composition(composition)
 {
     setFlag(QGraphicsItem::ItemIsSelectable, true);
