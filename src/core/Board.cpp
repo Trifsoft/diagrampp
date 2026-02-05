@@ -420,3 +420,7 @@ void Board::on_generate_project(){
         }
     }
 }
+
+void Board::set_title(const QString& title) {
+    ui->title->setText(title);
+}

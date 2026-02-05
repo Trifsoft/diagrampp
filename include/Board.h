@@ -40,6 +40,8 @@ public:
     void add_item(std::shared_ptr<Composition> item, const double coord_x = 0.0, const double coord_y = 0.0);
     void add_branch(SharedNodePtr node, SharedNodePtr neighbour, BranchType branch_type);
     void remove_branch(SharedNodePtr node, SharedNodePtr neighbour, BranchType branch_type);
+
+    void set_title(const QString&);
 public slots:
     void onAddClassClicked();
     void onAddInterfaceClicked();

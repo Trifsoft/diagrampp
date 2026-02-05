@@ -8,6 +8,23 @@
 #include <QJsonDocument>
 #include <QJsonArray>
 #include <QMessageBox>
+#include <QFileInfo>
+
+namespace {
+    QString title_from_file(const QFile& file) {
+        QFileInfo fileInfo(file);
+        QString baseName = fileInfo.completeBaseName();
+
+        QStringList words = baseName.split('_', Qt::SkipEmptyParts);
+        for (QString& word : words) {
+            if (!word.isEmpty()) {
+                word[0] = word[0].toUpper();
+            }
+        }
+
+        return words.join(' ');
+    }
+}
 
 MainWindow::MainWindow(QWidget *parent)
     : QWidget(parent)
@@ -68,6 +85,7 @@ void MainWindow::onImportProjectClicked()
     }
 
     QByteArray jsonData = file.readAll();
+    QString title = title_from_file(file);
     file.close();
 
     QJsonParseError parseError;
@@ -84,10 +102,10 @@ void MainWindow::onImportProjectClicked()
     }
 
     Board* board = new Board();
-    board->setAttribute(Qt::WA_DeleteOnClose);
 
     DiagramJsonSerializer serializer(board);
     serializer.deserialize(jsonDoc.array());
+    board->set_title(title);
 
     board->show();
 }
