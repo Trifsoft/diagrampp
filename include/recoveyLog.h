@@ -27,8 +27,11 @@ public slots:
 private:
     std::ofstream log_file;
     std::string file_name;
-    unsigned OPERATION_WIDTH = 20;
-    unsigned INFO_WIDTH      = 20;
+    int TIMESTAMP_WIDTH = 22;
+    int OPERATION_WIDTH = 20;
+    int USER_WIDTH = 15;
+    int INFO_WIDTH = 50;
+    int SEPARATOR_LENGTH = 80;
     void write_log_header();
     std::string branch_to_string(BranchType branch_type) const;
     std::string get_current_timestamp() const;
