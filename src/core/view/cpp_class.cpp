@@ -142,22 +142,26 @@ void CppClass::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, 
     Q_UNUSED(widget);
 
     auto bounding_rect = boundingRect();
-
-    painter->fillRect(bounding_rect, Qt::black);
-    painter->drawRect(bounding_rect);
+    painter->fillRect(bounding_rect, QColor("#2b2b2b"));
 
 
     auto y_offset = m_line_height;
     if(!m_composition->fields.isEmpty()) {
+        painter->setPen(QPen(QColor("#404040"), 1));  // tamna siva
         painter->drawRect(QRect(0, y_offset, m_width, 1));
+
         y_offset += 1 + m_line_height * m_composition->fields.count();
     }
     if(!m_composition->methods.isEmpty()) {
+        painter->setPen(QPen(QColor("#404040"), 1));  // tamna siva
         painter->drawRect(QRect(0, y_offset, m_width, 1));
+
         y_offset += 1 + m_line_height * m_composition->methods.count();
     }
 
+    painter->setPen(QPen(QColor("#404040"), 1));  // tamna siva
     painter->drawRect(QRect(0, y_offset, m_width, 1));
+
 }
 
 void CppClass::composition_changed() {
@@ -354,7 +358,7 @@ void CppClass::add_line_connection(CppClass* target, const BranchType branchType
     endPoint.setY(endPoint.y() + ((branchType == BranchType::ASSOCIATION) ? 0 : arrow_size)); // on bottom of arrow
 
     QGraphicsLineItem* line = new QGraphicsLineItem(QLineF(startPoint, endPoint));
-    QPen pen(Qt::black, 4);
+    QPen pen(Qt::gray, 4);
     if(branchType == BranchType::DEPENDENCY || branchType == BranchType::REALIZATION){
         pen.setStyle(Qt::DashLine);
     }

@@ -25,8 +25,12 @@ Board::Board(const QString& project_name, QWidget *parent)
 
     scene = new QGraphicsScene(this);
     ui->board->setScene(scene);
-    ui->board->setStyleSheet("background-color: white");
-    ui->side_menu->setStyleSheet("background-color: #2c3e50;");
+    ui->board->setStyleSheet("background-color: #1a1a1a;");
+    ui->top_bar->setStyleSheet("background-color: #252526;");
+    ui->side_menu->setStyleSheet("background-color: #252526;");
+    ui->back->setStyleSheet("color: #ffffff;");
+
+
     ui->linkageMode->setChecked(false);
 
     // signals for GUI
