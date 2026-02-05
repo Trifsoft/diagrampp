@@ -244,38 +244,11 @@ void Board::openNodeFactory(NodeType node_type) {
 void Board::onGenerateClicked(const QString& class_name, NodeType node_type) {
     switch(node_type) {
         case NodeType::Class: {
-            auto new_node = std::make_shared<CPPClass>(class_name);
-            // new_node->add_field("test1", std::make_shared<RegularType>(RegularType("int")));
-            // new_node->add_field("test2", std::make_shared<RegularType>(RegularType("bool")));
-            // new_node->add_field("test3", std::make_shared<RegularType>(RegularType("float")));
-            // new_node->add_field("test4", std::make_shared<RegularType>(RegularType("double")));
-            // new_node->add_method("foo", std::make_shared<RegularType>("void"), Visibility::Private, MethodType::Regular, { Description("bar", std::make_shared<RegularType>("int")) });
-
-
-            new_node->add_field("test1", "tip1", Visibility::Protected);
-            new_node->add_field("test2", "tip2", Visibility::Private);
-            new_node->add_field("test3", "tip3");
-            new_node->add_method("method","void", MethodKind::Regular, { new Argument("bar", "int") }, Visibility::Private);
-
-
-            add_item(new_node);
+            add_item(std::make_shared<CPPClass>(class_name));
             break;
         }
         case NodeType::Struct: {
-            auto new_node = std::make_shared<CPPStruct>(class_name);
-            // new_node->add_field("test1", std::make_shared<RegularType>(RegularType("int")));
-            // new_node->add_field("test2", std::make_shared<RegularType>(RegularType("bool")));
-            // new_node->add_field("test3", std::make_shared<RegularType>(RegularType("float")));
-            // new_node->add_field("test4", std::make_shared<RegularType>(RegularType("double")));
-            // new_node->add_method("foo", std::make_shared<RegularType>("void"), Visibility::Private, MethodType::Regular, { Description("bar", std::make_shared<RegularType>("int")) });
-
-
-            new_node->add_field("test1", "tip1", Visibility::Protected);
-            new_node->add_field("test2", "tip2", Visibility::Private);
-            new_node->add_field("test3", "tip3");
-            new_node->add_method("method","void", MethodKind::Regular, { new Argument("bar", "int") }, Visibility::Private);
-
-            add_item(new_node);
+            add_item(std::make_shared<CPPStruct>(class_name));
             break;
         }
     }
