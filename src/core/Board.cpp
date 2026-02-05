@@ -44,8 +44,7 @@ Board::Board(const QString& project_name, QWidget *parent)
 
     // Connect buttons to slots
     connect(ui->add_class, &QPushButton::clicked, this, &Board::onAddClassClicked);
-    connect(ui->add_interface, &QPushButton::clicked, this, &Board::onAddInterfaceClicked);
-    connect(ui->add_enum, &QPushButton::clicked, this, &Board::onAddEnumClicked);
+    connect(ui->add_struct, &QPushButton::clicked, this, &Board::onAddStructClicked);
     connect(ui->Inheritance, &QPushButton::clicked, this, &Board::onCheckRadioButtonClicked);
     connect(ui->Association, &QPushButton::clicked, this, &Board::onCheckRadioButtonClicked);
     connect(ui->Realization, &QPushButton::clicked, this, &Board::onCheckRadioButtonClicked);
@@ -154,8 +153,7 @@ void Board::on_object_clicked(Composition* clicked_object){
 }
 
 void Board::onAddClassClicked()     { openNodeFactory(NodeType::Class);  }
-void Board::onAddInterfaceClicked() { openNodeFactory(NodeType::Struct); }
-void Board::onAddEnumClicked()      { openNodeFactory(NodeType::Enum);   }
+void Board::onAddStructClicked() { openNodeFactory(NodeType::Struct); }
 
 void Board::on_add_field_requested(Composition *node, std::shared_ptr<Field> field)
 {
@@ -227,7 +225,6 @@ void Board::openNodeFactory(NodeType node_type) {
     switch (node_type) {
         case NodeType::Class:  label = "class"; break;
         case NodeType::Struct: label = "struct"; break;
-        case NodeType::Enum:   label = "enum class"; break;
     }
 
     QInputDialog dialog(this);
@@ -277,23 +274,6 @@ void Board::onGenerateClicked(const QString& class_name, NodeType node_type) {
             new_node->add_field("test2", "tip2", Visibility::Private);
             new_node->add_field("test3", "tip3");
             new_node->add_method("method","void", MethodKind::Regular, { new Argument("bar", "int") }, Visibility::Private);
-
-            add_item(new_node);
-            break;
-        }
-        case NodeType::Enum: {
-            auto new_node = std::make_shared<CPPClass>(class_name);
-            // new_node->add_field("test1", std::make_shared<RegularType>(RegularType("int")));
-            // new_node->add_field("test2", std::make_shared<RegularType>(RegularType("bool")));
-            // new_node->add_field("test3", std::make_shared<RegularType>(RegularType("float")));
-            // new_node->add_field("test4", std::make_shared<RegularType>(RegularType("double")));
-            // new_node->add_method("foo", std::make_shared<RegularType>("void"), Visibility::Private, MethodType::Regular, { Description("bar", std::make_shared<RegularType>("int")) });
-
-            new_node->add_field("test1", "tip1", Visibility::Protected);
-            new_node->add_field("test2", "tip2", Visibility::Private);
-            new_node->add_field("test3", "tip3");
-            new_node->add_method("method","void", MethodKind::Regular, { new Argument("bar", "int") }, Visibility::Private);
-
 
             add_item(new_node);
             break;

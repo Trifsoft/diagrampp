@@ -384,26 +384,14 @@
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="add_interface">
+         <widget class="QPushButton" name="add_struct">
           <property name="font">
            <font>
             <pointsize>20</pointsize>
            </font>
           </property>
           <property name="text">
-           <string>Interface</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="add_enum">
-          <property name="font">
-           <font>
-            <pointsize>20</pointsize>
-           </font>
-          </property>
-          <property name="text">
-           <string>Enum</string>
+           <string>Struct</string>
           </property>
          </widget>
         </item>

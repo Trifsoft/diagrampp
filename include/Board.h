@@ -22,8 +22,7 @@ class IClassElement;
 
 enum class NodeType {
     Class,
-    Struct,
-    Enum
+    Struct
 };
 
 class Board : public QWidget
@@ -50,8 +49,7 @@ public:
     void set_title(const QString&);
 public slots:
     void onAddClassClicked();
-    void onAddInterfaceClicked();
-    void onAddEnumClicked();
+    void onAddStructClicked();
     void onCheckRadioButtonClicked();
     void onModeClicked();
     void exportPNG();
