@@ -3,6 +3,8 @@
 
 #include "QObject"
 #include "graph/diagram_graph.h"
+#include "model/elements/field.h"
+#include "model/elements/method.h"
 #include <iomanip>
 #include <fstream>
 #include <filesystem>
@@ -15,9 +17,12 @@ public:
     recoveryLog(const std::string& _file_name = "recoveryLog.txt");
     ~recoveryLog();
 public slots:
+    void add_field_operation(Composition* node, std::shared_ptr<Field> field);
+    void add_method_operation(Composition* node, std::shared_ptr<Method> method);
     void add_link_operation(SharedNodePtr from, SharedNodePtr to, BranchType BranchType);
     void remove_link_operation(SharedNodePtr from, SharedNodePtr to, BranchType BranchType);
     void remove_node_operation(SharedNodePtr node);
+
 
 private:
     std::ofstream log_file;

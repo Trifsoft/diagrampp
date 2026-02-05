@@ -30,8 +30,35 @@ recoveryLog::~recoveryLog(){
     }
 }
 
+void recoveryLog::add_field_operation(Composition* node, std::shared_ptr<Field> field) {
+    std::string node_name = node->get_name().toStdString();
+    log_file << std::left
+             << "[" << get_current_timestamp() << "]"
+             << std::setw(OPERATION_WIDTH) << " [ADD FIELD] "
+             << std::setw(INFO_WIDTH) << (node_name +
+                                          " Field name: " + field->get_field_name().toStdString() +
+                                          " Field type: " + field->get_type().toStdString() +
+                                          " Field destructor " + field->get_destruction().value_or("doesn't have").toStdString()
+                                          + "\n");
+}
+void recoveryLog::add_method_operation(Composition* node, std::shared_ptr<Method> method) {
+    std::string node_name = node->get_name().toStdString();
+    std::string arguments;
+    for(auto& arg : method->get_arguments()){
+        arguments.append("name : " + arg->get_name().toStdString() + " type : " + arg->get_type().toStdString() + " | ");
+    }
+    log_file << std::left
+             << "[" << get_current_timestamp() << "]"
+             << std::setw(OPERATION_WIDTH) << " [ADD METHOD] "
+             << std::setw(INFO_WIDTH) << (node_name +
+                                          " Method return type: " + method->get_return_type().toStdString() +
+                                          " Method arguments " + arguments +
+                                          "\n");
+
+}
+
+
 void recoveryLog::add_link_operation(SharedNodePtr from, SharedNodePtr to, BranchType branch_type) {
-    qDebug() << log_file.is_open();
     std::string child = from->get_name().toStdString();
     std::string parent = to->get_name().toStdString();
     log_file << std::left
@@ -58,7 +85,6 @@ void recoveryLog::remove_node_operation(SharedNodePtr target) {
              << std::setw(OPERATION_WIDTH) << " [REMOVE NODE] "
              << std::setw(INFO_WIDTH) << node << "\n";
     log_file.flush();
-
 }
 
 std::string recoveryLog::get_current_timestamp() const {
