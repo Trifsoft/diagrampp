@@ -1,5 +1,6 @@
 #include "graph/diagram_graph.h"
 #include <model/elements/composition/composition.h>
+#include <validator.h>
 
 void DiagramGraph::add_node(SharedNodePtr node) {
     if(m_diagram.find(node) != m_diagram.end()){
@@ -32,15 +33,26 @@ void DiagramGraph::remove_node(SharedNodePtr node_to_remove) {
     emit node_removed(node_to_remove);
 }
 
-void DiagramGraph::add_branch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type) {
-    add_neighbour(from, to, branch_type);
-    emit link_added(from, to, branch_type);
+std::optional<std::string> DiagramGraph::add_branch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type) {
+    if(!connection_exists(from, to, branch_type)){
+        if(branch_type == BranchType::INHERITANCE){
+            from->inherits(Visibility::Public, to.get());
+        } else if(branch_type == BranchType::ASSOCIATION){ // ASOCCIATION is undirected
+            add_neighbour(to, from, branch_type);
+        }
 
-    if(branch_type == BranchType::ASSOCIATION){ // ASOCCIATION is undirected
-        add_neighbour(to, from, branch_type);
+        add_neighbour(from, to, branch_type);
+        emit link_added(from, to, branch_type);
+
+        std::string error_message;
+        if(!Validator::validate(error_message, from, to, branch_type, m_diagram)){
+            this->remove_branch(from, to, branch_type);
+            return error_message;
+        }
+    }else {
+        return "Connection already exists.";
     }
-
-    return ;
+    return std::nullopt;
 }
 
 
@@ -50,14 +62,12 @@ SharedNodePtr DiagramGraph::find_pointer_owner(Composition* node_view)
         if(node.first.get() == node_view){
             return node.first;
         }
-
         for (auto [neighbour, _] : node.second){
             if(neighbour.get() == node_view){
                 return neighbour;
             }
         }
     }
-
     return nullptr;
 }
 
@@ -82,7 +92,14 @@ void DiagramGraph::add_neighbour(SharedNodePtr from, SharedNodePtr to, BranchTyp
     }
 }
 
-void DiagramGraph::remove_branch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type) {
+bool DiagramGraph::remove_branch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type) {
+    if(!connection_exists(from, to, branch_type)){
+        return false;
+    }
+
+    if(branch_type == BranchType::INHERITANCE){
+        from->break_inheritance();
+    }
     remove_neighbour(from, to, branch_type);
     emit link_removed(from, to, branch_type);
 
@@ -90,6 +107,8 @@ void DiagramGraph::remove_branch(SharedNodePtr from, SharedNodePtr to, BranchTyp
         remove_neighbour(to, from, branch_type);
         emit link_removed(to, from, branch_type);
     }
+
+    return true;
 }
 
 graph_type& DiagramGraph::get_diagram(){
