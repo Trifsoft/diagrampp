@@ -42,7 +42,8 @@ void DiagramJsonSerializer::trim_end(std::string& s) const {
 }
 
 void DiagramJsonSerializer::write_coords(std::ostream& output_stream, double x, double y){
-    SerializeHelpers::indent(output_stream, m_indentation_counter); output_stream << "\"coords\": {\n";
+    SerializeHelpers::indent(output_stream, m_indentation_counter);
+    SerializeHelpers::write_with_quotes(output_stream, "coords"); output_stream << ": {\n";
     ++m_indentation_counter;
 
     SerializeHelpers::write_indented_field(output_stream, m_indentation_counter, "x", x);
@@ -73,18 +74,17 @@ void DiagramJsonSerializer::serialize_neighbours(std::ostream& output_stream, co
         write_branch_type(output_stream, neighbour_it->second);
         output_stream << ",\n";
 
-        auto neighbour = m_board->get_view_from_node(neighbour_it->first);
-        NodeSerializers::serialize_composition_node(output_stream, m_indentation_counter, neighbour_it->first.get());
+        SerializeHelpers::write_indented_serialized_field<Composition>(output_stream, m_indentation_counter, "node", neighbour_it->first.get(), NodeSerializers::serialize_composition_node);
         output_stream << ",\n";
 
+        auto neighbour = m_board->get_view_from_node(neighbour_it->first);
         write_coords(output_stream, neighbour->x(), neighbour->y()); output_stream << '\n';
-        --m_indentation_counter;
-        SerializeHelpers::indent(output_stream, m_indentation_counter); output_stream << "}";
 
+        --m_indentation_counter;
         if(++neighbour_it == neighbours.end()){
-            output_stream << '\n';
+            output_stream << "}\n";
         }else {
-            output_stream << ",\n";
+            output_stream << "},\n";
         }
     }
 
@@ -99,9 +99,10 @@ void DiagramJsonSerializer::serialize(std::ostream& output_stream){
     auto m_diagram = m_board->get_diagram()->get_diagram();
 
     for (auto it = m_diagram.begin(); it != m_diagram.end(); ){
+        auto node_view = m_board->get_view_from_node(it->first);
+
         SerializeHelpers::indent(output_stream, m_indentation_counter);
         ++m_indentation_counter;
-        auto node_view = m_board->get_view_from_node(it->first);
         output_stream << "{\n";
 
         // 1) coords
