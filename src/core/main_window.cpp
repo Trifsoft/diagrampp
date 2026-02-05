@@ -2,6 +2,7 @@
 #include "ui_main_window.h"
 #include "new_project.h"
 #include "Board.h"
+#include <QInputDialog>
 
 MainWindow::MainWindow(QWidget *parent)
     : QWidget(parent)
@@ -37,9 +38,19 @@ MainWindow::~MainWindow()
 
 void MainWindow::onNewProjectClicked()
 {
-    NewProject *w = new NewProject();
-    w->setAttribute(Qt::WA_DeleteOnClose);
-    w->show();
+    bool ok;
+    QString project_name = QInputDialog::getText(
+        this,
+        "Project Name",
+        "Enter project name:",
+        QLineEdit::Normal,
+        "",
+        &ok
+    );
+    if(ok && !project_name.isEmpty()) {
+        auto project = new Board(project_name);
+        project->show();
+    }
 }
 
 void MainWindow::onImportProjectClicked()

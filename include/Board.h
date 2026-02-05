@@ -28,7 +28,7 @@ class Board : public QWidget
     Q_OBJECT
 
 public:
-    Board(QWidget *parent = nullptr);
+    Board(const QString& project_name = "Project name", QWidget *parent = nullptr);
     ~Board();
 
     DiagramGraph* get_diagram() const;
@@ -67,6 +67,5 @@ private:
 
     void add_item(std::shared_ptr<Composition> item);
     void openNodeFactory(NodeType node_type);
-    void set_project_name();
 };
 #endif // BOARD_H
