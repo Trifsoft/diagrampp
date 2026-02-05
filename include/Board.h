@@ -47,6 +47,7 @@ public slots:
     void onCheckRadioButtonClicked();
     void onModeClicked();
     void exportPNG();
+    void exportJSON();
 
     void onGenerateClicked(const QString& class_name, NodeType node_type);
     void on_object_clicked(Composition* clickedClass);

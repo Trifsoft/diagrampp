@@ -421,6 +421,13 @@
          </spacer>
         </item>
         <item>
+         <widget class="QPushButton" name="exportJSON">
+          <property name="text">
+           <string>Export JSON</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="QPushButton" name="exportPNG">
           <property name="text">
            <string>Export PNG</string>

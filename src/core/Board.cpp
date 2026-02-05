@@ -11,6 +11,8 @@
 #include <QDir>
 #include "generate_project_dialog.h"
 #include <QMessageBox>
+#include <fstream>
+#include "serializers/diagram_json_serializer.h"
 
 Board::Board(QWidget *parent)
     : QWidget(parent), ui(new Ui::Board), diagram(new DiagramGraph()), signal_processor(new signalProcessor(this)),
@@ -35,6 +37,7 @@ Board::Board(QWidget *parent)
     connect(diagram, &DiagramGraph::link_removed, recovery_log, &recoveryLog::remove_link_operation);
     connect(diagram, &DiagramGraph::node_removed, recovery_log, &recoveryLog::remove_node_operation);
 
+    connect(ui->exportJSON, &QPushButton::clicked, this, &Board::exportJSON);
     connect(ui->exportPNG, &QPushButton::clicked, this, &Board::exportPNG);
     connect(ui->generate_project, &QPushButton::clicked, this, &Board::on_generate_project);
 
@@ -344,6 +347,36 @@ void Board::exportPNG(){
     }else{
         QMessageBox::critical(this, "Error", "Failed to save image. Check write permissions.");
     }
+}
+
+void Board::exportJSON() {
+    QString filePath = QFileDialog::getSaveFileName(
+        this,
+        "Export Diagram as JSON",
+        QDir::homePath() + "/diagram_export.json",
+        "JSON Files (*.json)"
+    );
+
+    if (filePath.isEmpty()) {
+        return;
+    }
+
+    if (!filePath.endsWith(".json", Qt::CaseInsensitive)) {
+        filePath += ".json";
+    }
+
+    std::ofstream outputStream(filePath.toStdString());
+    if (!outputStream.is_open()) {
+        QMessageBox::critical(this, "Error", "Failed to open file for writing: " + filePath);
+        return;
+    }
+
+    DiagramJsonSerializer serializer(this);
+    serializer.serialize(outputStream);
+
+    outputStream.close();
+
+    QMessageBox::information(this, "Success", "Diagram exported to:\n" + filePath);
 }
 
 void Board::on_generate_project(){
