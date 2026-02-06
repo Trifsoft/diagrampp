@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Project</class>
- <widget class="QWidget" name="Project">
+ <class>Board</class>
+ <widget class="QWidget" name="Board">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
     <width>1280</width>
-    <height>720</height>
+    <height>927</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -133,7 +133,7 @@
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <property name="spacing">
-       <number>-1</number>
+       <number>6</number>
       </property>
       <property name="leftMargin">
        <number>12</number>
@@ -163,9 +163,6 @@
         </property>
         <property name="text">
          <string/>
-        </property>
-        <property name="icon">
-         <iconset theme="QIcon::ThemeIcon::GoPrevious"/>
         </property>
         <property name="iconSize">
          <size>
@@ -297,6 +294,68 @@
          <number>12</number>
         </property>
         <item>
+         <widget class="QCheckBox" name="removeMode">
+          <property name="text">
+           <string>Remove Mode</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="linkageMode">
+          <property name="text">
+           <string>Linkage Mode</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="Inheritance">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="text">
+           <string>Inheritance</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="Association">
+          <property name="text">
+           <string>Association</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="Realization">
+          <property name="text">
+           <string>Realization</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="Aggregation">
+          <property name="text">
+           <string>Aggregation</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="Composition">
+          <property name="text">
+           <string>Composition</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="Dependency">
+          <property name="text">
+           <string>Dependency</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <spacer name="top_spacer">
           <property name="orientation">
            <enum>Qt::Orientation::Vertical</enum>
@@ -322,26 +381,14 @@
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="add_interface">
+         <widget class="QPushButton" name="add_struct">
           <property name="font">
            <font>
             <pointsize>20</pointsize>
            </font>
           </property>
           <property name="text">
-           <string>Interface</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="add_enum">
-          <property name="font">
-           <font>
-            <pointsize>20</pointsize>
-           </font>
-          </property>
-          <property name="text">
-           <string>Enum</string>
+           <string>Struct</string>
           </property>
          </widget>
         </item>
@@ -357,6 +404,27 @@
            </size>
           </property>
          </spacer>
+        </item>
+        <item>
+         <widget class="QPushButton" name="exportJSON">
+          <property name="text">
+           <string>Export JSON</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="exportPNG">
+          <property name="text">
+           <string>Export PNG</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="generate_project">
+          <property name="text">
+           <string>Generate</string>
+          </property>
+         </widget>
         </item>
        </layout>
       </widget>

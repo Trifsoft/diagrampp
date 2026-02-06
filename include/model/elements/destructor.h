@@ -1,8 +1,7 @@
 #ifndef DESTRUCTOR_H
 #define DESTRUCTOR_H
 
-#include <model/base/class_element.h>
-#include <model/base/visibility.h>
+#include <model/elements/class_element.h>
 #include <QString>
 #include <QVector>
 #include <optional>
@@ -12,16 +11,16 @@ class Field;
 class Destructor : public IClassElement {
 private:
     QString class_name;
-    QVector<Field> fields;
+    QVector<std::shared_ptr<Field>> fields;
     bool is_virtual;
 
     bool is_default() const;
     QString get_definition_block() const;
 
 public:
-    Destructor(const QString& class_name, const QVector<Field>& fields, bool is_virtual = false);
+    Destructor(const QString& class_name, const QVector<std::shared_ptr<Field>>& fields, bool is_virtual = false);
 
-    QString get_declaration() const override;
+    QString declaration() const override;
     std::optional<QString> definition(const QString& class_name) const override;
 
     bool get_is_virtual() const;
