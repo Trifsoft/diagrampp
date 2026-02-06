@@ -142,6 +142,7 @@ set(UI_SOURCES
 set(TEST_SOURCES
     test/test_main.cpp
     test/test_field.cpp
+    test/test_method.cpp
 )
 
 
