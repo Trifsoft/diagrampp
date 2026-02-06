@@ -184,16 +184,6 @@ void Board::on_add_method_requested(Composition *node, std::shared_ptr<Method> m
     qDebug() << "Recieved signal add method from: " << node->get_label();
 }
 
-// void Board::add_item(std::shared_ptr<Composition> node) {   //TODO [Nikola] - izmeniti da bude IUMLClassDiagramNode umesto Composition
-//     CppClassView* item = new CppClassView(this, node);
-//     scene->addItem(item);
-//     diagram->add_node(item);
-
-//     connect(item, &CppClassView::objectClicked, this, &Board::on_object_clicked);
-// }
-
-
-// [REFACTOR] implement get_element_by_id(int id) in Composition
 void Board::on_edit_field_requested(Composition *node, std::weak_ptr<Field> old_field_weak,  std::shared_ptr<Field> new_field)
 {
     if(node){
@@ -205,19 +195,8 @@ void Board::on_edit_field_requested(Composition *node, std::weak_ptr<Field> old_
     qDebug() << "Received signal edit field from: " << node->get_label();
 }
 
-// [REFACTOR] implement get_element_by_id(int id) in Composition
 void Board::on_edit_method_requested(Composition *node, std::weak_ptr<Method> old_method_weak, std::shared_ptr<Method>new_method)
 {
-    // if(node)
-    // {
-    //     for (int i = 0; i < node->methods.count(); ++i) {
-    //         if (node->methods[i]->get_id() == method_id) {
-    //             node->methods[i] = new_method;
-    //             break;
-    //         }
-    //     }
-    // }
-
     if(node){
         // old_field is now shared_ptr
         if(auto old_method = old_method_weak.lock()){
