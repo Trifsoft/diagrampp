@@ -143,6 +143,7 @@ set(TEST_SOURCES
     test/test_main.cpp
     test/test_field.cpp
     test/test_diagram_graph.cpp
+    test/test_method.cpp
 )
 
 
