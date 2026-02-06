@@ -162,8 +162,22 @@ void Composition::add_constructor(std::shared_ptr<DefaultConstructor> constructo
     emit changed();
 }
 
+void Composition::inherits(Visibility visibility, Composition* base_node)
+{
+    inheritance = {visibility, base_node};
+}
+
+void Composition::break_inheritance()
+{
+    inheritance = std::nullopt;
+}
+
+std::optional<std::pair<Visibility, Composition *> > Composition::get_inheritance() const
+{
+    return inheritance;
+}
+
 void Composition::add_copy_constructor(std::optional<Visibility> visibility) {
-    Visibility vis = visibility.value_or(get_default_visibility());
     copy_constructor_visibility = visibility;
     emit changed();
 }

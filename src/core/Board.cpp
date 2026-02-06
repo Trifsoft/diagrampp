@@ -1,51 +1,60 @@
 #include "Board.h"
-#include "view/cpp_class.h"
+#include "view/cpp_class_view.h"
 #include "model/elements/composition/cpp_struct.h"
 #include "model/elements/composition/cpp_class.h"
-#include "model/elements/composition/cpp_enum.h"
 #include <QGraphicsView>
 #include "src/ui/ui_Board.h"
 #include "model/elements/type/regular_type.h"
-#include "nodefactory.h"
 #include <QFileDialog>
 #include <QDir>
 #include <QInputDialog>
 #include "generate_project_dialog.h"
 #include <QMessageBox>
+#include <fstream>
+#include "serializers/diagram_json_serializer.h"
+#include <view/signal_processor.h>
 
-Board::Board(QWidget *parent)
-    : QWidget(parent), ui(new Ui::Board), diagram(new DiagramGraph()), signal_processor(new signalProcessor(this)),
+Board::Board(const QString& project_name, QWidget *parent)
+    : QWidget(parent), ui(new Ui::Board), diagram(new DiagramGraph()),
     recovery_log(new recoveryLog())
 {
     ui->setupUi(this);
 
     setAttribute(Qt::WA_DeleteOnClose);
 
+    ui->title->setText(project_name);
 
     scene = new QGraphicsScene(this);
     ui->board->setScene(scene);
-    ui->board->setStyleSheet("background-color: white");
-    ui->side_menu->setStyleSheet("background-color: #2c3e50;");
+    ui->board->setStyleSheet("background-color: #1a1a1a;");
+    ui->top_bar->setStyleSheet("background-color: #252526;");
+    ui->side_menu->setStyleSheet("background-color: #252526;");
+    ui->back->setStyleSheet("color: #ffffff;");
+
+
     ui->linkageMode->setChecked(false);
 
-    set_project_name();
-
+    // signals for connecting graph with GUI
+    connect(diagram, &DiagramGraph::link_added, this, &Board::on_link_added);
+    connect(diagram, &DiagramGraph::link_removed, this, &Board::on_link_removed);
+    connect(diagram, &DiagramGraph::node_removed, this, &Board::on_node_removed);
     // signals for GUI
-    connect(diagram, &DiagramGraph::link_added, signal_processor, &signalProcessor::add_link_process);
-    connect(diagram, &DiagramGraph::link_removed, signal_processor, &signalProcessor::remove_link_process);
-    connect(diagram, &DiagramGraph::node_removed, signal_processor, &signalProcessor::remove_node_process);
+    connect(this, &Board::link_added, &signalProcessor::instance(), &signalProcessor::add_link_process);
+    connect(this, &Board::link_removed, &signalProcessor::instance(), &signalProcessor::remove_link_process);
+    connect(this, &Board::node_removed, &signalProcessor::instance(), &signalProcessor::remove_node_process);
+
     // signals for log file
     connect(diagram, &DiagramGraph::link_added, recovery_log, &recoveryLog::add_link_operation);
     connect(diagram, &DiagramGraph::link_removed, recovery_log, &recoveryLog::remove_link_operation);
     connect(diagram, &DiagramGraph::node_removed, recovery_log, &recoveryLog::remove_node_operation);
 
+    connect(ui->exportJSON, &QPushButton::clicked, this, &Board::exportJSON);
     connect(ui->exportPNG, &QPushButton::clicked, this, &Board::exportPNG);
     connect(ui->generate_project, &QPushButton::clicked, this, &Board::on_generate_project);
 
     // Connect buttons to slots
     connect(ui->add_class, &QPushButton::clicked, this, &Board::onAddClassClicked);
-    connect(ui->add_interface, &QPushButton::clicked, this, &Board::onAddInterfaceClicked);
-    connect(ui->add_enum, &QPushButton::clicked, this, &Board::onAddEnumClicked);
+    connect(ui->add_struct, &QPushButton::clicked, this, &Board::onAddStructClicked);
     connect(ui->Inheritance, &QPushButton::clicked, this, &Board::onCheckRadioButtonClicked);
     connect(ui->Association, &QPushButton::clicked, this, &Board::onCheckRadioButtonClicked);
     connect(ui->Realization, &QPushButton::clicked, this, &Board::onCheckRadioButtonClicked);
@@ -56,26 +65,11 @@ Board::Board(QWidget *parent)
     connect(ui->removeMode, &QPushButton::clicked, this, &Board::onModeClicked);
 }
 
-void Board::set_project_name(){
-    bool ok;
-    QString project_name = QInputDialog::getText(
-        this,
-        "Project Name",
-        "Enter project name:",
-        QLineEdit::Normal,
-        "MyProject",
-        &ok
-        );
-    if(ok && !project_name.isEmpty()){
-        ui->title->setText(project_name);
-    }
-}
-
 DiagramGraph* Board::get_diagram() const {
     return diagram;
 }
 
-CppClass* Board::get_view_from_node(SharedNodePtr node) {
+CppClassView* Board::get_view_from_node(SharedNodePtr node) {
     for(auto view : views) {
         if(view->get_uml_class_diagram_node() == node.get()) {
             return view;
@@ -87,7 +81,6 @@ CppClass* Board::get_view_from_node(SharedNodePtr node) {
 Board::~Board()
 {
     delete diagram;
-    delete signal_processor;
     delete recovery_log;
     qDeleteAll(views);
     views.clear();
@@ -97,17 +90,17 @@ Board::~Board()
 
 void Board::onCheckRadioButtonClicked(){
     if(ui->Inheritance->isChecked()){
-        branchType = BranchType::INHERITANCE;
+        branch_type = BranchType::INHERITANCE;
     }else if(ui->Association->isChecked()){
-        branchType = BranchType::ASSOCIATION;
+        branch_type = BranchType::ASSOCIATION;
     }else if(ui->Realization->isChecked()){
-        branchType = BranchType::REALIZATION;
+        branch_type = BranchType::REALIZATION;
     }else if(ui->Aggregation->isChecked()){
-        branchType = BranchType::AGGREGATION;
+        branch_type = BranchType::AGGREGATION;
     }else if(ui->Composition->isChecked()){
-        branchType = BranchType::COMPOSITION;
+        branch_type = BranchType::COMPOSITION;
     }else{
-        branchType = BranchType::DEPENDENCY;
+        branch_type = BranchType::DEPENDENCY;
     }
 }
 
@@ -121,6 +114,22 @@ void Board::onModeClicked(){
     }
     first_activated = second_activated = nullptr;
 }
+
+
+void Board::add_branch(SharedNodePtr node, SharedNodePtr neighbour, BranchType branch_type){
+    std::string error_message;
+    if(!diagram->add_branch(node, neighbour, branch_type, error_message)){
+        QMessageBox::warning(this, "Warning", QString::fromStdString(error_message));
+    }
+}
+
+void Board::remove_branch(SharedNodePtr node, SharedNodePtr neighbour, BranchType branch_type){
+    const auto remove_status = diagram->remove_branch(node, neighbour, branch_type);
+    if(!remove_status){
+        QMessageBox::warning(this, "Warning", QString::fromStdString("Connection doesn't exsist"));
+    }
+}
+
 
 void Board::on_object_clicked(Composition* clicked_object){
     if(!linkageMode && !removeMode){
@@ -138,36 +147,22 @@ void Board::on_object_clicked(Composition* clicked_object){
         return;
     }
 
-    std::string errorMessage;
     if((first_activated && second_activated) && linkageMode){
-        if(!diagram->connection_exists(first_activated, second_activated, branchType)){
-            diagram->add_branch(first_activated, second_activated, branchType);
-            if(!Validator::validate(errorMessage, first_activated, second_activated, branchType, diagram->get_diagram())){
-                diagram->remove_branch(first_activated, second_activated, branchType);
-                QMessageBox::warning(this, "Warning", QString::fromStdString(errorMessage));
-            }
-        }else{
-            QMessageBox::warning(this, "Warning", "Connection already exists.");
-        }
+        add_branch(first_activated, second_activated, branch_type);
     }else if((first_activated && second_activated) && removeMode){
-        if(!diagram->connection_exists(first_activated, second_activated, branchType)){
-            QMessageBox::warning(this, "Warning", QString::fromStdString("Connection doesn't exsist"));
-        }else{
-            diagram->remove_branch(first_activated, second_activated, branchType);
-        }
+        remove_branch(first_activated, second_activated, branch_type);
     }
 
-#if DEBUG_MODE>=1
-    qDebug() << errorMessage;
-    diagram->show_diagram();
-#endif
+    #if DEBUG_MODE>=1
+        qDebug() << "";
+        diagram->show_diagram();
+    #endif
 
-    first_activated = second_activated = nullptr;
+        first_activated = second_activated = nullptr;
 }
 
 void Board::onAddClassClicked()     { openNodeFactory(NodeType::Class);  }
-void Board::onAddInterfaceClicked() { openNodeFactory(NodeType::Struct); }
-void Board::onAddEnumClicked()      { openNodeFactory(NodeType::Enum);   }
+void Board::onAddStructClicked() { openNodeFactory(NodeType::Struct); }
 
 void Board::on_add_field_requested(Composition *node, std::shared_ptr<Field> field)
 {
@@ -190,11 +185,11 @@ void Board::on_add_method_requested(Composition *node, std::shared_ptr<Method> m
 }
 
 // void Board::add_item(std::shared_ptr<Composition> node) {   //TODO [Nikola] - izmeniti da bude IUMLClassDiagramNode umesto Composition
-//     CppClass* item = new CppClass(this, node);
+//     CppClassView* item = new CppClassView(this, node);
 //     scene->addItem(item);
 //     diagram->add_node(item);
 
-//     connect(item, &CppClass::objectClicked, this, &Board::on_object_clicked);
+//     connect(item, &CppClassView::objectClicked, this, &Board::on_object_clicked);
 // }
 
 
@@ -235,86 +230,59 @@ void Board::on_edit_method_requested(Composition *node, std::weak_ptr<Method> ol
 
 
 void Board::openNodeFactory(NodeType node_type) {
+    QString label;
+    switch (node_type) {
+        case NodeType::Class:  label = "class"; break;
+        case NodeType::Struct: label = "struct"; break;
+    }
 
-    // [FIX] Probably a leak
-    NodeFactory* node_factory = new NodeFactory(node_type);
-    connect(node_factory, &NodeFactory::generateClicked, this, &Board::onGenerateClicked);
-    node_factory->show();
+    QInputDialog dialog(this);
+    dialog.setWindowTitle("Create new " + label);
+    dialog.setLabelText("Enter " + label + " name:");
+    dialog.setTextValue("");
+    dialog.setStyleSheet(
+        "QInputDialog QPushButton { background-color: #2c3e50; color: white; border-radius: 4px; padding: 6px 12px; }"
+        "QInputDialog QPushButton:hover { background-color: #34495e; }"
+    );
+
+    if (dialog.exec() == QDialog::Accepted && !dialog.textValue().isEmpty()) {
+        onGenerateClicked(dialog.textValue(), node_type);
+    }
 }
 
 void Board::onGenerateClicked(const QString& class_name, NodeType node_type) {
     switch(node_type) {
         case NodeType::Class: {
-            auto new_node = std::make_shared<CPPClass>(class_name);
-            // new_node->add_field("test1", std::make_shared<RegularType>(RegularType("int")));
-            // new_node->add_field("test2", std::make_shared<RegularType>(RegularType("bool")));
-            // new_node->add_field("test3", std::make_shared<RegularType>(RegularType("float")));
-            // new_node->add_field("test4", std::make_shared<RegularType>(RegularType("double")));
-            // new_node->add_method("foo", std::make_shared<RegularType>("void"), Visibility::Private, MethodType::Regular, { Description("bar", std::make_shared<RegularType>("int")) });
-
-
-            new_node->add_field("test1", "tip1", Visibility::Protected);
-            new_node->add_field("test2", "tip2", Visibility::Private);
-            new_node->add_field("test3", "tip3");
-            new_node->add_method("method","void", MethodKind::Regular, { new Argument("bar", "int") }, Visibility::Private);
-
-
-            add_item(new_node);
+            add_item(std::make_shared<CPPClass>(class_name));
             break;
         }
         case NodeType::Struct: {
-            auto new_node = std::make_shared<CPPStruct>(class_name);
-            // new_node->add_field("test1", std::make_shared<RegularType>(RegularType("int")));
-            // new_node->add_field("test2", std::make_shared<RegularType>(RegularType("bool")));
-            // new_node->add_field("test3", std::make_shared<RegularType>(RegularType("float")));
-            // new_node->add_field("test4", std::make_shared<RegularType>(RegularType("double")));
-            // new_node->add_method("foo", std::make_shared<RegularType>("void"), Visibility::Private, MethodType::Regular, { Description("bar", std::make_shared<RegularType>("int")) });
-
-
-            new_node->add_field("test1", "tip1", Visibility::Protected);
-            new_node->add_field("test2", "tip2", Visibility::Private);
-            new_node->add_field("test3", "tip3");
-            new_node->add_method("method","void", MethodKind::Regular, { new Argument("bar", "int") }, Visibility::Private);
-
-            add_item(new_node);
-            break;
-        }
-        case NodeType::Enum: {
-            auto new_node = std::make_shared<CPPClass>(class_name);
-            // new_node->add_field("test1", std::make_shared<RegularType>(RegularType("int")));
-            // new_node->add_field("test2", std::make_shared<RegularType>(RegularType("bool")));
-            // new_node->add_field("test3", std::make_shared<RegularType>(RegularType("float")));
-            // new_node->add_field("test4", std::make_shared<RegularType>(RegularType("double")));
-            // new_node->add_method("foo", std::make_shared<RegularType>("void"), Visibility::Private, MethodType::Regular, { Description("bar", std::make_shared<RegularType>("int")) });
-
-            new_node->add_field("test1", "tip1", Visibility::Protected);
-            new_node->add_field("test2", "tip2", Visibility::Private);
-            new_node->add_field("test3", "tip3");
-            new_node->add_method("method","void", MethodKind::Regular, { new Argument("bar", "int") }, Visibility::Private);
-
-
-            add_item(new_node);
+            add_item(std::make_shared<CPPStruct>(class_name));
             break;
         }
     }
 
 }
-void Board::add_item(std::shared_ptr<Composition> node) {   //TODO [Nikola] - izmeniti da bude IUMLClassDiagramNode umesto Composition
-    CppClass* item = new CppClass(this, node);
+void Board::add_item(std::shared_ptr<Composition> node, const double coord_x, const double coord_y) {
+    CppClassView* item = new CppClassView(node);
+    if(coord_x && coord_y){
+        item->setX(coord_x);
+        item->setY(coord_y);
+    }
+
     scene->addItem(item);
-    //dynamic_cast<CPPStruct*>(item->getClassDiagramNode().get())->parent = item;
     diagram->add_node(node);
     views.append(item);
 
-    connect(item, &CppClass::objectClicked, this, &Board::on_object_clicked);
+    connect(item, &CppClassView::objectClicked, this, &Board::on_object_clicked);
 
-    connect(item, &CppClass::add_field_request, recovery_log, &recoveryLog::add_field_operation);
-    connect(item, &CppClass::add_method_request, recovery_log, &recoveryLog::add_method_operation);
+    connect(item, &CppClassView::add_field_request, recovery_log, &recoveryLog::add_field_operation);
+    connect(item, &CppClassView::add_method_request, recovery_log, &recoveryLog::add_method_operation);
 
-    connect(item, &CppClass::add_field_request, this, &Board::on_add_field_requested);
-    connect(item, &CppClass::add_method_request, this, &Board::on_add_method_requested);
-    connect(item, &CppClass::edit_field_request, this, &Board::on_edit_field_requested);
-    connect(item, &CppClass::edit_method_request, this, &Board::on_edit_method_requested);
+    connect(item, &CppClassView::add_field_request, this, &Board::on_add_field_requested);
+    connect(item, &CppClassView::add_method_request, this, &Board::on_add_method_requested);
+    connect(item, &CppClassView::edit_field_request, this, &Board::on_edit_field_requested);
+    connect(item, &CppClassView::edit_method_request, this, &Board::on_edit_method_requested);
 }
 
 void Board::exportPNG(){
@@ -359,21 +327,108 @@ void Board::exportPNG(){
     }
 }
 
+void Board::exportJSON() {
+    QString filePath = QFileDialog::getSaveFileName(
+        this,
+        "Export Diagram as JSON",
+        QDir::homePath() + "/" + get_file_name() + ".json",
+        "JSON Files (*.json)"
+    );
+
+    if (filePath.isEmpty()) {
+        return;
+    }
+
+    if (!filePath.endsWith(".json", Qt::CaseInsensitive)) {
+        filePath += ".json";
+    }
+
+    std::ofstream outputStream(filePath.toStdString());
+    if (!outputStream.is_open()) {
+        QMessageBox::critical(this, "Error", "Failed to open file for writing: " + filePath);
+        return;
+    }
+
+    DiagramJsonSerializer serializer(this);
+    serializer.serialize(outputStream);
+
+    outputStream.close();
+
+    QMessageBox::information(this, "Success", "Diagram exported to:\n" + filePath);
+}
+
 void Board::on_generate_project(){
     generateProjectDialog dialog(this);
     if(dialog.exec() == QDialog::Accepted){
         std::string path = dialog.get_selected_path().toStdString();
         ProjectGenerator::FileNameNotation notation = dialog.get_selected_notation();
         ProjectGenerator::ReplaceToggle toggle = dialog.get_selected_toggle();
-        std::string project_dir_name = ui->title->text().toStdString();
-        if(!path.empty()){
-            ProjectGenerator::GenerationStatusCode status = ProjectGenerator::generate(
-                diagram->get_diagram(),
-                path,
-                project_dir_name,
-                notation,
-                toggle
-                );
+        std::string project_dir_name = dialog.get_project_dir_name().toStdString();
+        ProjectGenerator::GenerationStatusCode status = ProjectGenerator::generate(
+            diagram->get_diagram(),
+            path,
+            project_dir_name,
+            notation,
+            toggle
+            );
+
+        if(status != ProjectGenerator::GenerationStatusCode::OK){
+            QString err_message;
+            switch (status)
+            {
+            case ProjectGenerator::GenerationStatusCode::EXISTING_PROJECT_DIR_ON_PATH:
+                err_message = "Directory with a given name already exists on path. Choose a different name or replace it.";
+                break;
+            case ProjectGenerator::GenerationStatusCode::PERMISSION_DENIED:
+                err_message = "Permission denied.";
+                break;
+            case ProjectGenerator::GenerationStatusCode::NO_MEMORY_SPACE:
+                err_message = "No enough memory on the disc.";
+                break;
+            case ProjectGenerator::GenerationStatusCode::FILE_NOT_CREATED:
+                err_message = "Error while generating file.";
+                break;
+            case ProjectGenerator::GenerationStatusCode::NO_SUCH_DIR:
+                err_message = "The selected path does not exist. Please choose an existing directory.";
+                break;
+            defaul:
+                err_message = "";
+            }
+            QMessageBox::warning(this, "Warning", err_message);
+        }else{
+            QMessageBox::information(this, "Success", "Project is generated on path: \n" + QString::fromStdString(path));
         }
     }
+}
+
+void Board::set_title(const QString& title) {
+    ui->title->setText(title);
+}
+
+QString& Board::get_file_name() {
+    static QString file_name;
+    QString title = ui->title->text().trimmed();
+    title = title.toLower();
+    title.replace(QRegularExpression("\\s+"), "_");
+    title.remove(QRegularExpression("^_+|_+$"));
+    file_name = title;
+    return file_name;
+}
+
+
+void Board::on_link_added(SharedNodePtr from, SharedNodePtr to, BranchType branch) {
+    auto child = get_view_from_node(from);
+    auto parent = get_view_from_node(to);
+    emit link_added(child, parent, branch);
+}
+
+void Board::on_link_removed(SharedNodePtr from, SharedNodePtr to, BranchType branch) {
+    auto child = get_view_from_node(from);
+    auto parent = get_view_from_node(to);
+    emit link_removed(child, parent, branch);
+}
+
+void Board::on_node_removed(SharedNodePtr target) {
+    auto node = get_view_from_node(target);
+    emit node_removed(node);
 }

@@ -25,7 +25,10 @@ generateProjectDialog::generateProjectDialog(QWidget *parent)
     pathLayout->addWidget(path_edit);
     pathLayout->addWidget(browse_button);
 
-    QLabel *notationLabel = new QLabel("Notation:");
+    QLabel *label_project_name = new QLabel("Project directory name:");
+    project_name_edit = new QLineEdit();
+
+    QLabel *notationLabel = new QLabel("File name notation:");
 
     camel_case_radio = new QRadioButton("camelCase");
     snake_case_radio = new QRadioButton("snake_case");
@@ -40,10 +43,10 @@ generateProjectDialog::generateProjectDialog(QWidget *parent)
     notationLayout->addWidget(camel_case_radio);
     notationLayout->addWidget(snake_case_radio);
 
-    QLabel *toggleLabel = new QLabel("Toggle:");
+    QLabel *toggleLabel = new QLabel("Replace existing:");
 
-    on_toggle = new QRadioButton("on");
-    off_toggle = new QRadioButton("off");
+    on_toggle = new QRadioButton("yes");
+    off_toggle = new QRadioButton("no");
 
     toggle_group = new QButtonGroup(this);
     toggle_group->addButton(on_toggle);
@@ -60,6 +63,9 @@ generateProjectDialog::generateProjectDialog(QWidget *parent)
 
     mainLayout->addWidget(pathLabel);
     mainLayout->addLayout(pathLayout);
+    mainLayout->addSpacing(10);
+    mainLayout->addWidget(label_project_name);
+    mainLayout->addWidget(project_name_edit);
     mainLayout->addSpacing(10);
     mainLayout->addWidget(notationLabel);
     mainLayout->addLayout(notationLayout);
@@ -89,6 +95,8 @@ QString generateProjectDialog::get_selected_path() const {
     return path_edit->text();
 }
 
+
+
 ProjectGenerator::FileNameNotation generateProjectDialog::get_selected_notation() const {
     return snake_case_radio->isChecked() ? ProjectGenerator::FileNameNotation::SNAKE_NOTATION
                                        : ProjectGenerator::FileNameNotation::CAMEL_NOTATION;
@@ -97,4 +105,9 @@ ProjectGenerator::FileNameNotation generateProjectDialog::get_selected_notation(
 ProjectGenerator::ReplaceToggle generateProjectDialog::get_selected_toggle() const{
     return on_toggle->isChecked() ? ProjectGenerator::ReplaceToggle::ON
                                   : ProjectGenerator::ReplaceToggle::OFF;
+}
+
+QString generateProjectDialog::get_project_dir_name() const
+{
+    return project_name_edit->text();
 }

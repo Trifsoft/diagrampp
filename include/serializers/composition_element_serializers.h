@@ -48,9 +48,6 @@ namespace CompositionElementSerializers
 
     void serialize_constructor(std::ostream& output_stream, int indentation_counter, const DefaultConstructor* constructor);
     DefaultConstructor* deserialize_constructor(const QJsonObject json_constructor, const QString& class_name);
-
-    void serialize_argument(std::ostream& output_stream, int indentation_counter, const Argument* description);
-    Argument* deserialize_argument(const QJsonObject json_description);
 };
 
 #endif // COMPOSITION_ELEMENT_SERIALIZERS_H

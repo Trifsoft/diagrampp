@@ -7,12 +7,16 @@ Method::Method(const QString& name, const QString& return_type, Visibility visib
       arguments(arguments),
       definition_block(definition_block) {}
 
-QString Method::get_base_method_declaration() const {
+QString Method::get_call() const {
     QStringList var_strings;
     for (const auto& var : arguments) {
         var_strings.append(var->to_string());
     }
-    return return_type + " " + name + "(" + var_strings.join(", ") + ")";
+    return name + "(" + var_strings.join(", ") + ")";
+}
+
+QString Method::get_base_method_declaration() const {
+    return return_type + " " + get_call();
 }
 
 QString Method::declaration() const {
@@ -39,8 +43,8 @@ std::optional<QString> Method::definition(const QString& class_name) const {
     }
 
     QString def = return_type + " " + class_name + "::" +
-                  declaration() + "\n" +
-                  definition_block + "\n}";
+                  get_call() + "\n" +
+                  "{\n" + definition_block + "\n}";
     return def;
 }
 

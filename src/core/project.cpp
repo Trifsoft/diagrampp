@@ -1,5 +1,5 @@
 #include "project.h"
-#include "view/cpp_class.h"
+#include "view/cpp_class_view.h"
 #include "model/elements/composition/cpp_struct.h"
 #include <QGraphicsView>
 #include "src/ui/ui_project.h"
@@ -68,7 +68,7 @@ void Project::onRedo()
 
 void Project::onAddClassClicked()
 {
-    CppClass* item = new CppClass(
+    CppClassView* item = new CppClassView(
         std::make_shared<CPPStruct>(
             CPPStruct("Class")
         )
@@ -92,7 +92,7 @@ void Project::onAddClassClicked()
 
 void Project::onAddInterfaceClicked()
 {
-    CppClass* item = new CppClass(
+    CppClassView* item = new CppClassView(
         std::make_shared<CPPStruct>(
             CPPStruct("Interface")
         )
@@ -110,7 +110,7 @@ void Project::onAddInterfaceClicked()
 
 void Project::onAddEnumClicked()
 {
-    CppClass* item = new CppClass(
+    CppClassView* item = new CppClassView(
         std::make_shared<CPPStruct>(
             CPPStruct("Enum")
         )

@@ -3,6 +3,26 @@
 #include <model/elements/type/regular_type.h>
 #include <model/elements/constructor/copy_constructor.h>
 
+namespace {
+    void serialize_argument(std::ostream& output_stream, int indentation_counter, const Argument* description)
+    {
+        output_stream << "{\n";
+        SerializeHelpers::write_indented_string_field(output_stream, indentation_counter+1, "name", description->get_name().toStdString());
+        output_stream << ",\n";
+        SerializeHelpers::write_indented_string_field(output_stream, indentation_counter+1, "type", description->get_type().toStdString());
+        output_stream << "\n";
+        SerializeHelpers::indent(output_stream, indentation_counter);
+        output_stream << "}";
+    }
+
+    Argument* deserialize_argument(const QJsonObject json_description)
+    {
+        QString name = json_description["name"].toString();
+        QString type = json_description["type"].toString();
+        return new Argument(name, type);
+    }
+};
+
 void CompositionElementSerializers::serialize_method(std::ostream& output_stream, int indentation_counter, const Method *method)
 {
     output_stream << "{\n";
@@ -14,7 +34,7 @@ void CompositionElementSerializers::serialize_method(std::ostream& output_stream
     output_stream << ",\n";
     SerializeHelpers::write_indented_field<int>(output_stream, indentation_counter+1, "method_kind", static_cast<int>(method->get_method_kind()));
     output_stream << ",\n";
-    SerializeHelpers::write_indented_serialized_list_field<Argument>(output_stream, indentation_counter+1, "arguments", method->get_arguments(), &CompositionElementSerializers::serialize_argument);
+    SerializeHelpers::write_indented_serialized_list_field<Argument>(output_stream, indentation_counter+1, "arguments", method->get_arguments(), &serialize_argument);
     output_stream << ",\n";
     SerializeHelpers::write_indented_string_field(output_stream, indentation_counter+1, "definition_block", method->get_definition_block().toStdString());
     output_stream << "\n";
@@ -71,7 +91,7 @@ void CompositionElementSerializers::serialize_constructor(std::ostream& output_s
     output_stream << "{\n";
     SerializeHelpers::write_indented_field<int>(output_stream, indentation_counter+1, "visibility", static_cast<int>(constructor->get_visibility()));
     output_stream << ",\n";
-    SerializeHelpers::write_indented_serialized_list_field<Argument>(output_stream, indentation_counter+1, "arguments", constructor->get_arguments(), &CompositionElementSerializers::serialize_argument);
+    SerializeHelpers::write_indented_serialized_list_field<Argument>(output_stream, indentation_counter+1, "arguments", constructor->get_arguments(), &serialize_argument);
     output_stream << "\n";
     SerializeHelpers::indent(output_stream, indentation_counter);
     output_stream << "}";
@@ -85,22 +105,4 @@ DefaultConstructor *CompositionElementSerializers::deserialize_constructor(const
         arguments.append(deserialize_argument(element.toObject()));
     }
     return new DefaultConstructor(class_name, arguments, visibility);
-}
-
-void CompositionElementSerializers::serialize_argument(std::ostream& output_stream, int indentation_counter, const Argument* description)
-{
-    output_stream << "{\n";
-    SerializeHelpers::write_indented_string_field(output_stream, indentation_counter+1, "name", description->get_name().toStdString());
-    output_stream << ",\n";
-    SerializeHelpers::write_indented_string_field(output_stream, indentation_counter+1, "type", description->get_type().toStdString());
-    output_stream << "\n";
-    SerializeHelpers::indent(output_stream, indentation_counter);
-    output_stream << "}";
-}
-
-Argument* CompositionElementSerializers::deserialize_argument(const QJsonObject json_description)
-{
-    QString name = json_description["name"].toString();
-    QString type = json_description["type"].toString();
-    return new Argument(name, type);
 }

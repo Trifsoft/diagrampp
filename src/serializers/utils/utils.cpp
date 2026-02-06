@@ -7,7 +7,7 @@ void SerializeHelpers::indent(std::ostream& output_stream, const int indentation
 }
 
 void SerializeHelpers::write_with_quotes(std::ostream& output_stream, const std::string& text) {
-    output_stream << '"' << text << "\": ";
+    output_stream << '"' << text << "\" ";
 }
 
 void SerializeHelpers::write_indented_string_field(std::ostream& output_stream, const int indentation_counter, const std::string& key, const std::string& value) {
