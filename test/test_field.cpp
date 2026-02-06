@@ -2,12 +2,12 @@
 #include <model/elements/field.h>
 #include <model/base/visibility.h>
 
-TEST_CASE("Field - declaration() returns correct decl") {
+TEST_CASE("Field") {
     Field f("x", "int", Visibility::Private);
-    REQUIRE(f.declaration() == "int x");
-}
-
-TEST_CASE("Field - definition() returns std::nullopt") {
-    Field f("x", "int", Visibility::Private);
-    REQUIRE(f.definition("MyClass") == std::nullopt);
+    SECTION("declaration()") {
+        REQUIRE(f.declaration() == "int x");
+    }
+    SECTION("definition()") {
+        REQUIRE(f.definition("MyClass") == std::nullopt);
+    }
 }
