@@ -16,6 +16,7 @@ private:
     QString m_name;
 public:
     Field(QString name, QString type, Visibility visibility, std::optional<QString> destruction = std::nullopt);
+    virtual ~Field() = default;
 
     QString declaration() const override;
     std::optional<QString> definition(const QString& class_name) const override;
