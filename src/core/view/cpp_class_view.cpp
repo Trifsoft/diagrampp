@@ -125,6 +125,7 @@ CppClassView::~CppClassView(){
         if(connection.arrow){
             delete connection.arrow;
         }
+        connection.otherClass->remove_connection_to(this);
     }
     m_connections.clear();
     qDeleteAll(m_textItems);
@@ -213,7 +214,6 @@ void CppClassView::update_button()
     }
 }
 
-//[TODO] verovatno postoji bolje resenje od iscrtavanja i brisanja svaki put
 void CppClassView::updateTextItems()
 {
     // Clear old items
@@ -376,6 +376,8 @@ void CppClassView::add_line_connection(CppClassView* target, const BranchType br
     m_connections.append(sourceConn);
 
     Connection targetConn;
+    targetConn.line = line;
+    targetConn.arrow = arrow;
     targetConn.otherClass = this;
     targetConn.isSource = false;
     targetConn.endLine = true;
@@ -439,7 +441,7 @@ void CppClassView::update_all_connections(){
 
 
 void CppClassView::update_connection_line(Connection& conn){
-    if(!conn.line || !conn.otherClass){
+    if(!conn.line || !conn.otherClass || !conn.arrow){
         return;
     }
     QPointF newStart = get_top_center();
