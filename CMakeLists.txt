@@ -142,6 +142,7 @@ set(UI_SOURCES
 set(TEST_SOURCES
     test/test_main.cpp
     test/test_field.cpp
+    test/test_diagram_graph.cpp
 )
 
 
@@ -150,6 +151,12 @@ set(PROJECT_SOURCES
     ${CORE_HEADERS}
     ${CORE_SOURCES}
     ${UI_SOURCES}
+)
+
+
+set(TEST_SOURCES
+    tests/test_main.cpp
+    tests/test_diagram.cpp
 )
 
 set(CMAKE_AUTOUIC_SEARCH_PATHS
