@@ -14,7 +14,7 @@ void CommandManager::undo()
     if (can_undo()) {
         auto command = m_undo_stack.back();
         m_undo_stack.pop_back();
-        command->undo();  
+        command->undo();
         m_redo_stack.push_back(command);
     }
 }

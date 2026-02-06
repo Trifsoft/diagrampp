@@ -13,10 +13,13 @@ RemoveBranchCommand::RemoveBranchCommand(DiagramGraph* graph,
 bool RemoveBranchCommand::execute()
 {
     if (!m_branch_removed && m_from && m_to && m_graph) {
-        m_graph->remove_branch(m_from, m_to, m_branch_type);
-        m_branch_removed = true;
-        qDebug() << "Command EXECUTE: Branch uklonjen sa scene";
-        return true;
+        if(m_graph->remove_branch(m_from, m_to, m_branch_type)){
+            m_branch_removed = true;
+            qDebug() << "Command EXECUTE: Branch uklonjen sa scene";
+            return true;
+        }else{
+            qDebug()<<"Command EXECUTE: Ne moze se ukloniti branch sa scene";
+        }
     }
     return false;
 }
@@ -24,10 +27,14 @@ bool RemoveBranchCommand::execute()
 bool RemoveBranchCommand::undo()
 {
     if (m_branch_removed && m_from && m_to && m_graph) {
-        m_graph->add_branch(m_from, m_to, m_branch_type);
-        m_branch_removed = false;
-        qDebug() << "Command UNDO: Branch vracen na scenu";
-        return true;
+        std::string error_msg;
+        if(m_graph->add_branch(m_from, m_to, m_branch_type, error_msg)){
+            m_branch_removed = false;
+            qDebug() << "Command UNDO: Branch vracen na scenu";
+            return true;
+        }else{
+            qDebug() << error_msg;
+        }
     }
     return false;
 }

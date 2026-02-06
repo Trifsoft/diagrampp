@@ -4,8 +4,6 @@
 #include "model/base/branches.h"
 #include "graph/diagram_graph.h"
 
-
-
 namespace Validator {
     bool validate(std::string& errorMessage, SharedNodePtr from, SharedNodePtr to,
                   BranchType branchType,

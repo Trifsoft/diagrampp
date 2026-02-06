@@ -2,6 +2,17 @@ cmake_minimum_required(VERSION 3.16)
 
 project(DiagramPP VERSION 0.1 LANGUAGES CXX)
 
+include(FetchContent)
+
+FetchContent_Declare(
+  Catch2
+  GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+  GIT_TAG v3.5.2
+)
+
+FetchContent_MakeAvailable(Catch2)
+
+
 # Standard C++
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -41,8 +52,6 @@ set(CORE_HEADERS
     include/model/elements/field.h
     include/model/elements/method.h
     include/model/elements/destructor.h
-    include/model/elements/cpp_enum_value.h
-    include/model/elements/composition/cpp_enum.h
     include/model/elements/composition/cpp_class.h
     include/model/elements/composition/cpp_struct.h
     include/model/elements/composition/composition.h
@@ -50,7 +59,7 @@ set(CORE_HEADERS
     include/model/elements/constructor/default_constructor.h
     include/model/elements/constructor/copy_constructor.h
     include/model/base/uml_class_diagram_node.h
-    include/view/cpp_class.h
+    include/view/cpp_class_view.h
     include/validator.h
     include/commandManager/command_manager.h
     include/commandManager/command.h
@@ -63,11 +72,9 @@ set(CORE_HEADERS
     include/project_generator.h
     include/model/base/branches.h
     include/model/base/branches.h
-    include/view/node_view.h
     include/view/member_dialog_base.h
     include/view/field_dialog.h
     include/view/method_dialog.h
-    include/nodefactory.h
     include/methodeditor.h
     include/widget/class_element_text.h
     include/serializers/diagram_json_serializer.h
@@ -76,10 +83,10 @@ set(CORE_HEADERS
     include/serializers/utils/utils.h
     include/view/signal_processor.h
     include/recoveyLog.h
+    include/generate_project_dialog.h
 )
 
 set(CORE_SOURCES
-    src/core/main.cpp
     src/core/cpp_class_item.cpp
     src/core/help.cpp
     src/core/history.cpp
@@ -100,8 +107,6 @@ set(CORE_SOURCES
     src/core/model/elements/field.cpp
     src/core/model/elements/method.cpp
     src/core/model/elements/destructor.cpp
-    src/core/model/elements/cpp_enum_value.cpp
-    src/core/model/elements/composition/cpp_enum.cpp
     src/core/model/elements/composition/cpp_class.cpp
     src/core/model/elements/composition/cpp_struct.cpp
     src/core/model/elements/composition/composition.cpp
@@ -109,7 +114,7 @@ set(CORE_SOURCES
     src/core/model/elements/constructor/default_constructor.cpp
     src/core/model/elements/constructor/copy_constructor.cpp
     src/core/model/base/uml_class_diagram_node.cpp
-    src/core/view/cpp_class.cpp
+    src/core/view/cpp_class_view.cpp
     src/commandManager/command_manager.cpp
     src/commandManager/composite_command.cpp
     src/commandManager/add_node_command.cpp
@@ -119,11 +124,11 @@ set(CORE_SOURCES
     src/commandManager/remove_branch_command.cpp
     src/core/project_generator.cpp
     src/core/model/base/branchs.cpp
-    src/core/view/node_view.cpp
+    src/commandManager/command_manager.cpp
+    src/commandManager/add_node_command.cpp
     src/core/view/member_dialog_base.cpp
     src/core/view/field_dialog.cpp
     src/core/view/method_dialog.cpp
-    src/core/nodefactory.cpp
     src/core/methodeditor.cpp
     src/core/widget/class_element_text.cpp
     src/serializers/diagram_json_serializer.cpp
@@ -132,13 +137,19 @@ set(CORE_SOURCES
     src/serializers/utils/utils.cpp
     src/core/view/signal_processor.cpp
     src/core/recoveryLog.cpp
+    src/core/generate_project_dialog.cpp
 )
 
 set(UI_SOURCES
     src/ui/main_window.ui
     src/ui/Board.ui
-    src/ui/nodefactory.ui
     src/ui/methodeditor.ui
+)
+
+set(TEST_SOURCES
+    test/test_main.cpp
+    test/test_field.cpp
+    test/test_diagram_graph.cpp
 )
 
 
@@ -149,6 +160,13 @@ set(PROJECT_SOURCES
     ${UI_SOURCES}
 )
 
+
+set(TEST_SOURCES
+    test/test_main.cpp
+    test/test_diagram_graph.cpp
+    test/test_field.cpp
+)
+
 set(CMAKE_AUTOUIC_SEARCH_PATHS
     ${CMAKE_CURRENT_SOURCE_DIR}/src/ui
 )
@@ -157,14 +175,26 @@ set(CMAKE_AUTOUIC_SEARCH_PATHS
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(DiagramPP
         MANUAL_FINALIZATION
+        src/core/main.cpp
         ${PROJECT_SOURCES}
+    )
+    qt_add_executable(DiagramTest
+        MANUAL_FINALIZATION
+        ${PROJECT_SOURCES}
+        ${TEST_SOURCES}
     )
 else()
     add_executable(DiagramPP ${PROJECT_SOURCES})
+    add_executable(DiagramTest ${TEST_SOURCES})
 endif()
 
 # Linkovanje Qt biblioteka
 target_link_libraries(DiagramPP PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+target_link_libraries(DiagramTest
+    PRIVATE Qt${QT_VERSION_MAJOR}::Widgets
+    Catch2::Catch2WithMain
+)
+
 
 # iOS/macOS bundle opcije
 if(${QT_VERSION} VERSION_LESS 6.1.0)
@@ -187,6 +217,10 @@ install(TARGETS DiagramPP
 )
 
 target_include_directories(DiagramPP PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_BINARY_DIR}
+)
+target_include_directories(DiagramTest PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_CURRENT_BINARY_DIR}
 )

@@ -2,6 +2,30 @@
 #include "ui_main_window.h"
 #include "new_project.h"
 #include "Board.h"
+#include "serializers/diagram_json_serializer.h"
+#include <QFileDialog>
+#include <QFile>
+#include <QJsonDocument>
+#include <QJsonArray>
+#include <QMessageBox>
+#include <QFileInfo>
+#include <QInputDialog>
+
+namespace {
+    QString title_from_file(const QFile& file) {
+        QFileInfo fileInfo(file);
+        QString baseName = fileInfo.completeBaseName();
+
+        QStringList words = baseName.split('_', Qt::SkipEmptyParts);
+        for (QString& word : words) {
+            if (!word.isEmpty()) {
+                word[0] = word[0].toUpper();
+            }
+        }
+
+        return words.join(' ');
+    }
+}
 
 MainWindow::MainWindow(QWidget *parent)
     : QWidget(parent)
@@ -19,15 +43,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(ui->pbImport, &QPushButton::clicked,
             this, &MainWindow::onImportProjectClicked);
-
-    connect(ui->pbHistory, &QPushButton::clicked,
-            this, &MainWindow::onHistoryClicked);
-
-    connect(ui->pbHelp, &QPushButton::clicked,
-            this, &MainWindow::onHelpClicked);
-
-    connect(ui->pbExample, &QPushButton::clicked,
-            this, &MainWindow::onExampleClicked);
 }
 
 MainWindow::~MainWindow()
@@ -37,37 +52,71 @@ MainWindow::~MainWindow()
 
 void MainWindow::onNewProjectClicked()
 {
-    NewProject *w = new NewProject();
-    w->setAttribute(Qt::WA_DeleteOnClose);
-    w->show();
+    QInputDialog dialog(this);
+    dialog.setWindowTitle("Project Name");
+    dialog.setLabelText("Enter project name:");
+    dialog.setTextValue("");
+    dialog.setStyleSheet(
+        "QInputDialog QPushButton { background-color: #2c3e50; color: white; border-radius: 4px; padding: 6px 12px; }"
+        "QInputDialog QPushButton:hover { background-color: #34495e; }"
+        "QInputDialog QLabel { "
+        "  color: #2b2b2b; "
+        "} "
+        "QInputDialog QLineEdit { "
+        "  background-color: #2b2b2b; "
+        "  color: #ffffff; "
+        "  border: 1px solid #3a3a3a; "
+        "  padding: 4px; "
+        "} "
+    );
+
+    if (dialog.exec() == QDialog::Accepted && !dialog.textValue().isEmpty()) {
+        auto project = new Board(dialog.textValue());
+        project->show();
+    }
 }
 
 void MainWindow::onImportProjectClicked()
 {
-    QWidget *w = new QWidget();
-    w->setWindowTitle("Import Project");
-    w->resize(400, 200);
-    w->show();
-}
+    QString filePath = QFileDialog::getOpenFileName(
+        this,
+        "Import Project",
+        QString(),
+        "JSON Files (*.json)"
+    );
 
-void MainWindow::onHistoryClicked()
-{
-    QWidget *w = new QWidget();
-    w->setWindowTitle("History");
-    w->resize(400, 200);
-    w->show();
-}
+    if (filePath.isEmpty()) {
+        return;
+    }
 
-void MainWindow::onHelpClicked()
-{
-    QWidget *w = new QWidget();
-    w->setWindowTitle("Help");
-    w->resize(400, 200);
-    w->show();
-}
+    QFile file(filePath);
+    if (!file.open(QIODevice::ReadOnly)) {
+        QMessageBox::warning(this, "Error", "Could not open file: " + filePath);
+        return;
+    }
 
-void MainWindow::onExampleClicked()
-{
-    auto project = new Board();
-    project->show();
+    QByteArray jsonData = file.readAll();
+    QString title = title_from_file(file);
+    file.close();
+
+    QJsonParseError parseError;
+    QJsonDocument jsonDoc = QJsonDocument::fromJson(jsonData, &parseError);
+
+    if (parseError.error != QJsonParseError::NoError) {
+        QMessageBox::warning(this, "Error", "Failed to parse JSON: " + parseError.errorString());
+        return;
+    }
+
+    if (!jsonDoc.isArray()) {
+        QMessageBox::warning(this, "Error", "Invalid JSON format: expected array");
+        return;
+    }
+
+    Board* board = new Board();
+
+    DiagramJsonSerializer serializer(board);
+    serializer.deserialize(jsonDoc.array());
+    board->set_title(title);
+
+    board->show();
 }

@@ -13,9 +13,10 @@ class Field : public IClassElement {
 private:
     QString type;
     std::optional<QString> destruction;
-
+    QString m_name;
 public:
     Field(QString name, QString type, Visibility visibility, std::optional<QString> destruction = std::nullopt);
+    virtual ~Field() = default;
 
     QString declaration() const override;
     std::optional<QString> definition(const QString& class_name) const override;
@@ -23,6 +24,7 @@ public:
     void set_destruction(const std::optional<QString>& destruction);
     void set_destruction(const QString& destruction);
     QString get_type() const;
+    QString get_field_name() const;
     std::optional<QString> get_destruction() const;
 };
 
