@@ -125,7 +125,7 @@ bool DiagramGraph::connection_exists(SharedNodePtr start_node, SharedNodePtr end
 
     auto start_node_neighbours = start_node_it->second;
     for(auto const& [start_node_neighbour, start_end_branch_type] : start_node_neighbours){
-        if(start_node_neighbour == end_node){
+        if(start_node_neighbour == end_node && start_end_branch_type == branch_type){
             return true;
         }
     }
