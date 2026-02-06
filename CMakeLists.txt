@@ -155,8 +155,9 @@ set(PROJECT_SOURCES
 
 
 set(TEST_SOURCES
-    tests/test_main.cpp
-    tests/test_diagram.cpp
+    test/test_main.cpp
+    test/test_diagram_graph.cpp
+    test/test_field.cpp
 )
 
 set(CMAKE_AUTOUIC_SEARCH_PATHS
