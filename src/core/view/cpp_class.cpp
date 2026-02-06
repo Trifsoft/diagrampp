@@ -439,7 +439,7 @@ void CppClass::update_all_connections(){
 
 
 void CppClass::update_connection_line(Connection& conn){
-    if(!conn.line || !conn.otherClass){
+    if(!conn.line || !conn.otherClass || !conn.arrow){
         return;
     }
     QPointF newStart = get_top_center();
