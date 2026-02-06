@@ -194,8 +194,7 @@ void CppClassView::updateBoundingRect()
             m_width = tmp_width;
         }
     }
-    m_width += 20;
-
+    m_width = fmax(m_width+20, 150);
 
     m_height += m_add_button->height() + 4;
 
