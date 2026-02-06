@@ -2,6 +2,17 @@ cmake_minimum_required(VERSION 3.16)
 
 project(DiagramPP VERSION 0.1 LANGUAGES CXX)
 
+include(FetchContent)
+
+FetchContent_Declare(
+  Catch2
+  GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+  GIT_TAG v3.5.2
+)
+
+FetchContent_MakeAvailable(Catch2)
+
+
 # Standard C++
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -68,6 +79,7 @@ set(CORE_HEADERS
     include/serializers/utils/utils.h
     include/view/signal_processor.h
     include/recoveyLog.h
+    include/generate_project_dialog.h
 )
 
 set(CORE_SOURCES
@@ -119,12 +131,17 @@ set(CORE_SOURCES
     src/serializers/utils/utils.cpp
     src/core/view/signal_processor.cpp
     src/core/recoveryLog.cpp
+    src/core/generate_project_dialog.cpp
 )
 
 set(UI_SOURCES
     src/ui/main_window.ui
     src/ui/Board.ui
     src/ui/methodeditor.ui
+)
+
+set(TEST_SOURCES
+    test/test_main.cpp
 )
 
 
@@ -144,15 +161,23 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(DiagramPP
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
-        src/core/generate_project_dialog.cpp
-        include/generate_project_dialog.h
+    )
+    qt_add_executable(DiagramTest
+        MANUAL_FINALIZATION
+        ${TEST_SOURCES}
     )
 else()
     add_executable(DiagramPP ${PROJECT_SOURCES})
+    add_executable(DiagramTest ${TEST_SOURCES})
 endif()
 
 # Linkovanje Qt biblioteka
 target_link_libraries(DiagramPP PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+target_link_libraries(DiagramTest
+    PRIVATE Qt${QT_VERSION_MAJOR}::Widgets
+    Catch2::Catch2WithMain
+)
+
 
 # iOS/macOS bundle opcije
 if(${QT_VERSION} VERSION_LESS 6.1.0)
@@ -175,6 +200,10 @@ install(TARGETS DiagramPP
 )
 
 target_include_directories(DiagramPP PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_BINARY_DIR}
+)
+target_include_directories(DiagramTest PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_CURRENT_BINARY_DIR}
 )
