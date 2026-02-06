@@ -83,7 +83,6 @@ set(CORE_HEADERS
 )
 
 set(CORE_SOURCES
-    src/core/main.cpp
     src/core/cpp_class_item.cpp
     src/core/help.cpp
     src/core/history.cpp
@@ -142,6 +141,7 @@ set(UI_SOURCES
 
 set(TEST_SOURCES
     test/test_main.cpp
+    test/test_field.cpp
 )
 
 
@@ -160,10 +160,12 @@ set(CMAKE_AUTOUIC_SEARCH_PATHS
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(DiagramPP
         MANUAL_FINALIZATION
+        src/core/main.cpp
         ${PROJECT_SOURCES}
     )
     qt_add_executable(DiagramTest
         MANUAL_FINALIZATION
+        ${PROJECT_SOURCES}
         ${TEST_SOURCES}
     )
 else()
