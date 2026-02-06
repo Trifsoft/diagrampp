@@ -138,3 +138,72 @@ namespace Validator{
     }
 
 }
+
+
+namespace testvalidator{
+    bool check_multiple_connection(SharedNodePtr child, SharedNodePtr parent,
+                                   const std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram){
+        auto value = diagram.at(child);
+        int count = 0;
+        for(auto& pair : value){
+            if(pair.first == parent){
+                count++;
+            }
+        }
+        return count < 2;
+    }
+
+    bool detect_diamond(SharedNodePtr start, const std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram) {
+        std::unordered_map<SharedNodePtr, int> counts;
+        paths_to_base(start, diagram, counts);
+
+        for(const auto &[_, count] : counts){
+            if(count > 1){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    void paths_to_base(SharedNodePtr node,
+                       const std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram,
+                       std::unordered_map<SharedNodePtr, int>& reach_count) {
+        reach_count[node]++;
+        auto it = diagram.at(node);
+        for(const auto& [child, branchType] : it){
+            if(branchType == BranchType::INHERITANCE){
+                paths_to_base(child, diagram, reach_count);
+            }
+        }
+    }
+
+    bool check_cycle(SharedNodePtr start,
+                     BranchType branch_type,
+                     const std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram){
+        std::unordered_map<SharedNodePtr,bool> in_stack;
+        return dfs(start, branch_type, in_stack, diagram);
+    }
+
+    bool dfs(SharedNodePtr node,
+             BranchType branch_type,
+             std::unordered_map<SharedNodePtr,bool>& in_stack,
+             const std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram){
+        in_stack[node] = true;
+
+        auto it = diagram.at(node);
+        for(auto& pair : it){
+            if(pair.second == branch_type){
+                if(in_stack[pair.first]){
+                    return true;
+                }
+                if(dfs(pair.first, branch_type, in_stack, diagram)){
+                    return true;
+                }
+            }
+        }
+
+        in_stack[node] = false;
+        return false;
+    }
+
+}

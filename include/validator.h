@@ -10,4 +10,23 @@ namespace Validator {
                   const std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram);
 };
 
+namespace testvalidator{
+    bool check_multiple_connection(SharedNodePtr child, SharedNodePtr parent,
+                               const std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram);
+
+    bool check_cycle(SharedNodePtr start,
+                     BranchType branch_type,
+                     const std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram);
+
+    bool detect_diamond(SharedNodePtr start, const std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram);
+
+    void paths_to_base(SharedNodePtr node,
+                       const std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram,
+                       std::unordered_map<SharedNodePtr, int>& reach_count);
+    bool dfs(SharedNodePtr node,
+             BranchType branch_type,
+             std::unordered_map<SharedNodePtr,bool>& in_stack,
+             const std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram);
+    };
+
 #endif // VALIDATOR_H

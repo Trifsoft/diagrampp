@@ -150,8 +150,9 @@ set(TEST_SOURCES
     test/test_main.cpp
     test/test_field.cpp
     test/test_diagram_graph.cpp
+    test/test_method.cpp
+    test/test_validator.cpp
 )
-
 
 # Glavni projekat izvori
 set(PROJECT_SOURCES
@@ -165,6 +166,8 @@ set(TEST_SOURCES
     test/test_main.cpp
     test/test_diagram_graph.cpp
     test/test_field.cpp
+    test/test_method.cpp
+    test/test_validator.cpp
 )
 
 set(CMAKE_AUTOUIC_SEARCH_PATHS
@@ -177,6 +180,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         MANUAL_FINALIZATION
         src/core/main.cpp
         ${PROJECT_SOURCES}
+
     )
     qt_add_executable(DiagramTest
         MANUAL_FINALIZATION
@@ -228,6 +232,7 @@ target_include_directories(DiagramTest PRIVATE
 # Finalizacija Qt6
 if(QT_VERSION_MAJOR EQUAL 6)
     qt_finalize_executable(DiagramPP)
+    qt_finalize_executable(DiagramTest)
 endif()
 
 
