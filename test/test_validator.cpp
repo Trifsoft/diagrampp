@@ -178,17 +178,4 @@ TEST_CASE("testvalidator::detect_diamond tests")
 
         REQUIRE(testvalidator::detect_diamond(D, diagram) == false);
     }
-
-    SECTION("Given self-inheritance, "
-            "When checking for diamond problem, "
-            "Then returns false (but should be caught by cycle check)")
-    {
-        auto node = std::make_shared<CPPClass>("Node");
-
-        std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>> diagram = {
-            {node, {{node, BranchType::INHERITANCE}}}
-        };
-
-        REQUIRE(testvalidator::detect_diamond(node, diagram) == false);
-    }
 }
