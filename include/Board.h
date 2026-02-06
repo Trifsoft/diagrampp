@@ -37,7 +37,7 @@ public:
     DiagramGraph* get_diagram() const;
     CppClassView* get_view_from_node(SharedNodePtr);
 
-    BranchType branch_type = BranchType::INHERITANCE;
+    //BranchType branch_type = BranchType::INHERITANCE;
     bool linkageMode = false;
     bool removeMode = false;
 
@@ -52,7 +52,7 @@ signals:
 public slots:
     void onAddClassClicked();
     void onAddStructClicked();
-    void onCheckRadioButtonClicked();
+    //void onCheckRadioButtonClicked();
     void onModeClicked();
     void exportPNG();
     void exportJSON();
@@ -83,5 +83,6 @@ private:
     void onGenerateClicked(const QString& class_name, NodeType node_type);
 
     QString& get_file_name();
+    BranchType get_branch_type();
 };
 #endif // BOARD_H

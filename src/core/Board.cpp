@@ -55,12 +55,6 @@ Board::Board(const QString& project_name, QWidget *parent)
     // Connect buttons to slots
     connect(ui->add_class, &QPushButton::clicked, this, &Board::onAddClassClicked);
     connect(ui->add_struct, &QPushButton::clicked, this, &Board::onAddStructClicked);
-    connect(ui->Inheritance, &QPushButton::clicked, this, &Board::onCheckRadioButtonClicked);
-    connect(ui->Association, &QPushButton::clicked, this, &Board::onCheckRadioButtonClicked);
-    connect(ui->Realization, &QPushButton::clicked, this, &Board::onCheckRadioButtonClicked);
-    connect(ui->Aggregation, &QPushButton::clicked, this, &Board::onCheckRadioButtonClicked);
-    connect(ui->Composition, &QPushButton::clicked, this, &Board::onCheckRadioButtonClicked);
-    connect(ui->Dependency, &QPushButton::clicked, this, &Board::onCheckRadioButtonClicked);
     connect(ui->linkageMode, &QPushButton::clicked, this, &Board::onModeClicked);
     connect(ui->removeMode, &QPushButton::clicked, this, &Board::onModeClicked);
 }
@@ -88,19 +82,19 @@ Board::~Board()
     delete scene;
 }
 
-void Board::onCheckRadioButtonClicked(){
+BranchType Board::get_branch_type(){
     if(ui->Inheritance->isChecked()){
-        branch_type = BranchType::INHERITANCE;
+        return BranchType::INHERITANCE;
     }else if(ui->Association->isChecked()){
-        branch_type = BranchType::ASSOCIATION;
+        return BranchType::ASSOCIATION;
     }else if(ui->Realization->isChecked()){
-        branch_type = BranchType::REALIZATION;
+        return BranchType::REALIZATION;
     }else if(ui->Aggregation->isChecked()){
-        branch_type = BranchType::AGGREGATION;
+        return BranchType::AGGREGATION;
     }else if(ui->Composition->isChecked()){
-        branch_type = BranchType::COMPOSITION;
+        return BranchType::COMPOSITION;
     }else{
-        branch_type = BranchType::DEPENDENCY;
+        return BranchType::DEPENDENCY;
     }
 }
 
@@ -148,9 +142,9 @@ void Board::on_object_clicked(Composition* clicked_object){
     }
 
     if((first_activated && second_activated) && linkageMode){
-        add_branch(first_activated, second_activated, branch_type);
+        add_branch(first_activated, second_activated, get_branch_type());
     }else if((first_activated && second_activated) && removeMode){
-        remove_branch(first_activated, second_activated, branch_type);
+        remove_branch(first_activated, second_activated, get_branch_type());
     }
 
     #if DEBUG_MODE>=1
@@ -183,14 +177,6 @@ void Board::on_add_method_requested(Composition *node, std::shared_ptr<Method> m
 
     qDebug() << "Recieved signal add method from: " << node->get_label();
 }
-
-// void Board::add_item(std::shared_ptr<Composition> node) {   //TODO [Nikola] - izmeniti da bude IUMLClassDiagramNode umesto Composition
-//     CppClassView* item = new CppClassView(this, node);
-//     scene->addItem(item);
-//     diagram->add_node(item);
-
-//     connect(item, &CppClassView::objectClicked, this, &Board::on_object_clicked);
-// }
 
 
 // [REFACTOR] implement get_element_by_id(int id) in Composition
@@ -391,7 +377,7 @@ void Board::on_generate_project(){
             case ProjectGenerator::GenerationStatusCode::NO_SUCH_DIR:
                 err_message = "The selected path does not exist. Please choose an existing directory.";
                 break;
-            defaul:
+            default:
                 err_message = "";
             }
             QMessageBox::warning(this, "Warning", err_message);
