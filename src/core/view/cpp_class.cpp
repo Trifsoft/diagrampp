@@ -126,6 +126,7 @@ CppClass::~CppClass(){
         if(connection.arrow){
             delete connection.arrow;
         }
+        connection.otherClass->remove_connection_to(this);
     }
     m_connections.clear();
     qDeleteAll(m_textItems);
