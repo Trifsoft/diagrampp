@@ -160,6 +160,9 @@ set(TEST_SOURCES
     test/test_diagram_graph.cpp
     test/test_field.cpp
     test/test_method.cpp
+    test/test_default_constructor.cpp
+    test/test_destructor.cpp
+    test/test_copy_constructor.cpp
 )
 
 set(CMAKE_AUTOUIC_SEARCH_PATHS
