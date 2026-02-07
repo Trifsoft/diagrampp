@@ -137,14 +137,14 @@ std::pair<double, double> DiagramJsonSerializer::deserialize_coords(QJsonObject 
 }
 
 void DiagramJsonSerializer::deserialize(QJsonArray json_array){
-    std::map<std::tuple<QString, double, double>, bool> node_created;
+    std::map<std::tuple<QString, double, double>, std::shared_ptr<Composition>> node_created;
 
     for(const auto& json_value : json_array){
         QJsonObject json_object = json_value.toObject();
         const auto [x,y] = deserialize_coords(json_object["coords"].toObject());
         std::shared_ptr<Composition> node = NodeSerializers::deserialize_composition_node(json_object["node"].toObject());
         if(!node_created[{node.get()->get_name(), x, y}]){
-            node_created[std::make_tuple(node.get()->get_name(), x, y)] = true;
+            node_created[std::make_tuple(node.get()->get_name(), x, y)] = node;
             m_board->add_item(node, x, y);
         }
 
@@ -154,10 +154,12 @@ void DiagramJsonSerializer::deserialize(QJsonArray json_array){
             const auto& json_neighbour_object = json_neighbour_val.toObject();
 
             const auto [neighbour_x, neighbour_y] = deserialize_coords(json_neighbour_object["coords"].toObject());
-            const auto neighbour_node = NodeSerializers::deserialize_composition_node(json_neighbour_object["node"].toObject());
+            auto neighbour_node = NodeSerializers::deserialize_composition_node(json_neighbour_object["node"].toObject());
             if(!node_created[{neighbour_node.get()->get_name(), neighbour_x, neighbour_y}]){
                 m_board->add_item(neighbour_node, neighbour_x, neighbour_y);
-                node_created[{neighbour_node.get()->get_name(), neighbour_x, neighbour_y}] = true;
+                node_created[{neighbour_node.get()->get_name(), neighbour_x, neighbour_y}] = neighbour_node;
+            }else{
+                neighbour_node = node_created[{neighbour_node.get()->get_name(), neighbour_x, neighbour_y}];
             }
 
             const auto branch_type = get_branch_type_from_string(json_neighbour_object["branch_type"].toString().toStdString());
