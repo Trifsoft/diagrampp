@@ -1,11 +1,179 @@
 #include "graph/diagram_graph.h"
+#include <model/elements/composition/composition.h>
+#include <validator.h>
+#include <QDebug>
 
-void DiagramGraph::addNode(IUMLClassDiagramNode* node) {
-    if (!nodes.contains(node)) {
-        nodes.append(node);
+
+void DiagramGraph::add_node(SharedNodePtr node) {
+    if(m_diagram.find(node) != m_diagram.end()){
+        return;
+    }
+
+    m_diagram[node] = {};
+    emit node_added(node);
+}
+
+void DiagramGraph::remove_node(SharedNodePtr node_to_remove) {
+    if(m_diagram.find(node_to_remove) == m_diagram.end()){
+        return;
+    }
+
+    // erase all branches from any node to node_to_remove
+    for(auto& [_, neighbours] : m_diagram){
+        for(auto neighbours_it = neighbours.begin(); neighbours_it != neighbours.end(); ){
+            auto [neighbour_node, _] = (*neighbours_it);
+            if(neighbour_node == node_to_remove){
+                neighbours_it = neighbours.erase(neighbours_it);
+            }else {
+                ++neighbours_it;
+            }
+        }
+    }
+
+    // erase all node_to_remove neighbours
+    m_diagram.erase(node_to_remove);
+
+    emit node_removed(node_to_remove);
+}
+
+std::vector<DiagramGraph::BranchEdge> DiagramGraph::get_branches_for_node(SharedNodePtr node) const {
+    std::vector<BranchEdge> branches;
+    if(!node){
+        return branches;
+    }
+
+    // find all branches where node is either from or to node
+    for(const auto& [from_node, neighbours] : m_diagram){
+        for(const auto& [to_node, branch_type] : neighbours){
+            if(from_node == node || to_node == node){
+                branches.push_back({from_node, to_node, branch_type});
+            }
+        }
+    }
+
+    return branches;
+}
+
+
+bool DiagramGraph::add_branch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type, std::string& error_message) {
+    if(!connection_exists(from, to, branch_type)){
+        if(branch_type == BranchType::INHERITANCE){
+            from->inherits(Visibility::Public, to.get());
+        }
+
+        add_neighbour(from, to, branch_type);
+
+        if(!Validator::validate(error_message, from, to, branch_type, m_diagram)){
+            remove_neighbour(from, to, branch_type);
+            return false;
+        }
+    }else {
+        error_message = "Connection already exists.";
+        return false;
+    }
+
+    emit link_added(from, to, branch_type);
+    return true;
+}
+
+
+SharedNodePtr DiagramGraph::find_pointer_owner(Composition* node_view)
+{
+    for(auto node : m_diagram){
+        if(node.first.get() == node_view){
+            return node.first;
+        }
+        for (auto [neighbour, _] : node.second){
+            if(neighbour.get() == node_view){
+                return neighbour;
+            }
+        }
+    }
+    return nullptr;
+}
+
+
+void DiagramGraph::remove_neighbour(SharedNodePtr from, SharedNodePtr to, BranchType branch_type){
+    if(m_diagram.find(from) == m_diagram.end()){
+        return ;
+    }
+
+    for(auto it = m_diagram[from].begin(); it != m_diagram[from].end(); ){
+        auto& [neighbour, neighbour_branch_type] = (*it);
+        if(neighbour == to && neighbour_branch_type == branch_type){
+            it = m_diagram[from].erase(it);
+            break;
+        }else {
+            ++it;
+        }
     }
 }
 
-void DiagramGraph::addLink(Composition* from, Composition* to) {
-    links[from].append(to);
+void DiagramGraph::add_neighbour(SharedNodePtr from, SharedNodePtr to, BranchType branch_type){
+    m_diagram[from].push_back({to, branch_type});
 }
+
+bool DiagramGraph::remove_branch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type) {
+    if(!connection_exists(from, to, branch_type)){
+        return false;
+    }
+
+    if(branch_type == BranchType::INHERITANCE){
+        from->break_inheritance();
+    }
+
+    if(branch_type == BranchType::ASSOCIATION){
+        remove_neighbour(to, from, branch_type);
+    }
+
+    remove_neighbour(from, to, branch_type);
+    emit link_removed(from, to, branch_type);
+
+    return true;
+}
+
+graph_type& DiagramGraph::get_diagram(){
+    return m_diagram;
+}
+
+bool DiagramGraph::connection_exists(SharedNodePtr start_node, SharedNodePtr end_node, BranchType branch_type) const {
+    auto start_node_it = m_diagram.find(start_node);
+    if(start_node_it == m_diagram.end() && branch_type != BranchType::ASSOCIATION){
+        return false;
+    }
+
+    auto start_node_neighbours = start_node_it->second;
+    for(auto const& [start_node_neighbour, start_end_branch_type] : start_node_neighbours){
+        if(start_node_neighbour == end_node){
+            return true;
+        }
+    }
+
+    if(branch_type == BranchType::ASSOCIATION){
+        auto end_node_it = m_diagram.find(end_node);
+        auto neighbours = end_node_it->second;
+        for(auto const& [end_node_neighbour, end_start_branch_type] : neighbours){
+            if(end_node_neighbour == start_node && end_start_branch_type == BranchType::ASSOCIATION){
+                return true;
+            }
+        }
+    }
+
+    return false;
+    }
+
+#if DEBUG_MODE >=1
+void DiagramGraph::show_diagram(){
+    for(auto &value : m_diagram){
+        QDebug debug_stream = qDebug();
+        debug_stream << value.first->get_name() << ":";
+        qDebug() << value.first->get_name() << ":";
+        std::vector<std::pair<SharedNodePtr, BranchType>>& sequence = value.second;
+        for(auto &pairs : sequence){
+            debug_stream << pairs.first->get_name();
+            qDebug() << pairs.first->get_name();
+        }
+        qDebug() << "----";
+    }
+}
+#endif

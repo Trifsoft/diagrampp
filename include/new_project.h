@@ -3,7 +3,7 @@
 
 #include <QWidget>
 
-class NewProject: public QWidget
+class NewProject : public QWidget
 {
     Q_OBJECT
 public:
