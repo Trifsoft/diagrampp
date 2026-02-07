@@ -142,16 +142,16 @@ bool DiagramGraph::connection_exists(SharedNodePtr start_node, SharedNodePtr end
         return false;
     }
 
-    auto neighbours = start_node_it->second;
-    for(auto const& [start_node_neighbour, start_end_branch_type] : neighbours){
-        if(start_node_neighbour == end_node && start_end_branch_type == branch_type){
+    auto start_node_neighbours = start_node_it->second;
+    for(auto const& [start_node_neighbour, start_end_branch_type] : start_node_neighbours){
+        if(start_node_neighbour == end_node){
             return true;
         }
     }
 
     if(branch_type == BranchType::ASSOCIATION){
         auto end_node_it = m_diagram.find(end_node);
-        neighbours = end_node_it->second;
+        auto neighbours = end_node_it->second;
         for(auto const& [end_node_neighbour, end_start_branch_type] : neighbours){
             if(end_node_neighbour == start_node && end_start_branch_type == BranchType::ASSOCIATION){
                 return true;
@@ -160,7 +160,7 @@ bool DiagramGraph::connection_exists(SharedNodePtr start_node, SharedNodePtr end
     }
 
     return false;
-}
+    }
 
 #if DEBUG_MODE >=1
 void DiagramGraph::show_diagram(){
