@@ -6,9 +6,12 @@ CopyConstructor::CopyConstructor(const QString& class_name, const QList<std::sha
       class_fields(class_fields) {}
 
 QString CopyConstructor::get_custom_definition() const {
+    if(class_fields.empty()) {
+        return "";
+    }
     QStringList init_list;
     for (const auto& field : class_fields) {
         init_list.append(field->get_name() + "(other." + field->get_name() + ")");
     }
-    return init_list.join(", ");
+    return " : " + init_list.join(", ");
 }
