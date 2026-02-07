@@ -18,7 +18,7 @@ std::optional<QString> Constructor::definition(const QString& class_name) const 
     for (const auto& arg : arguments) {
         arg_strings.append(arg->to_string());
     }
-    return class_name + "::" + class_name + "(" + arg_strings.join(", ") + ") : " + get_custom_definition();
+    return class_name + "::" + class_name + "(" + arg_strings.join(", ") + ")" + get_custom_definition() + " {}";
 }
 
 QVector<Argument*> Constructor::get_arguments() const {
