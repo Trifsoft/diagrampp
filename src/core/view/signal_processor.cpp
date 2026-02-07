@@ -2,6 +2,8 @@
 
 signalProcessor::signalProcessor() {}
 
+
+
 void signalProcessor::add_link_process(CppClassView* child, CppClassView* parent, BranchType branch) const {
     if(child && parent){
         child->add_line_connection(parent, branch);
