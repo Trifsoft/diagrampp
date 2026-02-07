@@ -146,6 +146,8 @@ void DiagramJsonSerializer::deserialize(QJsonArray json_array){
         if(!node_created[{node.get()->get_name(), x, y}]){
             node_created[std::make_tuple(node.get()->get_name(), x, y)] = node;
             m_board->add_item(node, x, y);
+        }else{
+            node = node_created[{node->get_name(), x, y}];
         }
 
 
