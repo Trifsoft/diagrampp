@@ -146,14 +146,6 @@ set(UI_SOURCES
     src/ui/methodeditor.ui
 )
 
-set(TEST_SOURCES
-    test/test_main.cpp
-    test/test_field.cpp
-    test/test_diagram_graph.cpp
-    test/test_method.cpp
-    test/test_validator.cpp
-)
-
 # Glavni projekat izvori
 set(PROJECT_SOURCES
     ${CORE_HEADERS}
@@ -171,6 +163,7 @@ set(TEST_SOURCES
     test/test_default_constructor.cpp
     test/test_destructor.cpp
     test/test_copy_constructor.cpp
+    test/test_command_manager.cpp
 )
 
 set(CMAKE_AUTOUIC_SEARCH_PATHS
