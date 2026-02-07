@@ -20,7 +20,7 @@ QString Destructor::get_definition_block() const {
     QStringList destructions;
     for (const auto& field : fields) {
         if (field->get_destruction().has_value()) {
-            destructions.append(field->get_destruction().value());
+            destructions.append(field->get_destruction().value() + ";");
         }
     }
     return destructions.join("\n");
