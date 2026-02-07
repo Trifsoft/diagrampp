@@ -87,6 +87,10 @@ Dijagram se moze eksportovati na tri nacina:
 
 Prilikom generisanja koda moguce je izabrati konvenciju imenovanja fajlova (`snake_case` ili `CamelCase`).
 
+## Demo snimak
+
+Demonstraciju korišćenja projekta možete pronaći na [sledećem linku](https://youtu.be/twqH1DRyIRE)
+
 ## Clanovi tima
 
 - [Nikola Trifunovic 13/2022](https://gitlab.com/trifsoft)
