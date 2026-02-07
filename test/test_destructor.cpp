@@ -39,6 +39,6 @@ SECTION("declaration()") {
     REQUIRE(dtor.declaration() == "~MyClass()");
 }
 SECTION("definition()") {
-    REQUIRE(dtor.definition("MyClass") == "~MyClass::MyClass() {\ndelete ptr\n}");
+    REQUIRE(dtor.definition("MyClass") == "~MyClass::MyClass() {\ndelete ptr;\n}");
 }
 }
