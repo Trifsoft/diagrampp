@@ -58,7 +58,7 @@ std::vector<DiagramGraph::BranchEdge> DiagramGraph::get_branches_for_node(Shared
 bool DiagramGraph::add_branch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type, std::string& error_message) {
     if(!connection_exists(from, to, branch_type)){
         if(branch_type == BranchType::INHERITANCE){
-            from->inherits(Visibility::Public, to.get());
+            to->inherits(Visibility::Public, from.get());
         }
 
         add_neighbour(from, to, branch_type);

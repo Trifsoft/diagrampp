@@ -141,13 +141,31 @@ void Board::onCheckRadioButtonClicked(){
 }
 
 void Board::onModeClicked(){
-    linkageMode = ui->linkageMode->isChecked();
-    removeMode = ui->removeMode->isChecked();
-    if(linkageMode && removeMode){
-        ui->linkageMode->setChecked(false);
-        ui->removeMode->setChecked(false);
-        linkageMode = removeMode = false;
+    if(!linkageMode && !removeMode) {
+        linkageMode = ui->linkageMode->isChecked();
+        removeMode = ui->removeMode->isChecked();
     }
+    else if(linkageMode) {
+        linkageMode = false;
+        if(removeMode != ui->removeMode->isChecked()) {
+            removeMode = true;
+        }
+    }
+    else {
+        removeMode = false;
+        if(linkageMode != ui->linkageMode->isChecked()) {
+            linkageMode = true;
+        }
+    }
+    ui->linkageMode->setChecked(linkageMode);
+    ui->removeMode->setChecked(removeMode);
+    // linkageMode = ui->linkageMode->isChecked();
+    // removeMode = ui->removeMode->isChecked();
+    // if(linkageMode && removeMode){
+    //     ui->linkageMode->setChecked(false);
+    //     ui->removeMode->setChecked(false);
+    //     linkageMode = removeMode = false;
+    // }
     first_activated = second_activated = nullptr;
 }
 
