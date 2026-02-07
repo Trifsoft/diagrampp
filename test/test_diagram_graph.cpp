@@ -174,39 +174,6 @@ TEST_CASE("DiagramGraph::find_pointer_owner(Composition*) tests")
 }
 
 
-
-
-// uz ovaj test i remove_branch test, connection_exists je implicitno testiran
-TEST_CASE("DiagramGraph::connection_exists(SharedNodePtr, SharedNodePtr, BranchType) tests")
-{
-    SECTION("Given a graph where from->to exists with ASSOCIATION, "
-            "When adding branch "
-            "Then connection_exists in add_branch returns false.")
-    {
-        // Arrange
-        DiagramGraph graph;
-        SharedNodePtr A = std::make_shared<CPPClass>("A", Visibility::Public);
-        SharedNodePtr B = std::make_shared<CPPClass>("B", Visibility::Public);
-        SharedNodePtr C = std::make_shared<CPPClass>("C", Visibility::Public);
-
-        graph.add_node(B);
-        graph.add_node(B);
-
-        graph.get_diagram()[A].push_back({B, BranchType::ASSOCIATION});
-
-
-        // Act
-        std::string err_msg;
-
-
-        // Assert
-        // REQUIRE(graph.add_branch(A, B, BranchType::ASSOCIATION, err_msg) == false); // connection_exists -> true
-        // REQUIRE(graph.add_branch(A, C, BranchType::INHERITANCE, err_msg) == true); // connection_existst -> false (if validator is correct)
-    }
-}
-
-
-
 TEST_CASE("DiagramGraph::remove_branch(from,to,type) tests")
 {
     SECTION("Given there is no such connection, "
