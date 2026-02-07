@@ -82,7 +82,7 @@ QMap<Visibility, QVector<const IClassElement*>> Composition::get_grouped_code_el
     auto elements = get_code_elements();
 
     for (auto& elem : elements) {
-        Visibility vis = Visibility::Public;
+        Visibility vis = elem->get_visibility();
         grouped[vis].append(elem);
     }
 
@@ -90,7 +90,7 @@ QMap<Visibility, QVector<const IClassElement*>> Composition::get_grouped_code_el
 }
 
 QString Composition::declaration() const {
-    QString decl = get_declaration(visibility) + " " + get_label() + " " + name;
+    QString decl = get_label() + " " + name;
 
     if (inheritance.has_value()) {
         auto [vis, base_class] = inheritance.value();
