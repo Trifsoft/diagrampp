@@ -1,12 +1,12 @@
-#ifndef TYPE_H
-#define TYPE_H
+// #ifndef TYPE_H
+// #define TYPE_H
 
-#include <QString>
+// #include <QString>
 
-class IType {
-public:
-    virtual ~IType() = default;
-    virtual QString get_name() const = 0;
-};
+// class IType {
+// public:
+//     virtual ~IType() = default;
+//     virtual QString get_name() const = 0;
+// };
 
-#endif // TYPE_H
+// #endif // TYPE_H
