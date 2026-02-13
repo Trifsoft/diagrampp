@@ -81,6 +81,8 @@ set(CORE_HEADERS
     include/serializers/node_serializers.h
     include/serializers/composition_element_serializers.h
     include/serializers/utils/utils.h
+    include/view/arrow.h
+    include/view/line.h
     include/view/signal_processor.h
     include/recoveyLog.h
     include/generate_project_dialog.h
@@ -135,6 +137,8 @@ set(CORE_SOURCES
     src/serializers/node_serializers.cpp
     src/serializers/composition_element_serializers.cpp
     src/serializers/utils/utils.cpp
+    src/core/view/arrow.cpp
+    src/core/view/line.cpp
     src/core/view/signal_processor.cpp
     src/core/recoveryLog.cpp
     src/core/generate_project_dialog.cpp

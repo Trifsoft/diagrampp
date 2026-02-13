@@ -20,9 +20,11 @@
 #include "commandManager/add_branch_command.h"
 #include "commandManager/remove_branch_command.h"
 
+#include <view/signal_processor.h>
+
 
 Board::Board(const QString& project_name, QWidget *parent)
-    : QWidget(parent), ui(new Ui::Board), diagram(new DiagramGraph()),
+    : QWidget(parent), ui(new Ui::Board), diagram(new DiagramGraph()), processor(new signalProcessor()),
     recovery_log(new recoveryLog())
 {
     ui->setupUi(this);
@@ -48,10 +50,11 @@ Board::Board(const QString& project_name, QWidget *parent)
     connect(diagram, &DiagramGraph::node_removed, this, &Board::on_node_removed);
 
     //signals for connecting Board with GUI
-    connect(this, &Board::link_added, &signalProcessor::instance(), &signalProcessor::add_link_process);
-    connect(this, &Board::link_removed, &signalProcessor::instance(), &signalProcessor::remove_link_process);
-    connect(this, &Board::node_added, &signalProcessor::instance(), &signalProcessor::add_node_process);
-    connect(this, &Board::node_removed, &signalProcessor::instance(), &signalProcessor::remove_node_process);
+    connect(this, &Board::link_added, processor, &signalProcessor::add_link_process);
+    connect(this, &Board::link_removed, processor, &signalProcessor::remove_link_process);
+    connect(this, &Board::node_added, processor, &signalProcessor::add_node_process);
+    connect(this, &Board::node_removed, processor, &signalProcessor::remove_node_process);
+    connect(processor, &signalProcessor::added_connection, this, &Board::add_connection);
 
 
     // signals for log file
@@ -121,6 +124,7 @@ Board::~Board()
     qDeleteAll(views);
     views.clear();
     delete ui;
+    delete processor;
     delete scene;
 }
 
@@ -474,6 +478,7 @@ void Board::on_link_removed(SharedNodePtr from, SharedNodePtr to, BranchType bra
 
 void Board::on_node_removed(SharedNodePtr target) {
     auto node = get_view_from_node(target);
+    views.removeAll(node);
     emit node_removed(node);
 }
 
@@ -482,3 +487,7 @@ void Board::on_node_added(SharedNodePtr target) {
     emit node_added(node);
 }
 
+void Board::add_connection(Arrow* arrow, Line* line) {
+    scene->addItem(arrow);
+    scene->addItem(line);
+}

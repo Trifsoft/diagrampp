@@ -1,17 +1,16 @@
 #ifndef _CPP_CLASS_H
 #define _CPP_CLASS_H
 
-#include <functional>
 #include <QGraphicsTextItem>
 #include <QVector>
 #include <QPushButton>
 #include <QGraphicsProxyWidget>
 #include <QGraphicsSceneMouseEvent>
 #include <model/elements/composition/composition.h>
-#include "model/base/branches.h"
 #include "graph/diagram_graph.h"
 #include <model/elements/field.h>
 #include <model/elements/method.h>
+#include <view/arrow.h>
 
 class DiagramGraph;
 
@@ -45,19 +44,8 @@ public:
 
     void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
 
-    void addConnectionInfo(QGraphicsLineItem* line, bool isStart);
-
-    void removeLink(CppClassView* target, BranchType branch);
-
     QPointF get_top_center() const;
     QPointF get_bottom_center() const;
-    void update_connections();
-    void add_line_connection(CppClassView* target, const BranchType branch);
-    void remove_link_connection(CppClassView* target, const BranchType branch);
-    void set_object_visible(bool visible);
-    void remove_node();
-    void add_node();
-
 
     QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
     Composition* get_uml_class_diagram_node();
@@ -66,32 +54,11 @@ public slots:
     void composition_changed();
 
 private:
-    struct Connection {
-        QGraphicsLineItem* line = nullptr;
-        QGraphicsPolygonItem* arrow = nullptr;
-        CppClassView* otherClass = nullptr;
-        bool isSource;
-        bool endLine;
-        BranchType type;
-        int offset;
-    };
-    QList<Connection> m_connections;
-
-    qreal arrow_size = 15.0;
-    void update_connection_line(Connection& conn);
-    void update_connection_arrow(Connection& conn);
-    void update_all_connections();
-    void update_offsets();
-    void disconnect_all_connections();
-    void remove_connection_to(CppClassView* target);
-    QGraphicsPolygonItem* get_arrow(const BranchType branchType) const;
 
     std::shared_ptr<Composition> m_composition;
     int m_width;
     int m_height;
     int m_line_height;
-    int number_of_connecitons = 0;
-    int local_offset = 15;
 
     // Editable text items for now
     QVector<QGraphicsTextItem*> m_textItems;
@@ -120,6 +87,8 @@ signals:
     void edit_method_request(Composition* node, std::weak_ptr<Method> old_method,std::shared_ptr<Method> new_method);
     void objectClicked(Composition* node);
 
+    void height_changed_by(double);
+    void moved_by(const QPointF& delta);
 };
 
 #endif // _CPP_CLASS_H

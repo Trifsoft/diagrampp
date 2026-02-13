@@ -9,8 +9,11 @@
 #include <model/elements/method.h>
 #include "view/cpp_class_view.h"
 
-
 #include "commandManager/command_manager.h"
+#include <view/signal_processor.h>
+
+#include <view/arrow.h>
+#include <view/line.h>
 
 
 QT_BEGIN_NAMESPACE
@@ -19,7 +22,6 @@ class Board;
 }
 QT_END_NAMESPACE
 
-class signalProcessor;
 class DiagramGraph;
 class IClassElement;
 
@@ -78,6 +80,8 @@ public slots:
     void on_link_removed(SharedNodePtr from, SharedNodePtr to, BranchType branch);
     void on_node_removed(SharedNodePtr node);
     void on_node_added(SharedNodePtr node);
+
+    void add_connection(Arrow*, Line*);
 private:
 
     DiagramGraph *diagram;
@@ -98,6 +102,8 @@ private:
     void onGenerateClicked(const QString& class_name, NodeType node_type);
 
     QString& get_file_name();
+
+    signalProcessor* processor;
 
 };
 #endif // BOARD_H
