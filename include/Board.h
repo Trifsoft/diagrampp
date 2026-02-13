@@ -12,8 +12,9 @@
 #include "commandManager/command_manager.h"
 #include <view/signal_processor.h>
 
-#include <view/arrow.h>
-#include <view/line.h>
+#include <view/connection.h>
+
+using ConnectionInfoType = QMap<CppClassView*, QList<std::tuple<CppClassView*, CppClassView*, BranchType>>>;
 
 
 QT_BEGIN_NAMESPACE
@@ -54,12 +55,6 @@ public:
     void execute_remove_node_with_branches(SharedNodePtr node);
     void execute_add_branch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type);
     void execute_remove_branch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type);
-
-signals:
-    void link_added(CppClassView* child, CppClassView* parent, BranchType branch) const;
-    void link_removed(CppClassView* child, CppClassView* parent, BranchType branch) const;
-    void node_added(CppClassView* node) const;
-    void node_removed(CppClassView* node) const;
 public slots:
     void onAddClassClicked();
     void onAddStructClicked();
@@ -79,15 +74,16 @@ public slots:
     void on_link_added(SharedNodePtr from, SharedNodePtr to, BranchType branch);
     void on_link_removed(SharedNodePtr from, SharedNodePtr to, BranchType branch);
     void on_node_removed(SharedNodePtr node);
-    void on_node_added(SharedNodePtr node);
-
-    void add_connection(Arrow*, Line*);
 private:
 
     DiagramGraph *diagram;
-
     CommandManager m_command_manager;
+
     QList<CppClassView*> views;
+    QMap<std::tuple<CppClassView*, CppClassView*, BranchType>, Connection*> connections;
+    ConnectionInfoType incomingConnectionInfo;
+    ConnectionInfoType outgoingConnectionInfo;
+    Arrow* get_arrow(CppClassView*, BranchType);
 
     Ui::Board *ui;
     recoveryLog *recovery_log;
@@ -102,8 +98,6 @@ private:
     void onGenerateClicked(const QString& class_name, NodeType node_type);
 
     QString& get_file_name();
-
-    signalProcessor* processor;
 
 };
 #endif // BOARD_H

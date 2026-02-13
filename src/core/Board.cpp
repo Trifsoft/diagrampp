@@ -22,10 +22,11 @@
 
 #include <view/signal_processor.h>
 
-
 Board::Board(const QString& project_name, QWidget *parent)
-    : QWidget(parent), ui(new Ui::Board), diagram(new DiagramGraph()), processor(new signalProcessor()),
-    recovery_log(new recoveryLog())
+    : QWidget(parent)
+    , ui(new Ui::Board)
+    , diagram(new DiagramGraph())
+    , recovery_log(new recoveryLog())
 {
     ui->setupUi(this);
 
@@ -46,15 +47,8 @@ Board::Board(const QString& project_name, QWidget *parent)
     // signals for connecting graph with Board
     connect(diagram, &DiagramGraph::link_added, this, &Board::on_link_added);
     connect(diagram, &DiagramGraph::link_removed, this, &Board::on_link_removed);
-    connect(diagram, &DiagramGraph::node_added, this, &Board::on_node_added);
+    //connect(diagram, &DiagramGraph::node_added, this, &Board::on_node_added);
     connect(diagram, &DiagramGraph::node_removed, this, &Board::on_node_removed);
-
-    //signals for connecting Board with GUI
-    connect(this, &Board::link_added, processor, &signalProcessor::add_link_process);
-    connect(this, &Board::link_removed, processor, &signalProcessor::remove_link_process);
-    connect(this, &Board::node_added, processor, &signalProcessor::add_node_process);
-    connect(this, &Board::node_removed, processor, &signalProcessor::remove_node_process);
-    connect(processor, &signalProcessor::added_connection, this, &Board::add_connection);
 
 
     // signals for log file
@@ -124,7 +118,6 @@ Board::~Board()
     qDeleteAll(views);
     views.clear();
     delete ui;
-    delete processor;
     delete scene;
 }
 
@@ -163,13 +156,6 @@ void Board::onModeClicked(){
     }
     ui->linkageMode->setChecked(linkageMode);
     ui->removeMode->setChecked(removeMode);
-    // linkageMode = ui->linkageMode->isChecked();
-    // removeMode = ui->removeMode->isChecked();
-    // if(linkageMode && removeMode){
-    //     ui->linkageMode->setChecked(false);
-    //     ui->removeMode->setChecked(false);
-    //     linkageMode = removeMode = false;
-    // }
     first_activated = second_activated = nullptr;
 }
 
@@ -467,27 +453,62 @@ QString& Board::get_file_name() {
 void Board::on_link_added(SharedNodePtr from, SharedNodePtr to, BranchType branch) {
     auto child = get_view_from_node(from);
     auto parent = get_view_from_node(to);
-    emit link_added(child, parent, branch);
+    if(child && parent){
+        Arrow* arrow = get_arrow(parent, branch);
+
+        Line* line = new Line(branch, QLineF(child->get_top_center(), arrow->get_bottom_center()));
+        Connection* connection = new Connection(arrow, line);
+
+        connect(arrow, &Arrow::moved_by, line, &Line::move_end);
+        connect(child, &CppClassView::moved_by, line, &Line::move_start);
+
+        connect(child, &QObject::destroyed, connection, &QObject::deleteLater);
+        connect(parent, &QObject::destroyed, connection, &QObject::deleteLater);
+
+        connections[{child, parent, branch}] = connection;
+        outgoingConnectionInfo[child].append({child, parent, branch});
+        incomingConnectionInfo[parent].append({child, parent, branch});
+
+        scene->addItem(arrow);
+        scene->addItem(line);
+    }
 }
 
 void Board::on_link_removed(SharedNodePtr from, SharedNodePtr to, BranchType branch) {
     auto child = get_view_from_node(from);
     auto parent = get_view_from_node(to);
-    emit link_removed(child, parent, branch);
+    if(child && parent && connections.contains({child, parent, branch})){
+        delete connections.take({child, parent, branch});
+    }
 }
 
 void Board::on_node_removed(SharedNodePtr target) {
     auto node = get_view_from_node(target);
     views.removeAll(node);
-    emit node_removed(node);
+    if(node){
+        delete node;
+        if(incomingConnectionInfo.contains(node)) {
+            auto info = incomingConnectionInfo.take(node);
+            for(auto it = info.begin(); it != info.end(); it++) {
+                connections.remove(*it);
+            }
+        }
+        if(outgoingConnectionInfo.contains(node)) {
+            auto info = incomingConnectionInfo.take(node);
+            for(auto it = info.begin(); it != info.end(); it++) {
+                connections.remove(*it);
+            }
+        }
+    }
 }
 
-void Board::on_node_added(SharedNodePtr target) {
-    auto node = get_view_from_node(target);
-    emit node_added(node);
-}
-
-void Board::add_connection(Arrow* arrow, Line* line) {
-    scene->addItem(arrow);
-    scene->addItem(line);
+Arrow* Board::get_arrow(CppClassView* view, BranchType branch) {
+    Arrow* new_arrow = new Arrow(branch, view->pos(), view->boundingRect().height(), incomingConnectionInfo[view].size());
+    for(auto info : incomingConnectionInfo[view]) {
+        auto connection = connections[info];
+        connect(connection, &QObject::destroyed, new_arrow, &Arrow::move_back);
+    }
+    connect(view, &CppClassView::moved_by, new_arrow, &Arrow::move_by);
+    connect(view, &CppClassView::height_changed_by, new_arrow, &Arrow::move_y);
+    return new_arrow;
 }
