@@ -10,7 +10,6 @@
 #include "view/cpp_class_view.h"
 
 #include "commandManager/command_manager.h"
-#include <view/signal_processor.h>
 
 #include <view/connection.h>
 

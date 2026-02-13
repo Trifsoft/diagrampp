@@ -12,15 +12,12 @@
 #include <QMessageBox>
 #include <fstream>
 #include "serializers/diagram_json_serializer.h"
-#include <view/signal_processor.h>
 
 #include <commandManager/command_manager.h>
 #include "commandManager/add_node_command.h"
 #include "commandManager/remove_node_with_branches_command.h"
 #include "commandManager/add_branch_command.h"
 #include "commandManager/remove_branch_command.h"
-
-#include <view/signal_processor.h>
 
 Board::Board(const QString& project_name, QWidget *parent)
     : QWidget(parent)
