@@ -26,6 +26,7 @@ Board::Board(const QString& project_name, QWidget *parent)
     , recovery_log(new recoveryLog())
     , mDialogFactory(new DialogFactory(this))
     , m_command_manager(new CommandManager())
+    , mConnectionHandler(new ConnectionHandler())
 {
     ui->setupUi(this);
 
@@ -66,15 +67,29 @@ Board::Board(const QString& project_name, QWidget *parent)
     connect(diagram, &DiagramGraph::addNodeRequestApproved, m_command_manager, &CommandManager::addCreateNodeCommand);
     connect(m_command_manager, &CommandManager::createNodeCommandAdded, this, &Board::connectCreateNodeCommand);
     connect(diagram, &DiagramGraph::node_added, this, &Board::addItem);
-    // Connect buttons to slots
+
+    // Connect radio buttons to command handler
     connect(ui->Inheritance, &QPushButton::clicked, this, &Board::onCheckRadioButtonClicked);
     connect(ui->Association, &QPushButton::clicked, this, &Board::onCheckRadioButtonClicked);
     connect(ui->Realization, &QPushButton::clicked, this, &Board::onCheckRadioButtonClicked);
     connect(ui->Aggregation, &QPushButton::clicked, this, &Board::onCheckRadioButtonClicked);
     connect(ui->Composition, &QPushButton::clicked, this, &Board::onCheckRadioButtonClicked);
     connect(ui->Dependency, &QPushButton::clicked, this, &Board::onCheckRadioButtonClicked);
+    connect(this, &Board::radioButtonChecked, mConnectionHandler, &ConnectionHandler::updateSelectedBranchType);
+
+    // Connect mode selection to command handler
     connect(ui->linkageMode, &QPushButton::clicked, this, &Board::onModeClicked);
     connect(ui->removeMode, &QPushButton::clicked, this, &Board::onModeClicked);
+    connect(this, &Board::modeChanged, mConnectionHandler, &ConnectionHandler::updateSelectedNodeModification);
+
+    // Connect node removal
+    connect(mConnectionHandler, &ConnectionHandler::nodeRemovalRequested, this, &Board::removeNode);
+
+    // Connect branch creation
+    connect(mConnectionHandler, &ConnectionHandler::branchCreationRequested, this, &Board::addBranch);
+
+    // Connect branch removal
+    connect(mConnectionHandler, &ConnectionHandler::branchRemovalRequested, this, &Board::removeBranch);
 
     setup_actions();
 }
@@ -123,46 +138,44 @@ Board::~Board()
     views.clear();
     delete mDialogFactory;
     delete m_command_manager;
+    delete mConnectionHandler;
     delete ui;
     delete scene;
 }
 
 void Board::onCheckRadioButtonClicked(){
+    BranchType branchType;
     if(ui->Inheritance->isChecked()){
-        branch_type = BranchType::INHERITANCE;
+        branchType = BranchType::INHERITANCE;
     }else if(ui->Association->isChecked()){
-        branch_type = BranchType::ASSOCIATION;
+        branchType = BranchType::ASSOCIATION;
     }else if(ui->Realization->isChecked()){
-        branch_type = BranchType::REALIZATION;
+        branchType = BranchType::REALIZATION;
     }else if(ui->Aggregation->isChecked()){
-        branch_type = BranchType::AGGREGATION;
+        branchType = BranchType::AGGREGATION;
     }else if(ui->Composition->isChecked()){
-        branch_type = BranchType::COMPOSITION;
+        branchType = BranchType::COMPOSITION;
     }else{
-        branch_type = BranchType::DEPENDENCY;
+        branchType = BranchType::DEPENDENCY;
     }
+    emit radioButtonChecked(branchType);
 }
 
 void Board::onModeClicked(){
-    if(!linkageMode && !removeMode) {
-        linkageMode = ui->linkageMode->isChecked();
-        removeMode = ui->removeMode->isChecked();
+    auto oldMode = mConnectionHandler->getSelectedNodeModification();
+    NodeModification newMode;
+    if(oldMode == NodeModification::None) {
+        newMode = ui->linkageMode->isChecked() ? NodeModification::Link : NodeModification::Remove;
     }
-    else if(linkageMode) {
-        linkageMode = false;
-        if(removeMode != ui->removeMode->isChecked()) {
-            removeMode = true;
-        }
+    else if(oldMode == NodeModification::Link) {
+        newMode = ui->removeMode->isChecked() ? NodeModification::Remove : NodeModification::None;
     }
     else {
-        removeMode = false;
-        if(linkageMode != ui->linkageMode->isChecked()) {
-            linkageMode = true;
-        }
+        newMode = ui->linkageMode->isChecked() ? NodeModification::Link : NodeModification::None;
     }
-    ui->linkageMode->setChecked(linkageMode);
-    ui->removeMode->setChecked(removeMode);
-    first_activated = second_activated = nullptr;
+    ui->linkageMode->setChecked(newMode == NodeModification::Link);
+    ui->removeMode->setChecked(newMode == NodeModification::Remove);
+    emit modeChanged(newMode);
 }
 
 // void Board::execute_add_node(SharedNodePtr node)
@@ -190,35 +203,35 @@ void Board::execute_remove_branch(SharedNodePtr from, SharedNodePtr to, BranchTy
 }
 
 
-void Board::on_object_clicked(Composition* clicked_object){
-    if(!linkageMode && !removeMode){
-        return;
-    }
-    if(!first_activated){
-        first_activated = diagram->find_pointer_owner(clicked_object);
-        return;
-    }
-    second_activated = diagram->find_pointer_owner(clicked_object);
+// void Board::on_object_clicked(Composition* clicked_object){
+//     if(!linkageMode && !removeMode){
+//         return;
+//     }
+//     if(!first_activated){
+//         first_activated = diagram->find_pointer_owner(clicked_object);
+//         return;
+//     }
+//     second_activated = diagram->find_pointer_owner(clicked_object);
 
-    if((first_activated == second_activated) && removeMode){
-        execute_remove_node_with_branches(first_activated);
-        first_activated = second_activated = nullptr;
-        return;
-    }
+//     if((first_activated == second_activated) && removeMode){
+//         execute_remove_node_with_branches(first_activated);
+//         first_activated = second_activated = nullptr;
+//         return;
+//     }
 
-    if((first_activated && second_activated) && linkageMode){
-        execute_add_branch(first_activated, second_activated, branch_type);
-    }else if((first_activated && second_activated) && removeMode){
-        execute_remove_branch(first_activated, second_activated, branch_type);
-    }
+//     if((first_activated && second_activated) && linkageMode){
+//         execute_add_branch(first_activated, second_activated, branch_type);
+//     }else if((first_activated && second_activated) && removeMode){
+//         execute_remove_branch(first_activated, second_activated, branch_type);
+//     }
 
-    #if DEBUG_MODE>=1
-        qDebug() << "";
-        diagram->show_diagram();
-    #endif
+//     #if DEBUG_MODE>=1
+//         qDebug() << "";
+//         diagram->show_diagram();
+//     #endif
 
-        first_activated = second_activated = nullptr;
-}
+//         first_activated = second_activated = nullptr;
+// }
 
 void Board::on_add_field_requested(Composition *node, std::shared_ptr<Field> field)
 {
@@ -289,7 +302,7 @@ void Board::add_item(SharedNodePtr node, double x, double y) {
     scene->addItem(item);
     //execute_add_node(node);
 
-    connect(item, &CppClassView::objectClicked, this, &Board::on_object_clicked);
+    connect(item, &CppClassView::objectClicked, mConnectionHandler, &ConnectionHandler::handleNodeClick);
 
     connect(item, &CppClassView::add_field_request, recovery_log, &recoveryLog::add_field_operation);
     connect(item, &CppClassView::add_method_request, recovery_log, &recoveryLog::add_method_operation);
@@ -501,4 +514,24 @@ Arrow* Board::get_arrow(CppClassView* view, BranchType branch) {
 void Board::connectCreateNodeCommand(std::shared_ptr<AddNodeCommand> command) {
     connect(command.get(), &AddNodeCommand::addNodeRequested, diagram, &DiagramGraph::addNode);
     connect(command.get(), &AddNodeCommand::removeNodeRequested, diagram, &DiagramGraph::removeNode);
+}
+
+void Board::removeNode(NodePtr node)
+{
+    auto sharedNode = diagram->find_pointer_owner(node);
+    execute_remove_node_with_branches(sharedNode);
+}
+
+void Board::addBranch(NodePtr from, NodePtr to, BranchType branchType)
+{
+    auto fromShared = diagram->find_pointer_owner(from);
+    auto toShared = diagram->find_pointer_owner(to);
+    execute_add_branch(fromShared, toShared, branchType);
+}
+
+void Board::removeBranch(NodePtr from, NodePtr to, BranchType branchType)
+{
+    auto fromShared = diagram->find_pointer_owner(from);
+    auto toShared = diagram->find_pointer_owner(to);
+    execute_remove_branch(fromShared, toShared, branchType);
 }

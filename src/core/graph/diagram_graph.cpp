@@ -19,13 +19,13 @@ void DiagramGraph::addNode(const QString &name, NodeType nodeType) {
             break;
         }
     }
-
-    m_diagram[node] = {};
-    emit node_added(node);
+    add_node(node);
 }
 
 void DiagramGraph::add_node(SharedNodePtr node) { //TODO ukloniti
-    addNode(node->get_name(), node->getNodeType());
+    //addNode(node->get_name(), node->getNodeType());
+    m_diagram[node] = {};
+    emit node_added(node);
 }
 void DiagramGraph::remove_node(SharedNodePtr node) { //TODO ukloniti
     removeNode(node->get_name(), node->getNodeType());

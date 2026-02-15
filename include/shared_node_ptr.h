@@ -4,6 +4,12 @@
 #include <memory>
 #include <model/elements/composition/composition.h>
 
-using SharedNodePtr = std::shared_ptr<Composition>;
+using Node = Composition;
+using NodeView = CppClassView;
+
+using NodePtr = Node*;
+using NodeViewPtr = NodeView*;
+
+using SharedNodePtr = std::shared_ptr<Node>;
 
 #endif

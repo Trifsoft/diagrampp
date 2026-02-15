@@ -8,6 +8,7 @@
 #include <model/elements/field.h>
 #include <model/elements/method.h>
 #include "view/cpp_class_view.h"
+#include <connection_handler.h>
 
 #include "commandManager/command_manager.h"
 
@@ -40,10 +41,6 @@ public:
     DiagramGraph* get_diagram() const;
     CppClassView* get_view_from_node(SharedNodePtr);
 
-    BranchType branch_type = BranchType::INHERITANCE;
-    bool linkageMode = false;
-    bool removeMode = false;
-
     //void add_item(std::shared_ptr<Composition> item, const double coord_x = 0.0, const double coord_y = 0.0);
     void set_title(const QString&);
 
@@ -51,13 +48,16 @@ public:
     void execute_remove_node_with_branches(SharedNodePtr node);
     void execute_add_branch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type);
     void execute_remove_branch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type);
+signals:
+    void radioButtonChecked(BranchType);
+    void modeChanged(NodeModification);
 public slots:
     void onCheckRadioButtonClicked();
     void onModeClicked();
     void exportPNG();
     void exportJSON();
 
-    void on_object_clicked(Composition* clickedClass);
+    //void on_object_clicked(Composition* clickedClass);
     void on_generate_project();
 
     void on_add_field_requested(Composition* node, std::shared_ptr<Field> field);
@@ -72,11 +72,16 @@ public slots:
     void addItem(SharedNodePtr);
     void add_item(SharedNodePtr, double, double);
     void connectCreateNodeCommand(std::shared_ptr<AddNodeCommand> command);
+
+    void removeNode(NodePtr);
+    void addBranch(NodePtr, NodePtr, BranchType);
+    void removeBranch(NodePtr, NodePtr, BranchType);
 private:
 
     DiagramGraph *diagram;
     CommandManager *m_command_manager;
-    DialogFactory* mDialogFactory;
+    DialogFactory *mDialogFactory;
+    ConnectionHandler *mConnectionHandler;
 
     QList<CppClassView*> views;
     QMap<std::tuple<CppClassView*, CppClassView*, BranchType>, Connection*> connections;
@@ -86,9 +91,6 @@ private:
 
     Ui::Board *ui;
     recoveryLog *recovery_log;
-
-    SharedNodePtr first_activated = nullptr;
-    SharedNodePtr second_activated = nullptr;
 
     void setup_actions();
 

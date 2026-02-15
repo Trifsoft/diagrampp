@@ -89,6 +89,7 @@ set(CORE_HEADERS
     include/dialog_factory.h
     include/node_type.h
     include/shared_node_ptr.h
+    include/connection_handler.h
 )
 
 set(CORE_SOURCES
@@ -146,6 +147,7 @@ set(CORE_SOURCES
     src/core/recoveryLog.cpp
     src/core/generate_project_dialog.cpp
     src/core/dialog_factory.cpp
+    src/core/connection_handler.cpp
 )
 
 set(UI_SOURCES
