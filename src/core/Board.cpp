@@ -24,6 +24,8 @@ Board::Board(const QString& project_name, QWidget *parent)
     , ui(new Ui::Board)
     , diagram(new DiagramGraph())
     , recovery_log(new recoveryLog())
+    , mDialogFactory(new DialogFactory(this))
+    , m_command_manager(new CommandManager())
 {
     ui->setupUi(this);
 
@@ -57,9 +59,14 @@ Board::Board(const QString& project_name, QWidget *parent)
     connect(ui->exportPNG, &QPushButton::clicked, this, &Board::exportPNG);
     connect(ui->generate_project, &QPushButton::clicked, this, &Board::on_generate_project);
 
+    // Connect node creation
+    connect(ui->add_class, &QPushButton::clicked, mDialogFactory, &DialogFactory::handleClassClick);
+    connect(ui->add_struct, &QPushButton::clicked, mDialogFactory, &DialogFactory::handleStructClick);
+    connect(mDialogFactory, &DialogFactory::createNodeRequest, diagram, &DiagramGraph::processNewNodeRequest);
+    connect(diagram, &DiagramGraph::addNodeRequestApproved, m_command_manager, &CommandManager::addCreateNodeCommand);
+    connect(m_command_manager, &CommandManager::createNodeCommandAdded, this, &Board::connectCreateNodeCommand);
+    connect(diagram, &DiagramGraph::node_added, this, &Board::addItem);
     // Connect buttons to slots
-    connect(ui->add_class, &QPushButton::clicked, this, &Board::onAddClassClicked);
-    connect(ui->add_struct, &QPushButton::clicked, this, &Board::onAddStructClicked);
     connect(ui->Inheritance, &QPushButton::clicked, this, &Board::onCheckRadioButtonClicked);
     connect(ui->Association, &QPushButton::clicked, this, &Board::onCheckRadioButtonClicked);
     connect(ui->Realization, &QPushButton::clicked, this, &Board::onCheckRadioButtonClicked);
@@ -78,7 +85,7 @@ void Board::setup_actions(){
 
     connect(undoAction, &QAction::triggered,
             this, [this]() {
-                m_command_manager.undo();
+                m_command_manager->undo();
             });
 
     addAction(undoAction);
@@ -88,7 +95,7 @@ void Board::setup_actions(){
 
     connect(redoAction, &QAction::triggered,
             this, [this]() {
-                m_command_manager.redo();
+                m_command_manager->redo();
             });
 
     addAction(redoAction);
@@ -114,6 +121,8 @@ Board::~Board()
     delete recovery_log;
     qDeleteAll(views);
     views.clear();
+    delete mDialogFactory;
+    delete m_command_manager;
     delete ui;
     delete scene;
 }
@@ -156,28 +165,28 @@ void Board::onModeClicked(){
     first_activated = second_activated = nullptr;
 }
 
-void Board::execute_add_node(SharedNodePtr node)
-{
-    auto cmd = std::make_shared<AddNodeCommand>(diagram, node);
-    m_command_manager.execute(cmd);
-}
+// void Board::execute_add_node(SharedNodePtr node)
+// {
+//     auto cmd = std::make_shared<AddNodeCommand>(diagram, node);
+//     m_command_manager.execute(cmd);
+// }
 
 void Board::execute_remove_node_with_branches(SharedNodePtr node)
 {
     auto cmd = std::make_shared<RemoveNodeWithBranchesCommand>(diagram, node);
-    m_command_manager.execute(cmd);
+    m_command_manager->execute(cmd);
 }
 
 void Board::execute_add_branch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type)
 {
     auto cmd = std::make_shared<AddBranchCommand>(diagram, from, to, branch_type);
-    m_command_manager.execute(cmd);
+    m_command_manager->execute(cmd);
 }
 
 void Board::execute_remove_branch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type)
 {
     auto cmd = std::make_shared<RemoveBranchCommand>(diagram, from, to, branch_type);
-    m_command_manager.execute(cmd);
+    m_command_manager->execute(cmd);
 }
 
 
@@ -210,9 +219,6 @@ void Board::on_object_clicked(Composition* clicked_object){
 
         first_activated = second_activated = nullptr;
 }
-
-void Board::onAddClassClicked()     { openNodeFactory(NodeType::Class);  }
-void Board::onAddStructClicked() { openNodeFactory(NodeType::Struct); }
 
 void Board::on_add_field_requested(Composition *node, std::shared_ptr<Field> field)
 {
@@ -257,53 +263,31 @@ void Board::on_edit_method_requested(Composition *node, std::weak_ptr<Method> ol
     qDebug() << "Received signal edit method from: " << node->get_label();
 }
 
+// void Board::onGenerateClicked(const QString& class_name, NodeType node_type) {
+//     switch(node_type) {
+//         case NodeType::Class: {
+//             add_item(std::make_shared<CPPClass>(class_name));
+//             break;
+//         }
+//         case NodeType::Struct: {
+//             add_item(std::make_shared<CPPStruct>(class_name));
+//             break;
+//         }
+//     }
 
-void Board::openNodeFactory(NodeType node_type) {
-    QString label;
-    switch (node_type) {
-        case NodeType::Class:  label = "class"; break;
-        case NodeType::Struct: label = "struct"; break;
-    }
-
-    QInputDialog dialog(this);
-    dialog.setWindowTitle("Create new " + label);
-    dialog.setLabelText("Enter " + label + " name:");
-    dialog.setTextValue("");
-    dialog.setStyleSheet(
-        "QInputDialog QPushButton { background-color: #2c3e50; color: white; border-radius: 4px; padding: 6px 12px; }"
-        "QInputDialog QPushButton:hover { background-color: #34495e; }"
-    );
-
-    if (dialog.exec() == QDialog::Accepted && !dialog.textValue().isEmpty()) {
-        onGenerateClicked(dialog.textValue(), node_type);
-    }
-}
-
-void Board::onGenerateClicked(const QString& class_name, NodeType node_type) {
-    switch(node_type) {
-        case NodeType::Class: {
-            add_item(std::make_shared<CPPClass>(class_name));
-            break;
-        }
-        case NodeType::Struct: {
-            add_item(std::make_shared<CPPStruct>(class_name));
-            break;
-        }
-    }
-
-}
-void Board::add_item(std::shared_ptr<Composition> node, const double coord_x, const double coord_y) {
+// }
+void Board::add_item(SharedNodePtr node, double x, double y) {
     CppClassView* item = new CppClassView(node);
 
-    item->setX(coord_x);
-    item->setY(coord_y);
+    item->setX(x);
+    item->setY(y);
 
     Q_ASSERT(node);
     Q_ASSERT(item);
 
     views.append(item);
     scene->addItem(item);
-    execute_add_node(node);
+    //execute_add_node(node);
 
     connect(item, &CppClassView::objectClicked, this, &Board::on_object_clicked);
 
@@ -314,6 +298,10 @@ void Board::add_item(std::shared_ptr<Composition> node, const double coord_x, co
     connect(item, &CppClassView::add_method_request, this, &Board::on_add_method_requested);
     connect(item, &CppClassView::edit_field_request, this, &Board::on_edit_field_requested);
     connect(item, &CppClassView::edit_method_request, this, &Board::on_edit_method_requested);
+}
+
+void Board::addItem(SharedNodePtr node) {
+    add_item(node, 0, 0);
 }
 
 void Board::exportPNG(){
@@ -508,4 +496,9 @@ Arrow* Board::get_arrow(CppClassView* view, BranchType branch) {
     connect(view, &CppClassView::moved_by, new_arrow, &Arrow::move_by);
     connect(view, &CppClassView::height_changed_by, new_arrow, &Arrow::move_y);
     return new_arrow;
+}
+
+void Board::connectCreateNodeCommand(std::shared_ptr<AddNodeCommand> command) {
+    connect(command.get(), &AddNodeCommand::addNodeRequested, diagram, &DiagramGraph::addNode);
+    connect(command.get(), &AddNodeCommand::removeNodeRequested, diagram, &DiagramGraph::removeNode);
 }

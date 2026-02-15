@@ -3,18 +3,43 @@
 #include <validator.h>
 #include <QDebug>
 
+#include <model/elements/composition/cpp_class.h>
+#include <model/elements/composition/cpp_struct.h>
 
-void DiagramGraph::add_node(SharedNodePtr node) {
-    if(m_diagram.find(node) != m_diagram.end()){
-        return;
+
+void DiagramGraph::addNode(const QString &name, NodeType nodeType) {
+    SharedNodePtr node;
+    switch(nodeType) {
+        case NodeType::Class: {
+            node = std::make_shared<CPPClass>(name);
+            break;
+        }
+        case NodeType::Struct: {
+            node = std::make_shared<CPPStruct>(name);
+            break;
+        }
     }
 
     m_diagram[node] = {};
     emit node_added(node);
 }
 
-void DiagramGraph::remove_node(SharedNodePtr node_to_remove) {
-    if(m_diagram.find(node_to_remove) == m_diagram.end()){
+void DiagramGraph::add_node(SharedNodePtr node) { //TODO ukloniti
+    addNode(node->get_name(), node->getNodeType());
+}
+void DiagramGraph::remove_node(SharedNodePtr node) { //TODO ukloniti
+    removeNode(node->get_name(), node->getNodeType());
+}
+
+void DiagramGraph::removeNode(const QString& name, NodeType nodeType) {
+    SharedNodePtr node_to_remove = nullptr;
+    for(auto it = m_diagram.begin(); it != m_diagram.end(); it++) {
+        if(it->first->get_name() == name && it->first->getNodeType() == nodeType) {
+            node_to_remove = it->first;
+            break;
+        }
+    }
+    if(node_to_remove == nullptr){
         return;
     }
 
@@ -134,6 +159,30 @@ bool DiagramGraph::remove_branch(SharedNodePtr from, SharedNodePtr to, BranchTyp
 
 graph_type& DiagramGraph::get_diagram(){
     return m_diagram;
+}
+
+bool DiagramGraph::canCreateNode(const QString &name) const {
+    return true;
+}
+
+void DiagramGraph::processNewNodeRequest(const QString &name, NodeType nodeType)
+{
+    if(canCreateNode(name)) {
+        addNode(name, nodeType);
+        emit addNodeRequestApproved(name, nodeType);
+    }
+}
+void DiagramGraph::processRemoveNodeRequest(const QString &name, NodeType nodeType) {
+    SharedNodePtr node = nullptr;
+    for(auto it = m_diagram.begin(); it != m_diagram.end(); it++) {
+        if(it->first->get_name() == name && it->first->getNodeType() == nodeType) {
+            node = it->first;
+        }
+    }
+    if(node != nullptr) {
+        emit removeNodeRequestApproved(name, nodeType);
+        removeNode(name, nodeType);
+    }
 }
 
 bool DiagramGraph::connection_exists(SharedNodePtr start_node, SharedNodePtr end_node, BranchType branch_type) const {

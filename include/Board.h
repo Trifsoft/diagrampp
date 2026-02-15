@@ -13,6 +13,8 @@
 
 #include <view/connection.h>
 
+#include <dialog_factory.h>
+
 using ConnectionInfoType = QMap<CppClassView*, QList<std::tuple<CppClassView*, CppClassView*, BranchType>>>;
 
 
@@ -24,11 +26,6 @@ QT_END_NAMESPACE
 
 class DiagramGraph;
 class IClassElement;
-
-enum class NodeType {
-    Class,
-    Struct
-};
 
 class Board : public QWidget
 {
@@ -47,16 +44,14 @@ public:
     bool linkageMode = false;
     bool removeMode = false;
 
-    void add_item(std::shared_ptr<Composition> item, const double coord_x = 0.0, const double coord_y = 0.0);
+    //void add_item(std::shared_ptr<Composition> item, const double coord_x = 0.0, const double coord_y = 0.0);
     void set_title(const QString&);
 
-    void execute_add_node(SharedNodePtr node);
+    //void execute_add_node(SharedNodePtr node);
     void execute_remove_node_with_branches(SharedNodePtr node);
     void execute_add_branch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type);
     void execute_remove_branch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type);
 public slots:
-    void onAddClassClicked();
-    void onAddStructClicked();
     void onCheckRadioButtonClicked();
     void onModeClicked();
     void exportPNG();
@@ -73,10 +68,15 @@ public slots:
     void on_link_added(SharedNodePtr from, SharedNodePtr to, BranchType branch);
     void on_link_removed(SharedNodePtr from, SharedNodePtr to, BranchType branch);
     void on_node_removed(SharedNodePtr node);
+
+    void addItem(SharedNodePtr);
+    void add_item(SharedNodePtr, double, double);
+    void connectCreateNodeCommand(std::shared_ptr<AddNodeCommand> command);
 private:
 
     DiagramGraph *diagram;
-    CommandManager m_command_manager;
+    CommandManager *m_command_manager;
+    DialogFactory* mDialogFactory;
 
     QList<CppClassView*> views;
     QMap<std::tuple<CppClassView*, CppClassView*, BranchType>, Connection*> connections;
@@ -91,10 +91,6 @@ private:
     SharedNodePtr second_activated = nullptr;
 
     void setup_actions();
-
-    void openNodeFactory(NodeType node_type);
-
-    void onGenerateClicked(const QString& class_name, NodeType node_type);
 
     QString& get_file_name();
 

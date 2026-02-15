@@ -1,11 +1,12 @@
 #include "commandManager/command_manager.h"
 #include <QDebug>
 
+CommandManager::CommandManager(QObject* parent): QObject(parent) {};
+
 void CommandManager::execute(std::shared_ptr<Command> command)
 {
     if (command && command->execute()) {
-        m_undo_stack.push_back(command);
-        m_redo_stack.clear();
+        addCommand(command);
     }
 }
 
@@ -37,4 +38,15 @@ bool CommandManager::can_undo() const
 bool CommandManager::can_redo() const
 {
     return !m_redo_stack.empty();
+}
+
+void CommandManager::addCommand(std::shared_ptr<Command> command) {
+    m_undo_stack.push_back(command);
+    m_redo_stack.clear();
+}
+void CommandManager::addCreateNodeCommand(const QString& name, NodeType nodeType)
+{
+    auto cmd = std::make_shared<AddNodeCommand>(name, nodeType);
+    addCommand(cmd);
+    emit createNodeCommandAdded(cmd);
 }

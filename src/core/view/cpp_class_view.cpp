@@ -15,7 +15,6 @@
 #include <qgraphicsview.h>
 #include <methodeditor.h>
 #include <memory>
-#include <utility>
 
 // EditableTextItem implementation
 EditableTextItem::EditableTextItem(const QString& text, ItemType type, std::weak_ptr<IClassElement> element_weak, QGraphicsItem* parent)
@@ -91,7 +90,7 @@ void EditableTextItem::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
 }
 
 // CppClassView implementation
-CppClassView::CppClassView(std::shared_ptr<Composition> composition, QGraphicsObject* parent)
+CppClassView::CppClassView(SharedNodePtr composition, QGraphicsObject* parent)
     : QGraphicsObject(parent)
     , m_composition(composition)
 {

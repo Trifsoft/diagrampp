@@ -14,6 +14,7 @@
 #include <QMap>
 #include <optional>
 #include <memory>
+#include <node_type.h>
 
 class CppClassView;
 
@@ -47,6 +48,8 @@ public:
     virtual ~Composition() = default;
 
     virtual QString get_label() const = 0;
+    virtual NodeType getNodeType() const = 0;
+
     QString declaration() const;
     QString definition() const;
     QString get_name() const;

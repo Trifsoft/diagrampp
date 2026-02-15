@@ -15,6 +15,7 @@ protected:
     QString get_label() const override;
 public:
     CPPStruct(const QString& name, Visibility visibility = Visibility::Public, std::optional<std::pair<Visibility, Composition*>> inheritance = std::nullopt);
+    NodeType getNodeType() const override;
 };
 
 #endif // CPP_STRUCT_H

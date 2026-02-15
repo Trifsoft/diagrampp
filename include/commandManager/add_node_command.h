@@ -2,21 +2,26 @@
 #define ADD_NODE_COMMAND_H
 
 #include "command.h"
-#include "graph/diagram_graph.h"
+#include <QString>
+#include <node_type.h>
+#include <QObject>
 
 class IUMLClassDiagramNode;
 
-class AddNodeCommand : public Command
+class AddNodeCommand : public QObject, public Command
 {
+    Q_OBJECT
 public:
-    AddNodeCommand(DiagramGraph* graph, SharedNodePtr node);
+    AddNodeCommand(QString name, NodeType);
     
     bool execute() override;
     bool undo() override;
-    
+signals:
+    void addNodeRequested(QString, NodeType);
+    void removeNodeRequested(QString, NodeType);
 private:
-    DiagramGraph* m_graph;
-    SharedNodePtr m_node;
+    QString mName;
+    NodeType mNodeType;
     bool m_node_added;
 };
 

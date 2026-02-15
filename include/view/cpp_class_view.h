@@ -36,7 +36,7 @@ private:
 class CppClassView: public QGraphicsObject {
     Q_OBJECT
 public:
-    CppClassView(std::shared_ptr<Composition> composition, QGraphicsObject* parent = nullptr);
+    CppClassView(SharedNodePtr composition, QGraphicsObject* parent = nullptr);
     ~CppClassView();
 
     QRectF boundingRect() const override;
@@ -55,7 +55,7 @@ public slots:
 
 private:
 
-    std::shared_ptr<Composition> m_composition;
+    SharedNodePtr m_composition;
     int m_width;
     int m_height;
     int m_line_height;
@@ -67,7 +67,6 @@ private:
     void updateTextItems();
     void update_button();
 
-    // void add_text(QString text, int y_offset, EditableTextItem::ItemType type = EditableTextItem::TitleType, int element_id = -1);
     void add_text(const QString text, int y_offset, EditableTextItem::ItemType type, std::weak_ptr<IClassElement> element_weak);
     void add_new_field();
     void add_new_method();
