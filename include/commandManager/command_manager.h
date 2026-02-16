@@ -6,6 +6,7 @@
 #include <shared_node_ptr.h>
 
 #include <commandManager/add_node_command.h>
+#include <commandManager/remove_node_command.h>
 #include <commandManager/add_branch_command.h>
 #include <commandManager/remove_branch_command.h>
 
@@ -23,10 +24,12 @@ public:
     bool can_redo() const;
 signals:
     void createNodeCommandAdded(std::shared_ptr<AddNodeCommand>);
+    void removeNodeCommandAdded(std::shared_ptr<RemoveNodeCommand>);
     void createBranchCommandAdded(std::shared_ptr<AddBranchCommand>);
     void removeBranchCommandAdded(std::shared_ptr<RemoveBranchCommand>);
 public slots:
-    void addCreateNodeCommand(const QString&, NodeType);
+    void addCreateNodeCommand(SharedNodePtr);
+    void addRemoveNodeCommand(SharedNodePtr);
     void addCreateBranchCommand(SharedNodePtr, SharedNodePtr, BranchType);
     void addRemoveBranchCommand(SharedNodePtr, SharedNodePtr, BranchType);
 private:

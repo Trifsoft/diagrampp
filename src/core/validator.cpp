@@ -6,8 +6,8 @@ namespace Validator{
 
     namespace{
         bool check_multiple_connection(SharedNodePtr child, SharedNodePtr parent,
-                                       const std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram){
-            auto value = diagram.at(child);
+                                       const graph_type& diagram){
+            auto value = diagram[child];
             int count = 0;
             for(auto& pair : value){
                 if(pair.first == parent){
@@ -20,10 +20,10 @@ namespace Validator{
         bool dfs(SharedNodePtr node,
                  BranchType branch_type,
                  std::unordered_map<SharedNodePtr,bool>& in_stack,
-                 const std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram){
+                 const graph_type& diagram){
             in_stack[node] = true;
 
-            auto it = diagram.at(node);
+            auto it = diagram[node];
             for(auto& pair : it){
                 if(pair.second == branch_type){
                     if(in_stack[pair.first]){
@@ -41,16 +41,16 @@ namespace Validator{
 
         bool check_cycle(SharedNodePtr start,
                          BranchType branch_type,
-                         const std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram){
+                         const graph_type& diagram){
             std::unordered_map<SharedNodePtr,bool> in_stack;
             return dfs(start, branch_type, in_stack, diagram);
         }
 
         void paths_to_base(SharedNodePtr node,
-                           const std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram,
+                           const graph_type& diagram,
                            std::unordered_map<SharedNodePtr, int>& reach_count) {
             reach_count[node]++;
-            auto it = diagram.at(node);
+            auto it = diagram[node];
             for(const auto& [child, branchType] : it){
                 if(branchType == BranchType::INHERITANCE){
                     paths_to_base(child, diagram, reach_count);
@@ -58,7 +58,7 @@ namespace Validator{
             }
         }
 
-        bool detect_diamond(SharedNodePtr start, const std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram) {
+        bool detect_diamond(SharedNodePtr start, const graph_type& diagram) {
             std::unordered_map<SharedNodePtr, int> counts;
             paths_to_base(start, diagram, counts);
 
@@ -70,10 +70,12 @@ namespace Validator{
             return false;
         }
 
-        bool diamond(const std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram) {
+        bool diamond(const graph_type& diagram) {
             std::unordered_set<SharedNodePtr> all_nodes;
 
-            for(const auto& [parent, children] : diagram){
+            for(auto it = diagram.begin(); it != diagram.end(); it++){
+                auto parent = it.key();
+                auto children = it.value();
                 all_nodes.insert(parent);
                 for(const auto& [child, branchType] : children){
                     if(branchType == BranchType::INHERITANCE){
@@ -92,7 +94,7 @@ namespace Validator{
 
         bool validate_inheritance(std::string& errorMessage, SharedNodePtr child,
                                   SharedNodePtr parent,
-                                  const std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram){
+                                  const graph_type& diagram){
             if(check_cycle(child, BranchType::INHERITANCE, diagram)){
                 errorMessage = "Connection creates Cycle";
                 return false;
@@ -107,7 +109,7 @@ namespace Validator{
 
         bool validate_others(std::string& errorMessage, BranchType branchType, SharedNodePtr child,
                              SharedNodePtr parent,
-                             const std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram){
+                             const graph_type& diagram){
             if(branchType == BranchType::COMPOSITION || branchType == BranchType::AGGREGATION){
                 if(check_cycle(child, branchType, diagram)){
                     errorMessage = "Connection creates circular inheritance problem";
@@ -120,7 +122,7 @@ namespace Validator{
     bool validate(std::string& errorMessage, SharedNodePtr child,
                   SharedNodePtr parent,
                   BranchType branchType,
-                  const std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram){
+                  const graph_type& diagram){
         if(child == parent){
             errorMessage = "Cannot self connection";
             return false;
@@ -142,8 +144,8 @@ namespace Validator{
 
 namespace testvalidator{
     bool check_multiple_connection(SharedNodePtr child, SharedNodePtr parent,
-                                   const std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram){
-        auto value = diagram.at(child);
+                                   const graph_type& diagram){
+        auto value = diagram[child];
         int count = 0;
         for(auto& pair : value){
             if(pair.first == parent){
@@ -153,7 +155,7 @@ namespace testvalidator{
         return count < 2;
     }
 
-    bool detect_diamond(SharedNodePtr start, const std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram) {
+    bool detect_diamond(SharedNodePtr start, const graph_type& diagram) {
         std::unordered_map<SharedNodePtr, int> counts;
         paths_to_base(start, diagram, counts);
 
@@ -166,10 +168,10 @@ namespace testvalidator{
     }
 
     void paths_to_base(SharedNodePtr node,
-                       const std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram,
+                       const graph_type& diagram,
                        std::unordered_map<SharedNodePtr, int>& reach_count) {
         reach_count[node]++;
-        auto it = diagram.at(node);
+        auto it = diagram[node];
         for(const auto& [child, branchType] : it){
             if(branchType == BranchType::INHERITANCE){
                 paths_to_base(child, diagram, reach_count);
@@ -179,7 +181,7 @@ namespace testvalidator{
 
     bool check_cycle(SharedNodePtr start,
                      BranchType branch_type,
-                     const std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram){
+                     const graph_type& diagram){
         std::unordered_map<SharedNodePtr,bool> in_stack;
         return dfs(start, branch_type, in_stack, diagram);
     }
@@ -187,10 +189,10 @@ namespace testvalidator{
     bool dfs(SharedNodePtr node,
              BranchType branch_type,
              std::unordered_map<SharedNodePtr,bool>& in_stack,
-             const std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>& diagram){
+             const graph_type& diagram){
         in_stack[node] = true;
 
-        auto it = diagram.at(node);
+        auto it = diagram[node];
         for(auto& pair : it){
             if(pair.second == branch_type){
                 if(in_stack[pair.first]){

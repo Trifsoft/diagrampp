@@ -15,7 +15,7 @@ TEST_CASE("testvalidator::check_multiple_connection tests")
         auto child = std::make_shared<CPPClass>("Child");
         auto parent = std::make_shared<CPPClass>("Parent");
 
-        std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>> diagram = {
+        graph_type diagram = {
             {child, {{parent, BranchType::INHERITANCE}}}
         };
 
@@ -29,7 +29,7 @@ TEST_CASE("testvalidator::check_multiple_connection tests")
         auto child = std::make_shared<CPPClass>("Child");
         auto parent = std::make_shared<CPPClass>("Parent");
 
-        std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>> diagram = {
+        graph_type diagram = {
             {child, { {parent, BranchType::INHERITANCE}, {parent, BranchType::COMPOSITION} }}
         };
 
@@ -44,7 +44,7 @@ TEST_CASE("testvalidator::check_multiple_connection tests")
         auto parent = std::make_shared<CPPClass>("Parent");
         auto other = std::make_shared<CPPClass>("Other");
 
-        std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>> diagram = {
+        graph_type diagram = {
             {child, {{other, BranchType::INHERITANCE}}}
         };
 
@@ -62,7 +62,7 @@ TEST_CASE("testvalidator::check_cycle tests")
         auto node2 = std::make_shared<CPPClass>("Node2");
         auto node3 = std::make_shared<CPPClass>("Node3");
 
-        std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>> diagram = {
+        graph_type diagram = {
             {node1, {{node2, BranchType::INHERITANCE}}},
             {node2, {{node3, BranchType::INHERITANCE}}},
             {node3, {}}
@@ -77,7 +77,7 @@ TEST_CASE("testvalidator::check_cycle tests")
     {
         auto node1 = std::make_shared<CPPClass>("Node1");
 
-        std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>> diagram = {
+        graph_type diagram = {
             {node1, {{node1, BranchType::INHERITANCE}}}
         };
 
@@ -92,7 +92,7 @@ TEST_CASE("testvalidator::check_cycle tests")
         auto node2 = std::make_shared<CPPClass>("Node2");
         auto node3 = std::make_shared<CPPClass>("Node3");
 
-        std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>> diagram = {
+        graph_type diagram = {
             {node1, {{node2, BranchType::INHERITANCE}}},
             {node2, {{node3, BranchType::INHERITANCE}}},
             {node3, {{node1, BranchType::INHERITANCE}}}
@@ -110,7 +110,7 @@ TEST_CASE("testvalidator::check_cycle tests")
         auto node3 = std::make_shared<CPPClass>("Node3");
         auto node4 = std::make_shared<CPPClass>("Node4");
 
-        std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>> diagram = {
+        graph_type diagram = {
             {node1, {{node2, BranchType::INHERITANCE}, {node3, BranchType::INHERITANCE}}},
             {node2, {{node4, BranchType::INHERITANCE}}},
             {node3, {{node4, BranchType::INHERITANCE}}},
@@ -131,7 +131,7 @@ TEST_CASE("testvalidator::detect_diamond tests")
         auto derived1 = std::make_shared<CPPClass>("Derived1");
         auto derived2 = std::make_shared<CPPClass>("Derived2");
 
-        std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>> diagram = {
+        graph_type diagram = {
             {derived1, {{base, BranchType::INHERITANCE}}},
             {derived2, {{base, BranchType::INHERITANCE}}},
             {base, {}}
@@ -150,7 +150,7 @@ TEST_CASE("testvalidator::detect_diamond tests")
         auto B2 = std::make_shared<CPPClass>("B2");
         auto D = std::make_shared<CPPClass>("D");
 
-        std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>> diagram = {
+        graph_type diagram = {
             {D, {{B1, BranchType::INHERITANCE}, {B2, BranchType::INHERITANCE}}},
             {B1, {{A, BranchType::INHERITANCE}}},
             {B2, {{A, BranchType::INHERITANCE}}},
@@ -169,7 +169,7 @@ TEST_CASE("testvalidator::detect_diamond tests")
         auto C = std::make_shared<CPPClass>("C");
         auto D = std::make_shared<CPPClass>("D");
 
-        std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>> diagram = {
+        graph_type diagram = {
             {D, {{B, BranchType::INHERITANCE}, {C, BranchType::INHERITANCE}}},
             {B, {{A, BranchType::INHERITANCE}}},
             {C, {}},

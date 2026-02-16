@@ -6,59 +6,26 @@
 #include <model/elements/composition/cpp_class.h>
 #include <model/elements/composition/cpp_struct.h>
 
-
-void DiagramGraph::addNode(const QString &name, NodeType nodeType) {
-    SharedNodePtr node;
-    switch(nodeType) {
-        case NodeType::Class: {
-            node = std::make_shared<CPPClass>(name);
-            break;
-        }
-        case NodeType::Struct: {
-            node = std::make_shared<CPPStruct>(name);
-            break;
-        }
+void DiagramGraph::addNode(SharedNodePtr node) {
+    ConnectionList list;
+    if(m_removed.contains(node)) {
+        list = m_removed.take(node);
     }
-    add_node(node);
-}
-
-void DiagramGraph::add_node(SharedNodePtr node) { //TODO ukloniti
-    //addNode(node->get_name(), node->getNodeType());
-    m_diagram[node] = {};
+    else {
+        list = {};
+    }
+    m_diagram[node] = list;
     emit node_added(node);
 }
-void DiagramGraph::remove_node(SharedNodePtr node) { //TODO ukloniti
-    removeNode(node->get_name(), node->getNodeType());
-}
-
-void DiagramGraph::removeNode(const QString& name, NodeType nodeType) {
-    SharedNodePtr node_to_remove = nullptr;
-    for(auto it = m_diagram.begin(); it != m_diagram.end(); it++) {
-        if(it->first->get_name() == name && it->first->getNodeType() == nodeType) {
-            node_to_remove = it->first;
-            break;
-        }
-    }
-    if(node_to_remove == nullptr){
+void DiagramGraph::removeNode(SharedNodePtr node) {
+    if(node == nullptr){
         return;
     }
 
-    // erase all branches from any node to node_to_remove
-    for(auto& [_, neighbours] : m_diagram){
-        for(auto neighbours_it = neighbours.begin(); neighbours_it != neighbours.end(); ){
-            auto [neighbour_node, _] = (*neighbours_it);
-            if(neighbour_node == node_to_remove){
-                neighbours_it = neighbours.erase(neighbours_it);
-            }else {
-                ++neighbours_it;
-            }
-        }
-    }
+    auto list = m_diagram.take(node);
+    m_removed[node] = {};
 
-    // erase all node_to_remove neighbours
-    m_diagram.erase(node_to_remove);
-
-    emit node_removed(node_to_remove);
+    emit node_removed(node);
 }
 
 std::vector<DiagramGraph::BranchEdge> DiagramGraph::get_branches_for_node(SharedNodePtr node) const {
@@ -68,7 +35,9 @@ std::vector<DiagramGraph::BranchEdge> DiagramGraph::get_branches_for_node(Shared
     }
 
     // find all branches where node is either from or to node
-    for(const auto& [from_node, neighbours] : m_diagram){
+    for(auto it = m_diagram.begin(); it != m_diagram.end(); it++){
+        auto from_node = it.key();
+        auto neighbours = it.value();
         for(const auto& [to_node, branch_type] : neighbours){
             if(from_node == node || to_node == node){
                 branches.push_back({from_node, to_node, branch_type});
@@ -103,11 +72,11 @@ void DiagramGraph::processNewBranchRequest(NodePtr fromRaw, NodePtr toRaw, Branc
 
 SharedNodePtr DiagramGraph::find_pointer_owner(Composition* node_view)
 {
-    for(auto node : m_diagram){
-        if(node.first.get() == node_view){
-            return node.first;
+    for(auto it = m_diagram.begin(); it != m_diagram.end(); it++){
+        if(it.key().get() == node_view){
+            return it.key();
         }
-        for (auto [neighbour, _] : node.second){
+        for (auto [neighbour, _] : it.value()){
             if(neighbour.get() == node_view){
                 return neighbour;
             }
@@ -122,22 +91,29 @@ void DiagramGraph::removeBranch(SharedNodePtr from, SharedNodePtr to, BranchType
         return ;
     }
 
-    for(auto it = m_diagram[from].begin(); it != m_diagram[from].end(); ){
+    bool branchFound = false;
+    for(auto it = m_diagram[from].begin(); it != m_diagram[from].end(); it++){
         auto& [neighbour, neighbour_branch_type] = (*it);
         if(neighbour == to && neighbour_branch_type == branch_type){
-            it = m_diagram[from].erase(it);
+            m_diagram[from].erase(it);
+            branchFound = true;
             break;
-        }else {
-            ++it;
         }
     }
-    emit link_removed(from, to, branch_type);
+    if(branchFound) {
+        m_removed_branches.append({from, to, branch_type});
+        emit link_removed(from, to, branch_type);
+    }
+    else {
+        emit linkError("Branch not found");
+    }
 }
 
 void DiagramGraph::addBranch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type){
     if(branch_type == BranchType::INHERITANCE){
         from->inherits(Visibility::Public, to.get());
     }
+    m_removed_branches.removeAll({from, to, branch_type});
     m_diagram[from].push_back({to, branch_type});
     emit link_added(from, to, branch_type);
 }
@@ -173,20 +149,26 @@ bool DiagramGraph::canCreateNode(const QString &name) const {
 void DiagramGraph::processNewNodeRequest(const QString &name, NodeType nodeType)
 {
     if(canCreateNode(name)) {
-        addNode(name, nodeType);
-        emit addNodeRequestApproved(name, nodeType);
+        SharedNodePtr node;
+        switch(nodeType) {
+            case NodeType::Class: {
+                node = std::make_shared<CPPClass>(name);
+                break;
+            }
+            case NodeType::Struct: {
+                node = std::make_shared<CPPStruct>(name);
+                break;
+            }
+        }
+        addNode(node);
+        emit addNodeRequestApproved(node);
     }
 }
-void DiagramGraph::processRemoveNodeRequest(const QString &name, NodeType nodeType) {
-    SharedNodePtr node = nullptr;
-    for(auto it = m_diagram.begin(); it != m_diagram.end(); it++) {
-        if(it->first->get_name() == name && it->first->getNodeType() == nodeType) {
-            node = it->first;
-        }
-    }
+void DiagramGraph::processRemoveNodeRequest(NodePtr node) {
     if(node != nullptr) {
-        emit removeNodeRequestApproved(name, nodeType);
-        removeNode(name, nodeType);
+        auto sharedNode = find_pointer_owner(node);
+        emit removeNodeRequestApproved(sharedNode);
+        removeNode(sharedNode);
     }
 }
 
@@ -196,7 +178,7 @@ bool DiagramGraph::connection_exists(SharedNodePtr start_node, SharedNodePtr end
         return false;
     }
 
-    auto start_node_neighbours = start_node_it->second;
+    auto start_node_neighbours = start_node_it.value();
     for(auto const& [start_node_neighbour, start_end_branch_type] : start_node_neighbours){
         if(start_node_neighbour == end_node){
             return true;
@@ -205,7 +187,7 @@ bool DiagramGraph::connection_exists(SharedNodePtr start_node, SharedNodePtr end
 
     if(branch_type == BranchType::ASSOCIATION){
         auto end_node_it = m_diagram.find(end_node);
-        auto neighbours = end_node_it->second;
+        auto neighbours = end_node_it.value();
         for(auto const& [end_node_neighbour, end_start_branch_type] : neighbours){
             if(end_node_neighbour == start_node && end_start_branch_type == BranchType::ASSOCIATION){
                 return true;
@@ -218,11 +200,11 @@ bool DiagramGraph::connection_exists(SharedNodePtr start_node, SharedNodePtr end
 
 #if DEBUG_MODE >=1
 void DiagramGraph::show_diagram(){
-    for(auto &value : m_diagram){
+    for(auto it = m_diagram.begin(); it != m_diagram.end(); it++){
         QDebug debug_stream = qDebug();
-        debug_stream << value.first->get_name() << ":";
-        qDebug() << value.first->get_name() << ":";
-        std::vector<std::pair<SharedNodePtr, BranchType>>& sequence = value.second;
+        debug_stream << it.key()->get_name() << ":";
+        qDebug() << it.key()->get_name() << ":";
+        std::vector<std::pair<SharedNodePtr, BranchType>>& sequence = it.value();
         for(auto &pairs : sequence){
             debug_stream << pairs.first->get_name();
             qDebug() << pairs.first->get_name();

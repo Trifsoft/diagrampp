@@ -28,9 +28,9 @@ namespace { // utlis
     const std::unordered_set<SharedNodePtr> retrieve_diagram_nodes(const graph_type& diagram){
         std::unordered_set<SharedNodePtr> nodes = {};
 
-        for(const auto& it : diagram){
-            nodes.insert(it.first);
-            for(const auto& [neighbour, _]: it.second){
+        for(auto it = diagram.begin(); it != diagram.end(); it++){
+            nodes.insert(it.key());
+            for(const auto& [neighbour, _]: it.value()){
                 nodes.insert(neighbour);
             }
         }

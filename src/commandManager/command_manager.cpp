@@ -44,11 +44,18 @@ void CommandManager::addCommand(std::shared_ptr<Command> command) {
     m_undo_stack.push_back(command);
     m_redo_stack.clear();
 }
-void CommandManager::addCreateNodeCommand(const QString& name, NodeType nodeType)
+void CommandManager::addCreateNodeCommand(SharedNodePtr node)
 {
-    auto cmd = std::make_shared<AddNodeCommand>(name, nodeType);
+    auto cmd = std::make_shared<AddNodeCommand>(node);
     addCommand(cmd);
     emit createNodeCommandAdded(cmd);
+}
+
+void CommandManager::addRemoveNodeCommand(SharedNodePtr node)
+{
+    auto cmd = std::make_shared<RemoveNodeCommand>(node);
+    addCommand(cmd);
+    emit removeNodeCommandAdded(cmd);
 }
 
 void CommandManager::addCreateBranchCommand(SharedNodePtr from, SharedNodePtr to, BranchType branchType)

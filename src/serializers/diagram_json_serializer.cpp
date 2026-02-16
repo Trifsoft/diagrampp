@@ -99,7 +99,7 @@ void DiagramJsonSerializer::serialize(std::ostream& output_stream){
     auto m_diagram = m_board->get_diagram()->get_diagram();
 
     for (auto it = m_diagram.begin(); it != m_diagram.end(); ){
-        auto node_view = m_board->get_view_from_node(it->first);
+        auto node_view = m_board->get_view_from_node(it.key());
 
         SerializeHelpers::indent(output_stream, m_indentation_counter);
         ++m_indentation_counter;
@@ -110,11 +110,11 @@ void DiagramJsonSerializer::serialize(std::ostream& output_stream){
         output_stream << ",\n";
 
         // 2) node
-        SerializeHelpers::write_indented_serialized_field<Composition>(output_stream, m_indentation_counter, "node", it->first.get(), &NodeSerializers::serialize_composition_node);
+        SerializeHelpers::write_indented_serialized_field<Composition>(output_stream, m_indentation_counter, "node", it.key().get(), &NodeSerializers::serialize_composition_node);
         output_stream << ",\n";
 
         // 3) neighbours (list of <{node, coords}, branch_type}>)
-        serialize_neighbours(output_stream, it->second);
+        serialize_neighbours(output_stream, it.value());
 
         --m_indentation_counter;
         SerializeHelpers::indent(output_stream, m_indentation_counter); output_stream << "}";

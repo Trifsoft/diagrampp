@@ -3,7 +3,7 @@
 
 #include <vector>
 #include <utility>
-#include <map>
+#include <QMap>
 #include <model/base/branches.h>
 #include <QObject>
 #include <node_type.h>
@@ -14,7 +14,8 @@
 class IUMLClassDiagramNode;
 class Composition;
 
-using graph_type = std::map<SharedNodePtr, std::vector<std::pair<SharedNodePtr, BranchType>>>;
+using ConnectionList = std::vector<std::pair<SharedNodePtr, BranchType>>;
+using graph_type = QMap<SharedNodePtr, ConnectionList>;
 
 class DiagramGraph : public QObject {
     Q_OBJECT
@@ -27,9 +28,6 @@ public:
 
     DiagramGraph() = default;
     ~DiagramGraph() = default;
-
-    void add_node(SharedNodePtr);
-    void remove_node(SharedNodePtr);
 
     std::vector<BranchEdge> get_branches_for_node(SharedNodePtr node) const;
 
@@ -44,14 +42,14 @@ public:
 
 public slots:
     void processNewNodeRequest(const QString&, NodeType);
-    void processRemoveNodeRequest(const QString&, NodeType);
+    void processRemoveNodeRequest(NodePtr);
     void processNewBranchRequest(NodePtr, NodePtr, BranchType);
     void processRemoveBranchRequest(NodePtr, NodePtr, BranchType);
 
-    void addNode(const QString&, NodeType);
-    void removeNode(const QString&, NodeType);
     void addBranch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type);
     void removeBranch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type);
+    void addNode(SharedNodePtr);
+    void removeNode(SharedNodePtr);
 
 signals:
     void link_added(SharedNodePtr from, SharedNodePtr to, BranchType branch);
@@ -61,16 +59,18 @@ signals:
     void removeBranchRequestApproved(SharedNodePtr from, SharedNodePtr to, BranchType branch);
 
     void node_removed(SharedNodePtr node);
-    void removeNodeRequestApproved(const QString&, NodeType);
+    void removeNodeRequestApproved(SharedNodePtr);
 
     void node_added(SharedNodePtr node);
-    void addNodeRequestApproved(const QString&, NodeType);
+    void addNodeRequestApproved(SharedNodePtr);
 
     void linkError(const std::string&);
 
 private:
     // disscussion, shared or weak
     graph_type m_diagram;
+    graph_type m_removed;
+    QList<std::tuple<SharedNodePtr, SharedNodePtr, BranchType>> m_removed_branches;
 
     bool connection_exists(SharedNodePtr from, SharedNodePtr to, BranchType branch_type) const;
     bool canCreateNode(const QString&) const;

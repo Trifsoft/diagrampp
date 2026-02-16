@@ -28,8 +28,8 @@ signals:
 private:
     NodePtr first;
     NodePtr second;
-    BranchType selectedBranchType;
-    NodeModification selectedNodeModification;
+    BranchType selectedBranchType = BranchType::INHERITANCE;
+    NodeModification selectedNodeModification = NodeModification::None;
 };
 
 #endif

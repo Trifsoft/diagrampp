@@ -43,8 +43,6 @@ public:
 
     //void add_item(std::shared_ptr<Composition> item, const double coord_x = 0.0, const double coord_y = 0.0);
     void set_title(const QString&);
-
-    void execute_remove_node_with_branches(SharedNodePtr node);
 signals:
     void radioButtonChecked(BranchType);
     void modeChanged(NodeModification);
@@ -64,14 +62,13 @@ public slots:
 
     void addLink(SharedNodePtr from, SharedNodePtr to, BranchType branch);
     void removeLink(SharedNodePtr from, SharedNodePtr to, BranchType branch);
-    void on_node_removed(SharedNodePtr node);
-
+    void removeItem(SharedNodePtr node);
     void addItem(SharedNodePtr);
+
     void add_item(SharedNodePtr, double, double);
 
-    void removeNode(NodePtr);
-
     void connectCreateNodeCommand(std::shared_ptr<AddNodeCommand> command);
+    void connectRemoveNodeCommand(std::shared_ptr<RemoveNodeCommand> command);
     void connectCreateBranchCommand(std::shared_ptr<AddBranchCommand> command);
     void connectRemoveBranchCommand(std::shared_ptr<RemoveBranchCommand> command);
 private:
@@ -82,6 +79,7 @@ private:
     ConnectionHandler *mConnectionHandler;
 
     QList<CppClassView*> views;
+    QMap<SharedNodePtr, CppClassView*> removedViews;
     QMap<std::tuple<CppClassView*, CppClassView*, BranchType>, Connection*> connections;
     ConnectionInfoType incomingConnectionInfo;
     ConnectionInfoType outgoingConnectionInfo;

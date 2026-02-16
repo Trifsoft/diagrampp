@@ -15,7 +15,6 @@
 
 #include <commandManager/command_manager.h>
 #include "commandManager/add_node_command.h"
-#include "commandManager/remove_node_with_branches_command.h"
 #include "commandManager/add_branch_command.h"
 #include "commandManager/remove_branch_command.h"
 
@@ -44,24 +43,9 @@ Board::Board(const QString& project_name, QWidget *parent)
 
     ui->linkageMode->setChecked(false);
 
-    // signals for connecting graph with Board
-    connect(diagram, &DiagramGraph::node_removed, this, &Board::on_node_removed);
-
-
-    // signals for log file
-    connect(diagram, &DiagramGraph::node_removed, recovery_log, &recoveryLog::remove_node_operation);
-
     connect(ui->exportJSON, &QPushButton::clicked, this, &Board::exportJSON);
     connect(ui->exportPNG, &QPushButton::clicked, this, &Board::exportPNG);
     connect(ui->generate_project, &QPushButton::clicked, this, &Board::on_generate_project);
-
-    // Connect node creation
-    connect(ui->add_class, &QPushButton::clicked, mDialogFactory, &DialogFactory::handleClassClick);
-    connect(ui->add_struct, &QPushButton::clicked, mDialogFactory, &DialogFactory::handleStructClick);
-    connect(mDialogFactory, &DialogFactory::createNodeRequest, diagram, &DiagramGraph::processNewNodeRequest);
-    connect(diagram, &DiagramGraph::addNodeRequestApproved, m_command_manager, &CommandManager::addCreateNodeCommand);
-    connect(m_command_manager, &CommandManager::createNodeCommandAdded, this, &Board::connectCreateNodeCommand);
-    connect(diagram, &DiagramGraph::node_added, this, &Board::addItem);
 
     // Connect radio buttons to command handler
     connect(ui->Inheritance, &QPushButton::clicked, this, &Board::onCheckRadioButtonClicked);
@@ -77,8 +61,21 @@ Board::Board(const QString& project_name, QWidget *parent)
     connect(ui->removeMode, &QPushButton::clicked, this, &Board::onModeClicked);
     connect(this, &Board::modeChanged, mConnectionHandler, &ConnectionHandler::updateSelectedNodeModification);
 
+    // Connect node creation
+    connect(ui->add_class, &QPushButton::clicked, mDialogFactory, &DialogFactory::handleClassClick);
+    connect(ui->add_struct, &QPushButton::clicked, mDialogFactory, &DialogFactory::handleStructClick);
+    connect(mDialogFactory, &DialogFactory::createNodeRequest, diagram, &DiagramGraph::processNewNodeRequest);
+    connect(diagram, &DiagramGraph::addNodeRequestApproved, m_command_manager, &CommandManager::addCreateNodeCommand);
+    connect(m_command_manager, &CommandManager::createNodeCommandAdded, this, &Board::connectCreateNodeCommand);
+    connect(diagram, &DiagramGraph::node_added, this, &Board::addItem);
+
     // Connect node removal
-    connect(mConnectionHandler, &ConnectionHandler::nodeRemovalRequested, this, &Board::removeNode);
+    //connect(mConnectionHandler, &ConnectionHandler::nodeRemovalRequested, this, &Board::removeNode);
+    connect(mConnectionHandler, &ConnectionHandler::nodeRemovalRequested, diagram, &DiagramGraph::processRemoveNodeRequest);
+    connect(diagram, &DiagramGraph::removeNodeRequestApproved, m_command_manager, &CommandManager::addRemoveNodeCommand);
+    connect(m_command_manager, &CommandManager::removeNodeCommandAdded, this, &Board::connectRemoveNodeCommand);
+    connect(diagram, &DiagramGraph::node_removed, this, &Board::removeItem);
+    connect(diagram, &DiagramGraph::node_removed, recovery_log, &recoveryLog::remove_node_operation);
 
     // Connect branch creation
     connect(mConnectionHandler, &ConnectionHandler::branchCreationRequested, diagram, &DiagramGraph::processNewBranchRequest);
@@ -184,12 +181,6 @@ void Board::onModeClicked(){
     emit modeChanged(newMode);
 }
 
-void Board::execute_remove_node_with_branches(SharedNodePtr node)
-{
-    auto cmd = std::make_shared<RemoveNodeWithBranchesCommand>(diagram, node);
-    m_command_manager->execute(cmd);
-}
-
 
 void Board::on_add_field_requested(Composition *node, std::shared_ptr<Field> field)
 {
@@ -245,7 +236,6 @@ void Board::add_item(SharedNodePtr node, double x, double y) {
 
     views.append(item);
     scene->addItem(item);
-    //execute_add_node(node);
 
     connect(item, &CppClassView::objectClicked, mConnectionHandler, &ConnectionHandler::handleNodeClick);
 
@@ -428,7 +418,7 @@ void Board::removeLink(SharedNodePtr from, SharedNodePtr to, BranchType branch) 
     }
 }
 
-void Board::on_node_removed(SharedNodePtr target) {
+void Board::removeItem(SharedNodePtr target) {
     auto node = get_view_from_node(target);
     views.removeAll(node);
     if(node){
@@ -464,6 +454,12 @@ void Board::connectCreateNodeCommand(std::shared_ptr<AddNodeCommand> command) {
     connect(command.get(), &AddNodeCommand::removeNodeRequested, diagram, &DiagramGraph::removeNode);
 }
 
+void Board::connectRemoveNodeCommand(std::shared_ptr<RemoveNodeCommand> command)
+{
+    connect(command.get(), &RemoveNodeCommand::addNodeRequested, diagram, &DiagramGraph::addNode);
+    connect(command.get(), &RemoveNodeCommand::removeNodeRequested, diagram, &DiagramGraph::removeNode);
+}
+
 void Board::connectCreateBranchCommand(std::shared_ptr<AddBranchCommand> command) {
     connect(command.get(), &AddBranchCommand::addBranchRequested, diagram, &DiagramGraph::addBranch);
     connect(command.get(), &AddBranchCommand::removeBranchRequested, diagram, &DiagramGraph::removeBranch);
@@ -472,10 +468,4 @@ void Board::connectCreateBranchCommand(std::shared_ptr<AddBranchCommand> command
 void Board::connectRemoveBranchCommand(std::shared_ptr<RemoveBranchCommand> command) {
     connect(command.get(), &RemoveBranchCommand::addBranchRequested, diagram, &DiagramGraph::addBranch);
     connect(command.get(), &RemoveBranchCommand::removeBranchRequested, diagram, &DiagramGraph::removeBranch);
-}
-
-void Board::removeNode(NodePtr node)
-{
-    auto sharedNode = diagram->find_pointer_owner(node);
-    execute_remove_node_with_branches(sharedNode);
 }
