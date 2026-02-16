@@ -204,7 +204,7 @@ void DiagramGraph::show_diagram(){
         QDebug debug_stream = qDebug();
         debug_stream << it.key()->get_name() << ":";
         qDebug() << it.key()->get_name() << ":";
-        std::vector<std::pair<SharedNodePtr, BranchType>>& sequence = it.value();
+        ConnectionList& sequence = it.value();
         for(auto &pairs : sequence){
             debug_stream << pairs.first->get_name();
             qDebug() << pairs.first->get_name();

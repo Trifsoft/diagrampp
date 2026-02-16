@@ -60,7 +60,7 @@ void DiagramJsonSerializer::write_branch_type(std::ostream& output_stream, Branc
     SerializeHelpers::write_indented_string_field(output_stream, m_indentation_counter, "branch_type", branch_string);
 }
 
-void DiagramJsonSerializer::serialize_neighbours(std::ostream& output_stream, const std::vector<std::pair<SharedNodePtr, BranchType>>& neighbours){
+void DiagramJsonSerializer::serialize_neighbours(std::ostream& output_stream, const ConnectionList& neighbours){
     SerializeHelpers::indent(output_stream, m_indentation_counter);
     SerializeHelpers::write_with_quotes(output_stream, "neighbours");
     output_stream << ": ";

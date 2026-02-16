@@ -14,7 +14,7 @@
 class IUMLClassDiagramNode;
 class Composition;
 
-using ConnectionList = std::vector<std::pair<SharedNodePtr, BranchType>>;
+using ConnectionList = QList<std::pair<SharedNodePtr, BranchType>>;
 using graph_type = QMap<SharedNodePtr, ConnectionList>;
 
 class DiagramGraph : public QObject {

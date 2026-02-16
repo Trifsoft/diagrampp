@@ -26,7 +26,7 @@ private:
     void write_coords(std::ostream& output_stream, double x, double y);
     void write_branch_type(std::ostream& output_stream, BranchType branch_type) const;
 
-    void serialize_neighbours(std::ostream& output_stream, const std::vector<std::pair<SharedNodePtr, BranchType>>& neighbours);
+    void serialize_neighbours(std::ostream& output_stream, const ConnectionList& neighbours);
 
     std::pair<double, double> deserialize_coords(QJsonObject json_coords) const;
     BranchType deserialize_branch_type(QJsonValue json_branch_type) const;
