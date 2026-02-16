@@ -51,7 +51,6 @@ Board::Board(const QString& project_name, QWidget *parent)
 
 
     // signals for log file
-    connect(diagram, &DiagramGraph::link_added, recovery_log, &recoveryLog::add_link_operation);
     connect(diagram, &DiagramGraph::link_removed, recovery_log, &recoveryLog::remove_link_operation);
     connect(diagram, &DiagramGraph::node_removed, recovery_log, &recoveryLog::remove_node_operation);
 
@@ -89,9 +88,13 @@ Board::Board(const QString& project_name, QWidget *parent)
     connect(diagram, &DiagramGraph::addBranchRequestApproved, m_command_manager, &CommandManager::addCreateBranchCommand);
     connect(m_command_manager, &CommandManager::createBranchCommandAdded, this, &Board::connectCreateBranchCommand);
     connect(diagram, &DiagramGraph::link_added, this, &Board::addLink);
+    connect(diagram, &DiagramGraph::link_added, recovery_log, &recoveryLog::add_link_operation);
 
     // Connect branch removal
     connect(mConnectionHandler, &ConnectionHandler::branchRemovalRequested, this, &Board::removeBranch);
+
+    // Show diagram error messages
+    connect(diagram, &DiagramGraph::linkError, mDialogFactory, &DialogFactory::showError);
 
     setup_actions();
 }

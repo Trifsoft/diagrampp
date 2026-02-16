@@ -1,11 +1,17 @@
 #include <dialog_factory.h>
 #include <QInputDialog>
+#include <QMessageBox>
 
 DialogFactory::DialogFactory(QWidget* widget)
     : mWidget(widget) {}
 
 void DialogFactory::handleClassClick()      { openNodeFactory(NodeType::Class); }
 void DialogFactory::handleStructClick()     { openNodeFactory(NodeType::Struct); }
+
+void DialogFactory::showError(const std::string &message)
+{
+    QMessageBox::critical(mWidget, "Error", QString::fromStdString(message));
+}
 
 void DialogFactory::openNodeFactory(NodeType nodeType) {
     QString label;

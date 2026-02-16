@@ -15,6 +15,7 @@ signals:
 public slots:
     void handleClassClick();
     void handleStructClick();
+    void showError(const std::string&);
 private:
     QWidget* mWidget;
 
