@@ -6,6 +6,7 @@
 #include <shared_node_ptr.h>
 
 #include <commandManager/add_node_command.h>
+#include <commandManager/add_branch_command.h>
 
 class CommandManager: public QObject
 {
@@ -21,8 +22,10 @@ public:
     bool can_redo() const;
 signals:
     void createNodeCommandAdded(std::shared_ptr<AddNodeCommand>);
+    void createBranchCommandAdded(std::shared_ptr<AddBranchCommand>);
 public slots:
     void addCreateNodeCommand(const QString&, NodeType);
+    void addCreateBranchCommand(SharedNodePtr, SharedNodePtr, BranchType);
 private:
     QVector<std::shared_ptr<Command>> m_undo_stack;
     QVector<std::shared_ptr<Command>> m_redo_stack;

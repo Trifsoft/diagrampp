@@ -45,7 +45,6 @@ Board::Board(const QString& project_name, QWidget *parent)
     ui->linkageMode->setChecked(false);
 
     // signals for connecting graph with Board
-    connect(diagram, &DiagramGraph::link_added, this, &Board::on_link_added);
     connect(diagram, &DiagramGraph::link_removed, this, &Board::on_link_removed);
     //connect(diagram, &DiagramGraph::node_added, this, &Board::on_node_added);
     connect(diagram, &DiagramGraph::node_removed, this, &Board::on_node_removed);
@@ -86,7 +85,10 @@ Board::Board(const QString& project_name, QWidget *parent)
     connect(mConnectionHandler, &ConnectionHandler::nodeRemovalRequested, this, &Board::removeNode);
 
     // Connect branch creation
-    connect(mConnectionHandler, &ConnectionHandler::branchCreationRequested, this, &Board::addBranch);
+    connect(mConnectionHandler, &ConnectionHandler::branchCreationRequested, diagram, &DiagramGraph::processNewBranchRequest);
+    connect(diagram, &DiagramGraph::addBranchRequestApproved, m_command_manager, &CommandManager::addCreateBranchCommand);
+    connect(m_command_manager, &CommandManager::createBranchCommandAdded, this, &Board::connectCreateBranchCommand);
+    connect(diagram, &DiagramGraph::link_added, this, &Board::addLink);
 
     // Connect branch removal
     connect(mConnectionHandler, &ConnectionHandler::branchRemovalRequested, this, &Board::removeBranch);
@@ -178,21 +180,9 @@ void Board::onModeClicked(){
     emit modeChanged(newMode);
 }
 
-// void Board::execute_add_node(SharedNodePtr node)
-// {
-//     auto cmd = std::make_shared<AddNodeCommand>(diagram, node);
-//     m_command_manager.execute(cmd);
-// }
-
 void Board::execute_remove_node_with_branches(SharedNodePtr node)
 {
     auto cmd = std::make_shared<RemoveNodeWithBranchesCommand>(diagram, node);
-    m_command_manager->execute(cmd);
-}
-
-void Board::execute_add_branch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type)
-{
-    auto cmd = std::make_shared<AddBranchCommand>(diagram, from, to, branch_type);
     m_command_manager->execute(cmd);
 }
 
@@ -202,36 +192,6 @@ void Board::execute_remove_branch(SharedNodePtr from, SharedNodePtr to, BranchTy
     m_command_manager->execute(cmd);
 }
 
-
-// void Board::on_object_clicked(Composition* clicked_object){
-//     if(!linkageMode && !removeMode){
-//         return;
-//     }
-//     if(!first_activated){
-//         first_activated = diagram->find_pointer_owner(clicked_object);
-//         return;
-//     }
-//     second_activated = diagram->find_pointer_owner(clicked_object);
-
-//     if((first_activated == second_activated) && removeMode){
-//         execute_remove_node_with_branches(first_activated);
-//         first_activated = second_activated = nullptr;
-//         return;
-//     }
-
-//     if((first_activated && second_activated) && linkageMode){
-//         execute_add_branch(first_activated, second_activated, branch_type);
-//     }else if((first_activated && second_activated) && removeMode){
-//         execute_remove_branch(first_activated, second_activated, branch_type);
-//     }
-
-//     #if DEBUG_MODE>=1
-//         qDebug() << "";
-//         diagram->show_diagram();
-//     #endif
-
-//         first_activated = second_activated = nullptr;
-// }
 
 void Board::on_add_field_requested(Composition *node, std::shared_ptr<Field> field)
 {
@@ -276,19 +236,6 @@ void Board::on_edit_method_requested(Composition *node, std::weak_ptr<Method> ol
     qDebug() << "Received signal edit method from: " << node->get_label();
 }
 
-// void Board::onGenerateClicked(const QString& class_name, NodeType node_type) {
-//     switch(node_type) {
-//         case NodeType::Class: {
-//             add_item(std::make_shared<CPPClass>(class_name));
-//             break;
-//         }
-//         case NodeType::Struct: {
-//             add_item(std::make_shared<CPPStruct>(class_name));
-//             break;
-//         }
-//     }
-
-// }
 void Board::add_item(SharedNodePtr node, double x, double y) {
     CppClassView* item = new CppClassView(node);
 
@@ -448,7 +395,7 @@ QString& Board::get_file_name() {
 }
 
 
-void Board::on_link_added(SharedNodePtr from, SharedNodePtr to, BranchType branch) {
+void Board::addLink(SharedNodePtr from, SharedNodePtr to, BranchType branch) {
     auto child = get_view_from_node(from);
     auto parent = get_view_from_node(to);
     if(child && parent){
@@ -476,7 +423,10 @@ void Board::on_link_removed(SharedNodePtr from, SharedNodePtr to, BranchType bra
     auto child = get_view_from_node(from);
     auto parent = get_view_from_node(to);
     if(child && parent && connections.contains({child, parent, branch})){
-        delete connections.take({child, parent, branch});
+        auto conn = connections.take({child, parent, branch});
+        incomingConnectionInfo[parent].removeAll({child, parent, branch});
+        outgoingConnectionInfo[child].removeAll({child, parent, branch});
+        delete conn;
     }
 }
 
@@ -516,17 +466,15 @@ void Board::connectCreateNodeCommand(std::shared_ptr<AddNodeCommand> command) {
     connect(command.get(), &AddNodeCommand::removeNodeRequested, diagram, &DiagramGraph::removeNode);
 }
 
+void Board::connectCreateBranchCommand(std::shared_ptr<AddBranchCommand> command) {
+    connect(command.get(), &AddBranchCommand::addBranchRequested, diagram, &DiagramGraph::addBranch);
+    connect(command.get(), &AddBranchCommand::removeBranchRequested, diagram, &DiagramGraph::removeBranch);
+}
+
 void Board::removeNode(NodePtr node)
 {
     auto sharedNode = diagram->find_pointer_owner(node);
     execute_remove_node_with_branches(sharedNode);
-}
-
-void Board::addBranch(NodePtr from, NodePtr to, BranchType branchType)
-{
-    auto fromShared = diagram->find_pointer_owner(from);
-    auto toShared = diagram->find_pointer_owner(to);
-    execute_add_branch(fromShared, toShared, branchType);
 }
 
 void Board::removeBranch(NodePtr from, NodePtr to, BranchType branchType)

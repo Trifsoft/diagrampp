@@ -33,8 +33,6 @@ public:
 
     std::vector<BranchEdge> get_branches_for_node(SharedNodePtr node) const;
 
-    bool add_branch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type, std::string& error_message);
-    bool remove_branch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type);
 
     SharedNodePtr find_pointer_owner(Composition *node_view);
 
@@ -47,12 +45,20 @@ public:
 public slots:
     void processNewNodeRequest(const QString&, NodeType);
     void processRemoveNodeRequest(const QString&, NodeType);
+    void processNewBranchRequest(NodePtr, NodePtr, BranchType);
+    void processRemoveBranchRequest(SharedNodePtr from, SharedNodePtr to, BranchType branch_type);
 
     void addNode(const QString&, NodeType);
     void removeNode(const QString&, NodeType);
+    void addBranch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type);
+    void removeBranch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type);
+
 signals:
     void link_added(SharedNodePtr from, SharedNodePtr to, BranchType branch);
+    void addBranchRequestApproved(SharedNodePtr from, SharedNodePtr to, BranchType branch);
+
     void link_removed(SharedNodePtr from, SharedNodePtr to, BranchType branch);
+    void removeBranchRequestApproved(SharedNodePtr from, SharedNodePtr to, BranchType branch);
 
     void node_removed(SharedNodePtr node);
     void removeNodeRequestApproved(const QString&, NodeType);
@@ -60,11 +66,11 @@ signals:
     void node_added(SharedNodePtr node);
     void addNodeRequestApproved(const QString&, NodeType);
 
+    void linkError(const std::string&);
+
 private:
     // disscussion, shared or weak
     graph_type m_diagram;
-    void remove_neighbour(SharedNodePtr from, SharedNodePtr to, BranchType branch_type);
-    void add_neighbour(SharedNodePtr from, SharedNodePtr to, BranchType branch_type);
 
     bool connection_exists(SharedNodePtr from, SharedNodePtr to, BranchType branch_type) const;
     bool canCreateNode(const QString&) const;

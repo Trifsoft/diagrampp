@@ -165,7 +165,7 @@ void DiagramJsonSerializer::deserialize(QJsonArray json_array){
             }
 
             const auto branch_type = get_branch_type_from_string(json_neighbour_object["branch_type"].toString().toStdString());
-            m_board->execute_add_branch(node, neighbour_node, branch_type);
+            m_board->get_diagram()->addBranch(node, neighbour_node, branch_type);
         }
     }
 }

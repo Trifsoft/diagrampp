@@ -50,3 +50,10 @@ void CommandManager::addCreateNodeCommand(const QString& name, NodeType nodeType
     addCommand(cmd);
     emit createNodeCommandAdded(cmd);
 }
+
+void CommandManager::addCreateBranchCommand(SharedNodePtr from, SharedNodePtr to, BranchType branchType)
+{
+    auto cmd = std::make_shared<AddBranchCommand>(from, to, branchType);
+    addCommand(cmd);
+    emit createBranchCommandAdded(cmd);
+}
