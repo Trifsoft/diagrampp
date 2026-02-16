@@ -142,7 +142,9 @@ void DiagramGraph::addBranch(SharedNodePtr from, SharedNodePtr to, BranchType br
     emit link_added(from, to, branch_type);
 }
 
-void DiagramGraph::processRemoveBranchRequest(SharedNodePtr from, SharedNodePtr to, BranchType branch_type) {
+void DiagramGraph::processRemoveBranchRequest(NodePtr fromRaw, NodePtr toRaw, BranchType branch_type) {
+    auto from = find_pointer_owner(fromRaw);
+    auto to = find_pointer_owner(toRaw);
     if(!connection_exists(from, to, branch_type)){
         emit linkError("Link doesn't exist");
         return;

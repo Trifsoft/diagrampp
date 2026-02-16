@@ -46,7 +46,7 @@ public slots:
     void processNewNodeRequest(const QString&, NodeType);
     void processRemoveNodeRequest(const QString&, NodeType);
     void processNewBranchRequest(NodePtr, NodePtr, BranchType);
-    void processRemoveBranchRequest(SharedNodePtr from, SharedNodePtr to, BranchType branch_type);
+    void processRemoveBranchRequest(NodePtr, NodePtr, BranchType);
 
     void addNode(const QString&, NodeType);
     void removeNode(const QString&, NodeType);

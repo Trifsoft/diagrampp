@@ -19,7 +19,7 @@ void RemoveNodeWithBranchesCommand::build_commands()
     auto branches = m_graph->get_branches_for_node(m_node);
     for (const auto& edge : branches) {
         auto remove_branch = std::make_shared<RemoveBranchCommand>(
-            m_graph, edge.from, edge.to, edge.branch_type);
+            edge.from, edge.to, edge.branch_type);
         m_composite->add_command(remove_branch);
     }
 

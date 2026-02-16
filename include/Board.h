@@ -45,7 +45,6 @@ public:
     void set_title(const QString&);
 
     void execute_remove_node_with_branches(SharedNodePtr node);
-    void execute_remove_branch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type);
 signals:
     void radioButtonChecked(BranchType);
     void modeChanged(NodeModification);
@@ -64,17 +63,17 @@ public slots:
     void on_edit_method_requested(Composition* node, std::weak_ptr<Method> old_method_weak, std::shared_ptr<Method>  new_method);
 
     void addLink(SharedNodePtr from, SharedNodePtr to, BranchType branch);
-    void on_link_removed(SharedNodePtr from, SharedNodePtr to, BranchType branch);
+    void removeLink(SharedNodePtr from, SharedNodePtr to, BranchType branch);
     void on_node_removed(SharedNodePtr node);
 
     void addItem(SharedNodePtr);
     void add_item(SharedNodePtr, double, double);
 
     void removeNode(NodePtr);
-    void removeBranch(NodePtr, NodePtr, BranchType);
 
     void connectCreateNodeCommand(std::shared_ptr<AddNodeCommand> command);
     void connectCreateBranchCommand(std::shared_ptr<AddBranchCommand> command);
+    void connectRemoveBranchCommand(std::shared_ptr<RemoveBranchCommand> command);
 private:
 
     DiagramGraph *diagram;

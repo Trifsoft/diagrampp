@@ -45,13 +45,10 @@ Board::Board(const QString& project_name, QWidget *parent)
     ui->linkageMode->setChecked(false);
 
     // signals for connecting graph with Board
-    connect(diagram, &DiagramGraph::link_removed, this, &Board::on_link_removed);
-    //connect(diagram, &DiagramGraph::node_added, this, &Board::on_node_added);
     connect(diagram, &DiagramGraph::node_removed, this, &Board::on_node_removed);
 
 
     // signals for log file
-    connect(diagram, &DiagramGraph::link_removed, recovery_log, &recoveryLog::remove_link_operation);
     connect(diagram, &DiagramGraph::node_removed, recovery_log, &recoveryLog::remove_node_operation);
 
     connect(ui->exportJSON, &QPushButton::clicked, this, &Board::exportJSON);
@@ -91,7 +88,11 @@ Board::Board(const QString& project_name, QWidget *parent)
     connect(diagram, &DiagramGraph::link_added, recovery_log, &recoveryLog::add_link_operation);
 
     // Connect branch removal
-    connect(mConnectionHandler, &ConnectionHandler::branchRemovalRequested, this, &Board::removeBranch);
+    connect(mConnectionHandler, &ConnectionHandler::branchRemovalRequested, diagram, &DiagramGraph::processRemoveBranchRequest);
+    connect(diagram, &DiagramGraph::removeBranchRequestApproved, m_command_manager, &CommandManager::addRemoveBranchCommand);
+    connect(m_command_manager, &CommandManager::removeBranchCommandAdded, this, &Board::connectRemoveBranchCommand);
+    connect(diagram, &DiagramGraph::link_removed, this, &Board::removeLink);
+    connect(diagram, &DiagramGraph::link_removed, recovery_log, &recoveryLog::remove_link_operation);
 
     // Show diagram error messages
     connect(diagram, &DiagramGraph::linkError, mDialogFactory, &DialogFactory::showError);
@@ -186,12 +187,6 @@ void Board::onModeClicked(){
 void Board::execute_remove_node_with_branches(SharedNodePtr node)
 {
     auto cmd = std::make_shared<RemoveNodeWithBranchesCommand>(diagram, node);
-    m_command_manager->execute(cmd);
-}
-
-void Board::execute_remove_branch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type)
-{
-    auto cmd = std::make_shared<RemoveBranchCommand>(diagram, from, to, branch_type);
     m_command_manager->execute(cmd);
 }
 
@@ -422,7 +417,7 @@ void Board::addLink(SharedNodePtr from, SharedNodePtr to, BranchType branch) {
     }
 }
 
-void Board::on_link_removed(SharedNodePtr from, SharedNodePtr to, BranchType branch) {
+void Board::removeLink(SharedNodePtr from, SharedNodePtr to, BranchType branch) {
     auto child = get_view_from_node(from);
     auto parent = get_view_from_node(to);
     if(child && parent && connections.contains({child, parent, branch})){
@@ -474,15 +469,13 @@ void Board::connectCreateBranchCommand(std::shared_ptr<AddBranchCommand> command
     connect(command.get(), &AddBranchCommand::removeBranchRequested, diagram, &DiagramGraph::removeBranch);
 }
 
+void Board::connectRemoveBranchCommand(std::shared_ptr<RemoveBranchCommand> command) {
+    connect(command.get(), &RemoveBranchCommand::addBranchRequested, diagram, &DiagramGraph::addBranch);
+    connect(command.get(), &RemoveBranchCommand::removeBranchRequested, diagram, &DiagramGraph::removeBranch);
+}
+
 void Board::removeNode(NodePtr node)
 {
     auto sharedNode = diagram->find_pointer_owner(node);
     execute_remove_node_with_branches(sharedNode);
-}
-
-void Board::removeBranch(NodePtr from, NodePtr to, BranchType branchType)
-{
-    auto fromShared = diagram->find_pointer_owner(from);
-    auto toShared = diagram->find_pointer_owner(to);
-    execute_remove_branch(fromShared, toShared, branchType);
 }

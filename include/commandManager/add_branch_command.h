@@ -5,8 +5,6 @@
 #include <shared_node_ptr.h>
 #include <model/base/branches.h>
 
-class IUMLClassDiagramNode;
-
 class AddBranchCommand : public QObject, public Command
 {
     Q_OBJECT

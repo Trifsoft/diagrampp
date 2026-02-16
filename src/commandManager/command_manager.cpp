@@ -57,3 +57,10 @@ void CommandManager::addCreateBranchCommand(SharedNodePtr from, SharedNodePtr to
     addCommand(cmd);
     emit createBranchCommandAdded(cmd);
 }
+
+void CommandManager::addRemoveBranchCommand(SharedNodePtr from, SharedNodePtr to, BranchType branchType)
+{
+    auto cmd = std::make_shared<RemoveBranchCommand>(from, to, branchType);
+    addCommand(cmd);
+    emit removeBranchCommandAdded(cmd);
+}

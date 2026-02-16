@@ -2,27 +2,26 @@
 #define REMOVE_BRANCH_COMMAND_H
 
 #include "command.h"
-#include "graph/diagram_graph.h"
+#include <shared_node_ptr.h>
+#include <model/base/branches.h>
 
-class IUMLClassDiagramNode;
-
-class RemoveBranchCommand : public Command
+class RemoveBranchCommand : public QObject, public Command
 {
+    Q_OBJECT
 public:
-    RemoveBranchCommand(DiagramGraph* graph,
-                      SharedNodePtr from,
-                      SharedNodePtr to,
-                      BranchType branch_type);
-    
+    RemoveBranchCommand(SharedNodePtr from,
+                     SharedNodePtr to,
+                     BranchType branch_type);
+
     bool execute() override;
     bool undo() override;
-    
+signals:
+    void addBranchRequested(SharedNodePtr, SharedNodePtr, BranchType);
+    void removeBranchRequested(SharedNodePtr, SharedNodePtr, BranchType);
 private:
-    DiagramGraph* m_graph;
     SharedNodePtr m_from;
     SharedNodePtr m_to;
     BranchType m_branch_type;
-    bool m_branch_removed;
 };
 
 #endif // REMOVE_BRANCH_COMMAND_H
