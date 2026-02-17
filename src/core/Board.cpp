@@ -10,8 +10,8 @@
 #include <QInputDialog>
 #include "generate_project_dialog.h"
 #include <QMessageBox>
-#include <fstream>
-#include "serializers/diagram_json_serializer.h"
+#include <serializers/serializer.h>
+#include <QRegularExpression>
 
 #include <commandManager/command_manager.h>
 #include "commandManager/add_node_command.h"
@@ -40,10 +40,17 @@ Board::Board(const QString& project_name, QWidget *parent)
     ui->side_menu->setStyleSheet("background-color: #252526;");
     ui->back->setStyleSheet("color: #ffffff;");
 
-
     ui->linkageMode->setChecked(false);
 
-    connect(ui->exportJSON, &QPushButton::clicked, this, &Board::exportJSON);
+    // Connect export json
+    //connect(ui->exportJSON, &QPushButton::clicked, this, &Board::exportJSON);
+    connect(ui->exportJSON, &QPushButton::clicked, this, &Board::requestJSONPath);
+    connect(this, &Board::JSONPathRequested, mDialogFactory, &DialogFactory::selectJSON);
+    connect(mDialogFactory, &DialogFactory::JSONPathSelected, this, &Board::requestSerialization);
+    connect(this, &Board::serializationRequested, &Serializer::instance(), &Serializer::serialize);
+    connect(&Serializer::instance(), &Serializer::serializationSuccess, this, &Board::showSerializationSuccessMessage);
+    connect(&Serializer::instance(), &Serializer::serializationFailure, mDialogFactory, &DialogFactory::showError);
+
     connect(ui->exportPNG, &QPushButton::clicked, this, &Board::exportPNG);
     connect(ui->generate_project, &QPushButton::clicked, this, &Board::on_generate_project);
 
@@ -91,8 +98,10 @@ Board::Board(const QString& project_name, QWidget *parent)
     connect(diagram, &DiagramGraph::link_removed, this, &Board::removeLink);
     connect(diagram, &DiagramGraph::link_removed, recovery_log, &recoveryLog::remove_link_operation);
 
-    // Show diagram error messages
+    // Show messages
     connect(diagram, &DiagramGraph::linkError, mDialogFactory, &DialogFactory::showError);
+    connect(this, &Board::message, mDialogFactory, &DialogFactory::showMessage);
+    connect(this, &Board::error, mDialogFactory, &DialogFactory::showError);
 
     setup_actions();
 }
@@ -330,34 +339,16 @@ void Board::exportPNG(){
     }
 }
 
-void Board::exportJSON() {
-    QString filePath = QFileDialog::getSaveFileName(
-        this,
-        "Export Diagram as JSON",
-        QDir::homePath() + "/" + get_file_name() + ".json",
-        "JSON Files (*.json)"
-    );
+void Board::requestJSONPath()
+{
+    emit JSONPathRequested(get_file_name());
+}
 
-    if (filePath.isEmpty()) {
-        return;
-    }
+void Board::requestSerialization(const QString &path) { emit serializationRequested(path, this); }
 
-    if (!filePath.endsWith(".json", Qt::CaseInsensitive)) {
-        filePath += ".json";
-    }
-
-    std::ofstream outputStream(filePath.toStdString());
-    if (!outputStream.is_open()) {
-        QMessageBox::critical(this, "Error", "Failed to open file for writing: " + filePath);
-        return;
-    }
-
-    DiagramJsonSerializer serializer(this);
-    serializer.serialize(outputStream);
-
-    outputStream.close();
-
-    QMessageBox::information(this, "Success", "Diagram exported to:\n" + filePath);
+void Board::showSerializationSuccessMessage(const QString& filePath)
+{
+    emit message("Success", "Diagram exported to:\n" + filePath.toStdString());
 }
 
 void Board::on_generate_project(){

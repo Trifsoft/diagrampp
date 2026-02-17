@@ -90,6 +90,7 @@ set(CORE_HEADERS
     include/shared_node_ptr.h
     include/connection_handler.h
     include/graph/graph.h
+    include/serializers/serializer.h
 )
 
 set(CORE_SOURCES
@@ -147,6 +148,7 @@ set(CORE_SOURCES
     src/core/generate_project_dialog.cpp
     src/core/dialog_factory.cpp
     src/core/connection_handler.cpp
+    src/serializers/serializer.cpp
 )
 
 set(UI_SOURCES

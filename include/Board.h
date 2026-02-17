@@ -23,9 +23,6 @@ class Board;
 }
 QT_END_NAMESPACE
 
-class DiagramGraph;
-class IClassElement;
-
 class Board : public QWidget, public Graph<CppClassView*, std::shared_ptr<Connection>>
 {
     Q_OBJECT
@@ -46,11 +43,17 @@ public:
 signals:
     void radioButtonChecked(BranchType);
     void modeChanged(NodeModification);
+    void JSONPathRequested(const QString&);
+    void serializationRequested(const QString&, Board*);
+    void message(const std::string&, const std::string&);
+    void error(const std::string&);
 public slots:
     void onCheckRadioButtonClicked();
     void onModeClicked();
     void exportPNG();
-    void exportJSON();
+    void requestJSONPath();
+    void requestSerialization(const QString&);
+    void showSerializationSuccessMessage(const QString&);
 
     //void on_object_clicked(Composition* clickedClass);
     void on_generate_project();
