@@ -33,7 +33,7 @@ Board::Board(const QString& project_name, QWidget *parent)
 
     ui->title->setText(project_name);
 
-    scene = new QGraphicsScene(this);
+    scene = new QGraphicsScene();
     ui->board->setScene(scene);
     ui->board->setStyleSheet("background-color: #1a1a1a;");
     ui->top_bar->setStyleSheet("background-color: #252526;");
@@ -124,26 +124,63 @@ DiagramGraph* Board::get_diagram() const {
     return diagram;
 }
 
-CppClassView* Board::get_view_from_node(SharedNodePtr node) {
-    for(auto view : views) {
-        if(view->get_uml_class_diagram_node() == node.get()) {
-            return view;
+CppClassView* Board::get_view_from_node(SharedNodePtr node) const {
+    for(auto& addedNode : nodes) {
+        if(addedNode->get_uml_class_diagram_node() == node) {
+            return addedNode;
+        }
+    }
+    for(auto& removedNode : removedNodes) {
+        if(removedNode->get_uml_class_diagram_node() == node) {
+            return removedNode;
         }
     }
     return nullptr;
+}
+
+std::shared_ptr<Connection> Board::get_connection_from_nodes(CppClassView* from,
+                                                             CppClassView* to,
+                                                             BranchType branchType) const
+{
+    const auto& connectionList = nodeMap[from];
+    for(auto it = connectionList.begin(); it != connectionList.end(); it++) {
+        if(it->first == to && it->second->branchType() == branchType) {
+            return it->second;
+        }
+    }
+    for(auto& [iFrom, iTo, iConn] : removedBranches) {
+        if(iFrom == from && iTo == to && iConn->branchType() == branchType) {
+            return iConn;
+        }
+    }
+    return nullptr;
+}
+
+QList<std::shared_ptr<Connection>> Board::getIncomingConnections(CppClassView* node) const
+{
+    QList<std::shared_ptr<Connection>> result;
+    for(auto it = nodeMap.begin(); it != nodeMap.end(); it++) {
+        if(it.key() == node) {
+            continue;
+        }
+        for(auto& [iTo, iConn] : it.value()) {
+            if(iTo == node) {
+                result.append(iConn);
+            }
+        }
+    }
+    return result;
 }
 
 Board::~Board()
 {
     delete diagram;
     delete recovery_log;
-    qDeleteAll(views);
-    views.clear();
     delete mDialogFactory;
     delete m_command_manager;
     delete mConnectionHandler;
-    delete ui;
     delete scene;
+    delete ui;
 }
 
 void Board::onCheckRadioButtonClicked(){
@@ -226,26 +263,25 @@ void Board::on_edit_method_requested(Composition *node, std::weak_ptr<Method> ol
 }
 
 void Board::add_item(SharedNodePtr node, double x, double y) {
-    CppClassView* item = new CppClassView(node);
+    auto item = get_view_from_node(node);
+    if(!item) {
+        item = new CppClassView(node);
 
-    item->setX(x);
-    item->setY(y);
+        connect(item, &CppClassView::objectClicked, mConnectionHandler, &ConnectionHandler::handleNodeClick);
 
-    Q_ASSERT(node);
-    Q_ASSERT(item);
+        connect(item, &CppClassView::add_field_request, recovery_log, &recoveryLog::add_field_operation);
+        connect(item, &CppClassView::add_method_request, recovery_log, &recoveryLog::add_method_operation);
 
-    views.append(item);
-    scene->addItem(item);
+        connect(item, &CppClassView::add_field_request, this, &Board::on_add_field_requested);
+        connect(item, &CppClassView::add_method_request, this, &Board::on_add_method_requested);
+        connect(item, &CppClassView::edit_field_request, this, &Board::on_edit_field_requested);
+        connect(item, &CppClassView::edit_method_request, this, &Board::on_edit_method_requested);
 
-    connect(item, &CppClassView::objectClicked, mConnectionHandler, &ConnectionHandler::handleNodeClick);
+        item->setX(x);
+        item->setY(y);
+    }
 
-    connect(item, &CppClassView::add_field_request, recovery_log, &recoveryLog::add_field_operation);
-    connect(item, &CppClassView::add_method_request, recovery_log, &recoveryLog::add_method_operation);
-
-    connect(item, &CppClassView::add_field_request, this, &Board::on_add_field_requested);
-    connect(item, &CppClassView::add_method_request, this, &Board::on_add_method_requested);
-    connect(item, &CppClassView::edit_field_request, this, &Board::on_edit_field_requested);
-    connect(item, &CppClassView::edit_method_request, this, &Board::on_edit_method_requested);
+    mAddNode(item);
 }
 
 void Board::addItem(SharedNodePtr node) {
@@ -382,67 +418,42 @@ QString& Board::get_file_name() {
     return file_name;
 }
 
-
 void Board::addLink(SharedNodePtr from, SharedNodePtr to, BranchType branch) {
     auto child = get_view_from_node(from);
     auto parent = get_view_from_node(to);
-    if(child && parent){
+    auto connection = get_connection_from_nodes(child, parent, branch);
+    if(child && parent && !connection){
         Arrow* arrow = get_arrow(parent, branch);
 
         Line* line = new Line(branch, QLineF(child->get_top_center(), arrow->get_bottom_center()));
-        Connection* connection = new Connection(arrow, line);
+        connection = std::make_shared<Connection>(arrow, line);
 
         connect(arrow, &Arrow::moved_by, line, &Line::move_end);
         connect(child, &CppClassView::moved_by, line, &Line::move_start);
 
-        connect(child, &QObject::destroyed, connection, &QObject::deleteLater);
-        connect(parent, &QObject::destroyed, connection, &QObject::deleteLater);
-
-        connections[{child, parent, branch}] = connection;
-        outgoingConnectionInfo[child].append({child, parent, branch});
-        incomingConnectionInfo[parent].append({child, parent, branch});
-
-        scene->addItem(arrow);
-        scene->addItem(line);
+        connect(child, &QObject::destroyed, connection.get(), &QObject::deleteLater);
+        connect(parent, &QObject::destroyed, connection.get(), &QObject::deleteLater);
     }
+    mAddBranch(child, parent, connection);
 }
 
 void Board::removeLink(SharedNodePtr from, SharedNodePtr to, BranchType branch) {
     auto child = get_view_from_node(from);
     auto parent = get_view_from_node(to);
-    if(child && parent && connections.contains({child, parent, branch})){
-        auto conn = connections.take({child, parent, branch});
-        incomingConnectionInfo[parent].removeAll({child, parent, branch});
-        outgoingConnectionInfo[child].removeAll({child, parent, branch});
-        delete conn;
-    }
+    auto connection = get_connection_from_nodes(child, parent, branch);
+    mRemoveBranch(child, parent, connection);
 }
 
 void Board::removeItem(SharedNodePtr target) {
     auto node = get_view_from_node(target);
-    views.removeAll(node);
-    if(node){
-        delete node;
-        if(incomingConnectionInfo.contains(node)) {
-            auto info = incomingConnectionInfo.take(node);
-            for(auto it = info.begin(); it != info.end(); it++) {
-                connections.remove(*it);
-            }
-        }
-        if(outgoingConnectionInfo.contains(node)) {
-            auto info = incomingConnectionInfo.take(node);
-            for(auto it = info.begin(); it != info.end(); it++) {
-                connections.remove(*it);
-            }
-        }
-    }
+    mRemoveNode(node);
 }
 
 Arrow* Board::get_arrow(CppClassView* view, BranchType branch) {
-    Arrow* new_arrow = new Arrow(branch, view->pos(), view->boundingRect().height(), incomingConnectionInfo[view].size());
-    for(auto info : incomingConnectionInfo[view]) {
-        auto connection = connections[info];
-        connect(connection, &QObject::destroyed, new_arrow, &Arrow::move_back);
+    const auto& incomingConnections = getIncomingConnections(view);
+    Arrow* new_arrow = new Arrow(branch, view->pos(), view->boundingRect().height(), incomingConnections.size());
+    for(auto& connection : incomingConnections) {
+        connect(connection.get(), &QObject::destroyed, new_arrow, &Arrow::move_back);
     }
     connect(view, &CppClassView::moved_by, new_arrow, &Arrow::move_by);
     connect(view, &CppClassView::height_changed_by, new_arrow, &Arrow::move_y);
@@ -458,6 +469,8 @@ void Board::connectRemoveNodeCommand(std::shared_ptr<RemoveNodeCommand> command)
 {
     connect(command.get(), &RemoveNodeCommand::addNodeRequested, diagram, &DiagramGraph::addNode);
     connect(command.get(), &RemoveNodeCommand::removeNodeRequested, diagram, &DiagramGraph::removeNode);
+    connect(command.get(), &RemoveNodeCommand::addBranchRequested, diagram, &DiagramGraph::addBranch);
+    connect(command.get(), &RemoveNodeCommand::removeBranchRequested, diagram, &DiagramGraph::removeBranch);
 }
 
 void Board::connectCreateBranchCommand(std::shared_ptr<AddBranchCommand> command) {
@@ -468,4 +481,30 @@ void Board::connectCreateBranchCommand(std::shared_ptr<AddBranchCommand> command
 void Board::connectRemoveBranchCommand(std::shared_ptr<RemoveBranchCommand> command) {
     connect(command.get(), &RemoveBranchCommand::addBranchRequested, diagram, &DiagramGraph::addBranch);
     connect(command.get(), &RemoveBranchCommand::removeBranchRequested, diagram, &DiagramGraph::removeBranch);
+}
+
+void Board::onAddBranch(CppClassView*,
+                        CppClassView*,
+                        std::shared_ptr<Connection> connection)
+{
+    scene->addItem(connection->arrow);
+    scene->addItem(connection->line);
+}
+
+void Board::onRemoveBranch(CppClassView*,
+                           CppClassView*,
+                           std::shared_ptr<Connection> connection)
+{
+    scene->removeItem(connection->arrow);
+    scene->removeItem(connection->line);
+}
+
+void Board::onAddNode(CppClassView* node)
+{
+    scene->addItem(node);
+}
+
+void Board::onRemoveNode(CppClassView* node)
+{
+    scene->removeItem(node);
 }

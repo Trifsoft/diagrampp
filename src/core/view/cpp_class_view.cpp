@@ -114,11 +114,7 @@ CppClassView::CppClassView(SharedNodePtr composition, QGraphicsObject* parent)
 }
 
 CppClassView::~CppClassView(){
-
-    qDeleteAll(m_textItems);
-    m_textItems.clear();
-
-    
+    m_textItems.clear();    
 }
 
 QRectF CppClassView::boundingRect() const
@@ -343,8 +339,8 @@ QVariant CppClassView::itemChange(GraphicsItemChange change, const QVariant &val
     return QGraphicsObject::itemChange(change, value);
 }
 
-Composition* CppClassView::get_uml_class_diagram_node() {
-    return m_composition.get();
+SharedNodePtr CppClassView::get_uml_class_diagram_node() {
+    return m_composition;
 }
 
 

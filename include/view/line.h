@@ -8,7 +8,9 @@
 class Line : public QObject, public QGraphicsLineItem {
     Q_OBJECT
 public:
-    explicit Line(BranchType branchType, const QLineF& line, QGraphicsItem* parent = nullptr);
+    Line(BranchType branchType, const QLineF& line, QGraphicsItem* parent = nullptr);
+
+    BranchType branchType() const;
 
 public slots:
     void move_start(const QPointF& delta);

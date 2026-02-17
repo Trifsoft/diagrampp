@@ -8,6 +8,7 @@
 #include <QObject>
 #include <node_type.h>
 #include <shared_node_ptr.h>
+#include <graph/graph.h>
 
 #define DEBUG_MODE 2
 
@@ -17,14 +18,11 @@ class Composition;
 using ConnectionList = QList<std::pair<SharedNodePtr, BranchType>>;
 using graph_type = QMap<SharedNodePtr, ConnectionList>;
 
-class DiagramGraph : public QObject {
+using BranchEdge = std::tuple<SharedNodePtr, SharedNodePtr, BranchType>;
+
+class DiagramGraph : public QObject, public Graph<SharedNodePtr, BranchType> {
     Q_OBJECT
 public:
-    struct BranchEdge {
-        SharedNodePtr from;
-        SharedNodePtr to;
-        BranchType branch_type;
-    };
 
     DiagramGraph() = default;
     ~DiagramGraph() = default;
@@ -59,18 +57,19 @@ signals:
     void removeBranchRequestApproved(SharedNodePtr from, SharedNodePtr to, BranchType branch);
 
     void node_removed(SharedNodePtr node);
-    void removeNodeRequestApproved(SharedNodePtr);
+    void removeNodeRequestApproved(SharedNodePtr, const QList<BranchEdge>&);
 
     void node_added(SharedNodePtr node);
     void addNodeRequestApproved(SharedNodePtr);
 
     void linkError(const std::string&);
+protected:
+    void onAddBranch(SharedNodePtr, SharedNodePtr, BranchType) override;
+    void onRemoveBranch(SharedNodePtr, SharedNodePtr, BranchType) override;
+    void onAddNode(SharedNodePtr) override;
+    void onRemoveNode(SharedNodePtr) override;
 
 private:
-    // disscussion, shared or weak
-    graph_type m_diagram;
-    graph_type m_removed;
-    QList<std::tuple<SharedNodePtr, SharedNodePtr, BranchType>> m_removed_branches;
 
     bool connection_exists(SharedNodePtr from, SharedNodePtr to, BranchType branch_type) const;
     bool canCreateNode(const QString&) const;

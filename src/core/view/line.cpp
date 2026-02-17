@@ -12,6 +12,11 @@ Line::Line(BranchType branchType, const QLineF& line, QGraphicsItem* parent)
     setPen(pen);
 }
 
+BranchType Line::branchType() const
+{
+    return m_branch_type;
+}
+
 void Line::move_start(const QPointF& delta) {
     QLineF l = line();
     l.setP1(l.p1() + delta);
@@ -23,4 +28,3 @@ void Line::move_end(const QPointF& delta) {
     l.setP2(l.p2() + delta);
     setLine(l);
 }
-

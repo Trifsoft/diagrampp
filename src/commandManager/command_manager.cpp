@@ -51,9 +51,10 @@ void CommandManager::addCreateNodeCommand(SharedNodePtr node)
     emit createNodeCommandAdded(cmd);
 }
 
-void CommandManager::addRemoveNodeCommand(SharedNodePtr node)
+void CommandManager::addRemoveNodeCommand(SharedNodePtr node,
+                                          const QList<std::tuple<SharedNodePtr, SharedNodePtr, BranchType>>& branches)
 {
-    auto cmd = std::make_shared<RemoveNodeCommand>(node);
+    auto cmd = std::make_shared<RemoveNodeCommand>(node, branches);
     addCommand(cmd);
     emit removeNodeCommandAdded(cmd);
 }

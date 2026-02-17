@@ -9,15 +9,13 @@
 #include <model/elements/method.h>
 #include "view/cpp_class_view.h"
 #include <connection_handler.h>
+#include <graph/graph.h>
 
 #include "commandManager/command_manager.h"
 
 #include <view/connection.h>
 
 #include <dialog_factory.h>
-
-using ConnectionInfoType = QMap<CppClassView*, QList<std::tuple<CppClassView*, CppClassView*, BranchType>>>;
-
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -28,10 +26,8 @@ QT_END_NAMESPACE
 class DiagramGraph;
 class IClassElement;
 
-class Board : public QWidget
+class Board : public QWidget, public Graph<CppClassView*, std::shared_ptr<Connection>>
 {
-    QGraphicsScene* scene;
-
     Q_OBJECT
 
 public:
@@ -39,7 +35,11 @@ public:
     ~Board();
 
     DiagramGraph* get_diagram() const;
-    CppClassView* get_view_from_node(SharedNodePtr);
+    CppClassView* get_view_from_node(SharedNodePtr) const;
+    std::shared_ptr<Connection> get_connection_from_nodes(CppClassView*,
+                                                          CppClassView*,
+                                                          BranchType) const;
+    QList<std::shared_ptr<Connection>> getIncomingConnections(CppClassView*) const;
 
     //void add_item(std::shared_ptr<Composition> item, const double coord_x = 0.0, const double coord_y = 0.0);
     void set_title(const QString&);
@@ -71,6 +71,11 @@ public slots:
     void connectRemoveNodeCommand(std::shared_ptr<RemoveNodeCommand> command);
     void connectCreateBranchCommand(std::shared_ptr<AddBranchCommand> command);
     void connectRemoveBranchCommand(std::shared_ptr<RemoveBranchCommand> command);
+protected:
+    void onAddBranch(CppClassView*, CppClassView*, std::shared_ptr<Connection>) override;
+    void onRemoveBranch(CppClassView*, CppClassView*, std::shared_ptr<Connection>) override;
+    void onAddNode(CppClassView*) override;
+    void onRemoveNode(CppClassView*) override;
 private:
 
     DiagramGraph *diagram;
@@ -78,11 +83,8 @@ private:
     DialogFactory *mDialogFactory;
     ConnectionHandler *mConnectionHandler;
 
-    QList<CppClassView*> views;
-    QMap<SharedNodePtr, CppClassView*> removedViews;
-    QMap<std::tuple<CppClassView*, CppClassView*, BranchType>, Connection*> connections;
-    ConnectionInfoType incomingConnectionInfo;
-    ConnectionInfoType outgoingConnectionInfo;
+    QGraphicsScene* scene;
+
     Arrow* get_arrow(CppClassView*, BranchType);
 
     Ui::Board *ui;

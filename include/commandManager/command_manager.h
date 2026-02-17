@@ -29,7 +29,7 @@ signals:
     void removeBranchCommandAdded(std::shared_ptr<RemoveBranchCommand>);
 public slots:
     void addCreateNodeCommand(SharedNodePtr);
-    void addRemoveNodeCommand(SharedNodePtr);
+    void addRemoveNodeCommand(SharedNodePtr, const QList<std::tuple<SharedNodePtr, SharedNodePtr, BranchType>>&);
     void addCreateBranchCommand(SharedNodePtr, SharedNodePtr, BranchType);
     void addRemoveBranchCommand(SharedNodePtr, SharedNodePtr, BranchType);
 private:

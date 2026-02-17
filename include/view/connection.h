@@ -6,10 +6,12 @@
 
 class Connection: public QObject {
     Q_OBJECT
+public:
     Arrow* arrow;
     Line* line;
-public:
     Connection(Arrow*, Line*);
     ~Connection();
+
+    BranchType branchType() const;
 };
 #endif

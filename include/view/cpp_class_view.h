@@ -48,7 +48,7 @@ public:
     QPointF get_bottom_center() const;
 
     QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
-    Composition* get_uml_class_diagram_node();
+    SharedNodePtr get_uml_class_diagram_node();
 
 public slots:
     void composition_changed();

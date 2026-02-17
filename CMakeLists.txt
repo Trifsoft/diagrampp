@@ -89,6 +89,7 @@ set(CORE_HEADERS
     include/node_type.h
     include/shared_node_ptr.h
     include/connection_handler.h
+    include/graph/graph.h
 )
 
 set(CORE_SOURCES

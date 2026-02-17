@@ -8,4 +8,8 @@ Connection::Connection(Arrow* arrow, Line* line)
     line->setParent(this);
 }
 
+BranchType Connection::branchType() const {
+    return line->branchType();
+}
+
 Connection::~Connection() {}
