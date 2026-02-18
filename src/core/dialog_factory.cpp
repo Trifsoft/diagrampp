@@ -31,7 +31,14 @@ namespace {
 }
 
 DialogFactory::DialogFactory(QWidget* widget)
-    : mWidget(widget) {}
+    : mWidget(widget), generateDialog(new generateProjectDialog(widget))
+{
+    connect(generateDialog, &QDialog::accepted, this, &DialogFactory::requestProjectGeneration);
+}
+
+DialogFactory::~DialogFactory() {
+    delete generateDialog;
+}
 
 void DialogFactory::handleClassClick()      { openNodeFactory(NodeType::Class); }
 void DialogFactory::handleStructClick()     { openNodeFactory(NodeType::Struct); }
@@ -39,6 +46,11 @@ void DialogFactory::handleStructClick()     { openNodeFactory(NodeType::Struct);
 void DialogFactory::showError(const QString &message)
 {
     QMessageBox::critical(mWidget, "Error", message);
+}
+
+void DialogFactory::showWarning(const QString &message)
+{
+    QMessageBox::warning(mWidget, "Warning", message);
 }
 
 void DialogFactory::showMessage(const QString &title, const QString &message)
@@ -64,6 +76,15 @@ void DialogFactory::selectPNG(const QString& fileName)
     if(!path.isEmpty()) {
         emit PNGPathSelected(path);
     }
+}
+
+void DialogFactory::requestProjectGeneration()
+{
+    QString path = generateDialog->get_selected_path();
+    ProjectGenerator::FileNameNotation notation = generateDialog->get_selected_notation();
+    ProjectGenerator::ReplaceToggle toggle = generateDialog->get_selected_toggle();
+    QString project_dir_name = generateDialog->get_project_dir_name();
+    emit projectGenerationRequested(path, notation, toggle, project_dir_name);
 }
 
 void DialogFactory::openNodeFactory(NodeType nodeType) {

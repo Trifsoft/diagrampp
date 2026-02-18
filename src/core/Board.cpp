@@ -8,7 +8,6 @@
 #include <QFileDialog>
 #include <QDir>
 #include <QInputDialog>
-#include "generate_project_dialog.h"
 #include <QMessageBox>
 #include <serializers/serializer.h>
 #include <QRegularExpression>
@@ -55,7 +54,9 @@ Board::Board(const QString& project_name, QWidget *parent)
     connect(this, &Board::PNGPathRequested, mDialogFactory, &DialogFactory::selectPNG);
     connect(mDialogFactory, &DialogFactory::PNGPathSelected, this, &Board::exportPNG);
 
-    connect(ui->generate_project, &QPushButton::clicked, this, &Board::on_generate_project);
+    // Connect generate project
+    connect(ui->generate_project, &QPushButton::clicked, mDialogFactory->generateDialog, &QDialog::exec);
+    connect(mDialogFactory, &DialogFactory::projectGenerationRequested, this, &Board::generateProject);
 
     // Connect radio buttons to command handler
     connect(ui->Inheritance, &QPushButton::clicked, this, &Board::onCheckRadioButtonClicked);
@@ -105,6 +106,7 @@ Board::Board(const QString& project_name, QWidget *parent)
     connect(diagram, &DiagramGraph::error, mDialogFactory, &DialogFactory::showError);
     connect(this, &Board::message, mDialogFactory, &DialogFactory::showMessage);
     connect(this, &Board::error, mDialogFactory, &DialogFactory::showError);
+    connect(this, &Board::warning, mDialogFactory, &DialogFactory::showWarning);
 
     setup_actions();
 }
@@ -348,47 +350,39 @@ void Board::showSerializationSuccessMessage(const QString& filePath)
     emit message("Success", "Diagram exported to:\n" + filePath);
 }
 
-void Board::on_generate_project(){
-    generateProjectDialog dialog(this);
-    if(dialog.exec() == QDialog::Accepted){
-        std::string path = dialog.get_selected_path().toStdString();
-        ProjectGenerator::FileNameNotation notation = dialog.get_selected_notation();
-        ProjectGenerator::ReplaceToggle toggle = dialog.get_selected_toggle();
-        std::string project_dir_name = dialog.get_project_dir_name().toStdString();
-        ProjectGenerator::GenerationStatusCode status = ProjectGenerator::generate(
-            diagram->get_diagram(),
-            path,
-            project_dir_name,
-            notation,
-            toggle
-            );
+void Board::generateProject(const QString& path,
+                         ProjectGenerator::FileNameNotation notation,
+                         ProjectGenerator::ReplaceToggle toggle,
+                         QString& projectDirName)
+{
+    ProjectGenerator::GenerationStatusCode status = ProjectGenerator::instance().generate(
+        diagram->get_diagram(),
+        path,
+        projectDirName,
+        notation,
+        toggle
+        );
 
-        if(status != ProjectGenerator::GenerationStatusCode::OK){
-            QString err_message;
-            switch (status)
-            {
-            case ProjectGenerator::GenerationStatusCode::EXISTING_PROJECT_DIR_ON_PATH:
-                err_message = "Directory with a given name already exists on path. Choose a different name or replace it.";
-                break;
-            case ProjectGenerator::GenerationStatusCode::PERMISSION_DENIED:
-                err_message = "Permission denied.";
-                break;
-            case ProjectGenerator::GenerationStatusCode::NO_MEMORY_SPACE:
-                err_message = "No enough memory on the disc.";
-                break;
-            case ProjectGenerator::GenerationStatusCode::FILE_NOT_CREATED:
-                err_message = "Error while generating file.";
-                break;
-            case ProjectGenerator::GenerationStatusCode::NO_SUCH_DIR:
-                err_message = "The selected path does not exist. Please choose an existing directory.";
-                break;
-            default:
-                err_message = "";
-            }
-            QMessageBox::warning(this, "Warning", err_message);
-        }else{
-            QMessageBox::information(this, "Success", "Project is generated on path: \n" + QString::fromStdString(path));
-        }
+    switch (status)
+    {
+    case ProjectGenerator::GenerationStatusCode::EXISTING_PROJECT_DIR_ON_PATH:
+        emit warning("Directory with a given name already exists on path. Choose a different name or replace it.");
+        break;
+    case ProjectGenerator::GenerationStatusCode::PERMISSION_DENIED:
+        emit warning("Permission denied.");
+        break;
+    case ProjectGenerator::GenerationStatusCode::NO_MEMORY_SPACE:
+        emit warning("No enough memory on the disc.");
+        break;
+    case ProjectGenerator::GenerationStatusCode::FILE_NOT_CREATED:
+        emit warning("Error while generating file.");
+        break;
+    case ProjectGenerator::GenerationStatusCode::NO_SUCH_DIR:
+        emit warning("The selected path does not exist. Please choose an existing directory.");
+        break;
+    case ProjectGenerator::GenerationStatusCode::OK:
+        emit message("Success", "Project is generated on path: \n" + path);
+        break;
     }
 }
 

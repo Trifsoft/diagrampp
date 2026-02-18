@@ -46,8 +46,10 @@ signals:
     void JSONPathRequested(const QString&);
     void PNGPathRequested(const QString&);
     void serializationRequested(const QString&, Board*);
+
     void message(const QString&, const QString&);
     void error(const QString&);
+    void warning(const QString&);
 public slots:
     void onCheckRadioButtonClicked();
     void onModeClicked();
@@ -57,8 +59,10 @@ public slots:
     void requestSerialization(const QString&);
     void showSerializationSuccessMessage(const QString&);
 
-    //void on_object_clicked(Composition* clickedClass);
-    void on_generate_project();
+    void generateProject(const QString&,
+                         ProjectGenerator::FileNameNotation,
+                         ProjectGenerator::ReplaceToggle,
+                         QString&);
 
     void on_add_field_requested(Composition* node, std::shared_ptr<Field> field);
     void on_add_method_requested(Composition* node, std::shared_ptr<Method>  method);
