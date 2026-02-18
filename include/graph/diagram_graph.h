@@ -62,7 +62,7 @@ signals:
     void node_added(SharedNodePtr node);
     void addNodeRequestApproved(SharedNodePtr);
 
-    void linkError(const std::string&);
+    void error(const QString&);
 protected:
     void onAddBranch(SharedNodePtr, SharedNodePtr, BranchType) override;
     void onRemoveBranch(SharedNodePtr, SharedNodePtr, BranchType) override;

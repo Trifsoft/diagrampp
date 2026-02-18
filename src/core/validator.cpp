@@ -92,7 +92,7 @@ namespace Validator{
             return false;
         }
 
-        bool validate_inheritance(std::string& errorMessage, SharedNodePtr child,
+        bool validate_inheritance(QString& errorMessage, SharedNodePtr child,
                                   SharedNodePtr parent,
                                   const graph_type& diagram){
             if(check_cycle(child, BranchType::INHERITANCE, diagram)){
@@ -107,7 +107,7 @@ namespace Validator{
             return true;
         }
 
-        bool validate_others(std::string& errorMessage, BranchType branchType, SharedNodePtr child,
+        bool validate_others(QString& errorMessage, BranchType branchType, SharedNodePtr child,
                              SharedNodePtr parent,
                              const graph_type& diagram){
             if(branchType == BranchType::COMPOSITION || branchType == BranchType::AGGREGATION){
@@ -119,7 +119,7 @@ namespace Validator{
             return true;
         }
     }
-    bool validate(std::string& errorMessage, SharedNodePtr child,
+    bool validate(QString& errorMessage, SharedNodePtr child,
                   SharedNodePtr parent,
                   BranchType branchType,
                   const graph_type& diagram){

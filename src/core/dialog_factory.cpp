@@ -8,12 +8,25 @@ namespace {
     QString fileExtension(ProjectFileType fileType) {
         switch(fileType) {
             case ProjectFileType::JSON : return "json";
+            case ProjectFileType::PNG : return "png";
         }
     }
     QString fileDescription(ProjectFileType fileType) {
+        QString desc;
         switch(fileType) {
-            case ProjectFileType::JSON : return "JSON Files (*.json)";
+            case ProjectFileType::JSON : {
+                desc = "JSON Files";
+                break;
+            }
+            case ProjectFileType::PNG : {
+                desc = "PNG Images";
+                break;
+            }
         }
+        desc += " (*.";
+        desc += fileExtension(fileType);
+        desc += ")";
+        return desc;
     }
 }
 
@@ -23,14 +36,14 @@ DialogFactory::DialogFactory(QWidget* widget)
 void DialogFactory::handleClassClick()      { openNodeFactory(NodeType::Class); }
 void DialogFactory::handleStructClick()     { openNodeFactory(NodeType::Struct); }
 
-void DialogFactory::showError(const std::string &message)
+void DialogFactory::showError(const QString &message)
 {
-    QMessageBox::critical(mWidget, "Error", QString::fromStdString(message));
+    QMessageBox::critical(mWidget, "Error", message);
 }
 
-void DialogFactory::showMessage(const std::string &title, const std::string &message)
+void DialogFactory::showMessage(const QString &title, const QString &message)
 {
-    QMessageBox::information(mWidget, QString::fromStdString(title), QString::fromStdString(message));
+    QMessageBox::information(mWidget, title, message);
 }
 
 void DialogFactory::selectJSON(const QString& fileName)
@@ -40,6 +53,16 @@ void DialogFactory::selectJSON(const QString& fileName)
                             ProjectFileType::JSON);
     if(!path.isEmpty()) {
         emit JSONPathSelected(path);
+    }
+}
+
+void DialogFactory::selectPNG(const QString& fileName)
+{
+    QString path = pickPath("Export Diagram as PNG",
+                            fileName,
+                            ProjectFileType::PNG);
+    if(!path.isEmpty()) {
+        emit PNGPathSelected(path);
     }
 }
 

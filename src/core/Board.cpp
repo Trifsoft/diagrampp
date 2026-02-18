@@ -43,7 +43,6 @@ Board::Board(const QString& project_name, QWidget *parent)
     ui->linkageMode->setChecked(false);
 
     // Connect export json
-    //connect(ui->exportJSON, &QPushButton::clicked, this, &Board::exportJSON);
     connect(ui->exportJSON, &QPushButton::clicked, this, &Board::requestJSONPath);
     connect(this, &Board::JSONPathRequested, mDialogFactory, &DialogFactory::selectJSON);
     connect(mDialogFactory, &DialogFactory::JSONPathSelected, this, &Board::requestSerialization);
@@ -51,7 +50,11 @@ Board::Board(const QString& project_name, QWidget *parent)
     connect(&Serializer::instance(), &Serializer::serializationSuccess, this, &Board::showSerializationSuccessMessage);
     connect(&Serializer::instance(), &Serializer::serializationFailure, mDialogFactory, &DialogFactory::showError);
 
-    connect(ui->exportPNG, &QPushButton::clicked, this, &Board::exportPNG);
+    // Connect export png
+    connect(ui->exportPNG, &QPushButton::clicked, this, &Board::requestPNGPath);
+    connect(this, &Board::PNGPathRequested, mDialogFactory, &DialogFactory::selectPNG);
+    connect(mDialogFactory, &DialogFactory::PNGPathSelected, this, &Board::exportPNG);
+
     connect(ui->generate_project, &QPushButton::clicked, this, &Board::on_generate_project);
 
     // Connect radio buttons to command handler
@@ -99,7 +102,7 @@ Board::Board(const QString& project_name, QWidget *parent)
     connect(diagram, &DiagramGraph::link_removed, recovery_log, &recoveryLog::remove_link_operation);
 
     // Show messages
-    connect(diagram, &DiagramGraph::linkError, mDialogFactory, &DialogFactory::showError);
+    connect(diagram, &DiagramGraph::error, mDialogFactory, &DialogFactory::showError);
     connect(this, &Board::message, mDialogFactory, &DialogFactory::showMessage);
     connect(this, &Board::error, mDialogFactory, &DialogFactory::showError);
 
@@ -297,17 +300,7 @@ void Board::addItem(SharedNodePtr node) {
     add_item(node, 0, 0);
 }
 
-void Board::exportPNG(){
-    QString file_name = QFileDialog::getSaveFileName(
-            this,
-            "Export Diagram as PNG",
-            QDir::homePath() + "/diagram_export.png",
-            "PNG Images (*.png);;All Files (*)"
-        );
-
-    if(file_name.isEmpty()){
-        return;
-    }
+void Board::exportPNG(const QString& filePath){
 
     QRectF items_rect = scene->itemsBoundingRect();
     if(items_rect.isEmpty()){
@@ -330,12 +323,11 @@ void Board::exportPNG(){
     scene->render(&painter, QRectF(0, 0, image.width(), image.height()),  items_rect);
     painter.end();
 
-    if(image.save(file_name, "PNG", 100)){
-        QMessageBox::information(this, "Success",
-                                 QString("Diagram exported to:\n%1\n\nSize: %2x%3 pixels")
-                                        .arg(file_name).arg(image.width()).arg(image.height()));
-    }else{
-        QMessageBox::critical(this, "Error", "Failed to save image. Check write permissions.");
+    if(image.save(filePath, "PNG", 100)){
+        emit message("Success", QString("Diagram exported to:\n%1\n\nSize: %2x%3 pixels")
+                                        .arg(filePath).arg(image.width()).arg(image.height()));
+    } else{
+        emit error("Failed to save image. Check write permissions.");
     }
 }
 
@@ -344,11 +336,16 @@ void Board::requestJSONPath()
     emit JSONPathRequested(get_file_name());
 }
 
+void Board::requestPNGPath()
+{
+    emit PNGPathRequested(get_file_name());
+}
+
 void Board::requestSerialization(const QString &path) { emit serializationRequested(path, this); }
 
 void Board::showSerializationSuccessMessage(const QString& filePath)
 {
-    emit message("Success", "Diagram exported to:\n" + filePath.toStdString());
+    emit message("Success", "Diagram exported to:\n" + filePath);
 }
 
 void Board::on_generate_project(){

@@ -7,7 +7,8 @@
 #include <node_type.h>
 
 enum class ProjectFileType {
-    JSON
+    JSON,
+    PNG
 };
 
 class DialogFactory: public QObject {
@@ -17,12 +18,14 @@ public:
 signals:
     void createNodeRequest(const QString&, NodeType);
     void JSONPathSelected(const QString&);
+    void PNGPathSelected(const QString&);
 public slots:
     void handleClassClick();
     void handleStructClick();
-    void showError(const std::string&);
-    void showMessage(const std::string&, const std::string&);
+    void showError(const QString&);
+    void showMessage(const QString&, const QString&);
     void selectJSON(const QString&);
+    void selectPNG(const QString&);
 private:
     QWidget* mWidget;
 

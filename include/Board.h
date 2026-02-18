@@ -44,14 +44,16 @@ signals:
     void radioButtonChecked(BranchType);
     void modeChanged(NodeModification);
     void JSONPathRequested(const QString&);
+    void PNGPathRequested(const QString&);
     void serializationRequested(const QString&, Board*);
-    void message(const std::string&, const std::string&);
-    void error(const std::string&);
+    void message(const QString&, const QString&);
+    void error(const QString&);
 public slots:
     void onCheckRadioButtonClicked();
     void onModeClicked();
-    void exportPNG();
+    void exportPNG(const QString&);
     void requestJSONPath();
+    void requestPNGPath();
     void requestSerialization(const QString&);
     void showSerializationSuccessMessage(const QString&);
 

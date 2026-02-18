@@ -17,7 +17,7 @@ public:
     }
 signals:
     void serializationSuccess(const QString& filePath);
-    void serializationFailure(const std::string& errorMessage);
+    void serializationFailure(const QString& errorMessage);
 public slots:
     void serialize(const QString&, Board*);
 };

@@ -5,7 +5,7 @@ void Serializer::serialize(const QString &filePath, Board* board)
 {
     std::ofstream outputStream(filePath.toStdString());
     if (!outputStream.is_open()) {
-        emit serializationFailure("Failed to open file for writing: " + filePath.toStdString());
+        emit serializationFailure("Failed to open file for writing: " + filePath);
         return;
     }
 

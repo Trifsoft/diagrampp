@@ -60,14 +60,14 @@ void DiagramGraph::processNewBranchRequest(NodePtr fromRaw, NodePtr toRaw, Branc
     if(!connection_exists(from, to, branch_type)){
         addBranch(from, to, branch_type);
 
-        std::string error_message;
+        QString error_message;
         if(!Validator::validate(error_message, from, to, branch_type, nodeMap)){
             removeBranch(from, to, branch_type);
-            emit linkError(error_message);
+            emit error(error_message);
             return;
         }
     } else {
-        emit linkError("Connection already exists.");
+        emit error("Connection already exists.");
         return;
     }
 
@@ -93,7 +93,7 @@ SharedNodePtr DiagramGraph::find_pointer_owner(Composition* node_view)
 
 void DiagramGraph::removeBranch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type){
     if(!mRemoveBranch(from, to, branch_type)) {
-        emit linkError("Branch not found");
+        emit error("Branch not found");
     }
 }
 
@@ -108,7 +108,7 @@ void DiagramGraph::processRemoveBranchRequest(NodePtr fromRaw, NodePtr toRaw, Br
     auto from = find_pointer_owner(fromRaw);
     auto to = find_pointer_owner(toRaw);
     if(!connection_exists(from, to, branch_type)){
-        emit linkError("Link doesn't exist");
+        emit error("Link doesn't exist");
         return;
     }
 

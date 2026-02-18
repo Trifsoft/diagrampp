@@ -5,7 +5,7 @@
 #include "graph/diagram_graph.h"
 
 namespace Validator {
-    bool validate(std::string& errorMessage, SharedNodePtr from, SharedNodePtr to,
+    bool validate(QString& errorMessage, SharedNodePtr from, SharedNodePtr to,
                   BranchType branchType,
                   const graph_type& diagram);
 };
