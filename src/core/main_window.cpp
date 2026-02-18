@@ -1,7 +1,7 @@
 #include "main_window.h"
 #include "ui_main_window.h"
-#include "new_project.h"
 #include "Board.h"
+#include "BoardController.h"
 #include "serializers/diagram_json_serializer.h"
 #include <QFileDialog>
 #include <QFile>
@@ -71,8 +71,7 @@ void MainWindow::onNewProjectClicked()
     );
 
     if (dialog.exec() == QDialog::Accepted && !dialog.textValue().isEmpty()) {
-        auto project = new Board(dialog.textValue());
-        project->show();
+        auto project = new BoardController(dialog.textValue());
     }
 }
 
@@ -113,10 +112,11 @@ void MainWindow::onImportProjectClicked()
     }
 
     Board* board = new Board();
+    DiagramGraph* graph = new DiagramGraph();
 
-    DiagramJsonSerializer serializer(board);
+    DiagramJsonSerializer serializer(board, graph);
     serializer.deserialize(jsonDoc.array());
     board->set_title(title);
 
-    board->show();
+    BoardController* controller = new BoardController(board, graph);
 }

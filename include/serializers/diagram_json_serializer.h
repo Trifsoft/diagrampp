@@ -20,6 +20,7 @@ class DiagramJsonSerializer{
 private:
     int m_indentation_counter;
     Board* m_board;
+    DiagramGraph* mDiagram;
 
     void trim_end(std::string& s) const;
 
@@ -32,7 +33,7 @@ private:
     BranchType deserialize_branch_type(QJsonValue json_branch_type) const;
     std::shared_ptr<Composition> deserialize_node(QJsonObject json_node) const;
 public:
-    DiagramJsonSerializer(Board*);
+    DiagramJsonSerializer(Board*, DiagramGraph*);
     ~DiagramJsonSerializer() = default;
 
     void serialize(std::ostream& output_stream);

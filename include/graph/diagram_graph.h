@@ -25,7 +25,7 @@ class DiagramGraph : public QObject, public Graph<SharedNodePtr, BranchType> {
 public:
 
     DiagramGraph() = default;
-    ~DiagramGraph() = default;
+    ~DiagramGraph();
 
     std::vector<BranchEdge> get_branches_for_node(SharedNodePtr node) const;
 

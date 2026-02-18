@@ -19,30 +19,24 @@ public:
     ~DialogFactory();
 
     generateProjectDialog* generateDialog;
+    QString selectJSON(const QString&);
+    QString selectPNG(const QString&);
 signals:
     void createNodeRequest(const QString&, NodeType);
-    void JSONPathSelected(const QString&);
-    void PNGPathSelected(const QString&);
     void projectGenerationRequested(const QString&,
                                   ProjectGenerator::FileNameNotation,
                                   ProjectGenerator::ReplaceToggle,
                                   QString&);
 public slots:
-    void handleClassClick();
-    void handleStructClick();
-
     void showError(const QString&);
     void showWarning(const QString&);
     void showMessage(const QString&, const QString&);
-
-    void selectJSON(const QString&);
-    void selectPNG(const QString&);
+    void openNodeFactory(NodeType);
 private slots:
     void requestProjectGeneration();
 private:
     QWidget* mWidget;
 
-    void openNodeFactory(NodeType);
     QString pickPath(const QString&, const QString&, ProjectFileType);
 };
 

@@ -5,16 +5,14 @@
 #include "graph/diagram_graph.h"
 #include "model/elements/field.h"
 #include "model/elements/method.h"
-#include <iomanip>
 #include <fstream>
-#include <filesystem>
 #include <stdio.h>
 
 
 class recoveryLog : public QObject{
     Q_OBJECT
 public:
-    recoveryLog(const std::string& _file_name = "recoveryLog.txt");
+    recoveryLog(QObject* parent = nullptr, const std::string& _file_name = "recoveryLog.txt");
     ~recoveryLog();
 public slots:
     void add_field_operation(Composition* node, std::shared_ptr<Field> field);

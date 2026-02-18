@@ -1,7 +1,12 @@
 #include "commandManager/command_manager.h"
 #include <QDebug>
 
-CommandManager::CommandManager(QObject* parent): QObject(parent) {};
+CommandManager::CommandManager(QObject* parent): QObject(parent) {}
+
+CommandManager::~CommandManager()
+{
+    qDebug() << "Deleted command manager";
+};
 
 void CommandManager::execute(std::shared_ptr<Command> command)
 {

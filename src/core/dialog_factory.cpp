@@ -31,17 +31,16 @@ namespace {
 }
 
 DialogFactory::DialogFactory(QWidget* widget)
-    : mWidget(widget), generateDialog(new generateProjectDialog(widget))
+    : QObject(widget), mWidget(widget), generateDialog(new generateProjectDialog(widget))
 {
     connect(generateDialog, &QDialog::accepted, this, &DialogFactory::requestProjectGeneration);
 }
 
 DialogFactory::~DialogFactory() {
     delete generateDialog;
-}
 
-void DialogFactory::handleClassClick()      { openNodeFactory(NodeType::Class); }
-void DialogFactory::handleStructClick()     { openNodeFactory(NodeType::Struct); }
+    qDebug() << "Deleted dialog factory";
+}
 
 void DialogFactory::showError(const QString &message)
 {
@@ -58,24 +57,18 @@ void DialogFactory::showMessage(const QString &title, const QString &message)
     QMessageBox::information(mWidget, title, message);
 }
 
-void DialogFactory::selectJSON(const QString& fileName)
+QString DialogFactory::selectJSON(const QString& fileName)
 {
-    QString path = pickPath("Export Diagram as JSON",
-                            fileName,
-                            ProjectFileType::JSON);
-    if(!path.isEmpty()) {
-        emit JSONPathSelected(path);
-    }
+    return pickPath("Export Diagram as JSON",
+                    fileName,
+                    ProjectFileType::JSON);
 }
 
-void DialogFactory::selectPNG(const QString& fileName)
+QString DialogFactory::selectPNG(const QString& fileName)
 {
-    QString path = pickPath("Export Diagram as PNG",
-                            fileName,
-                            ProjectFileType::PNG);
-    if(!path.isEmpty()) {
-        emit PNGPathSelected(path);
-    }
+    return pickPath("Export Diagram as PNG",
+                    fileName,
+                    ProjectFileType::PNG);
 }
 
 void DialogFactory::requestProjectGeneration()

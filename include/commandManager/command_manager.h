@@ -15,6 +15,7 @@ class CommandManager: public QObject
     Q_OBJECT
 public:
     CommandManager(QObject* parent = nullptr);
+    ~CommandManager();
     
     void execute(std::shared_ptr<Command> command);
     void undo();

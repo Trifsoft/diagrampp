@@ -28,8 +28,8 @@
  */
 
 
-DiagramJsonSerializer::DiagramJsonSerializer(Board* board)
-    : m_board(board), m_indentation_counter(0)
+DiagramJsonSerializer::DiagramJsonSerializer(Board* board, DiagramGraph* diagram)
+    : m_board(board), mDiagram(diagram), m_indentation_counter(0)
 {
 
 }
@@ -96,7 +96,7 @@ void DiagramJsonSerializer::serialize(std::ostream& output_stream){
     output_stream << "[\n";
     ++m_indentation_counter;
 
-    auto m_diagram = m_board->get_diagram()->get_diagram();
+    auto m_diagram = mDiagram->get_diagram();
 
     for (auto it = m_diagram.begin(); it != m_diagram.end(); ){
         auto node_view = m_board->get_view_from_node(it.key());
@@ -145,6 +145,7 @@ void DiagramJsonSerializer::deserialize(QJsonArray json_array){
         std::shared_ptr<Composition> node = NodeSerializers::deserialize_composition_node(json_object["node"].toObject());
         if(!node_created[{node.get()->get_name(), x, y}]){
             node_created[std::make_tuple(node.get()->get_name(), x, y)] = node;
+            mDiagram->addNode(node);
             m_board->add_item(node, x, y);
         }else{
             node = node_created[{node->get_name(), x, y}];
@@ -158,14 +159,15 @@ void DiagramJsonSerializer::deserialize(QJsonArray json_array){
             const auto [neighbour_x, neighbour_y] = deserialize_coords(json_neighbour_object["coords"].toObject());
             auto neighbour_node = NodeSerializers::deserialize_composition_node(json_neighbour_object["node"].toObject());
             if(!node_created[{neighbour_node.get()->get_name(), neighbour_x, neighbour_y}]){
-                m_board->add_item(neighbour_node, neighbour_x, neighbour_y);
                 node_created[{neighbour_node.get()->get_name(), neighbour_x, neighbour_y}] = neighbour_node;
+                mDiagram->addNode(neighbour_node);
+                m_board->add_item(neighbour_node, neighbour_x, neighbour_y);
             }else{
                 neighbour_node = node_created[{neighbour_node.get()->get_name(), neighbour_x, neighbour_y}];
             }
 
             const auto branch_type = get_branch_type_from_string(json_neighbour_object["branch_type"].toString().toStdString());
-            m_board->get_diagram()->addBranch(node, neighbour_node, branch_type);
+            mDiagram->addBranch(node, neighbour_node, branch_type);
         }
     }
 }

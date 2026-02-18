@@ -15,11 +15,10 @@ public:
         static Serializer inst;
         return inst;
     }
+    void serialize(const QString&, Board*, DiagramGraph*);
 signals:
     void serializationSuccess(const QString& filePath);
     void serializationFailure(const QString& errorMessage);
-public slots:
-    void serialize(const QString&, Board*);
 };
 
 #endif

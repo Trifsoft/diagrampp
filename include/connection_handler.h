@@ -5,16 +5,13 @@
 #include <shared_node_ptr.h>
 #include <model/base/branches.h>
 
-enum class NodeModification {
-    Link,
-    Remove,
-    None
-};
+#include <node_modification.h>
 
 class ConnectionHandler: public QObject {
     Q_OBJECT
 public:
     ConnectionHandler(QObject* parent = nullptr): QObject(parent) {}
+    ~ConnectionHandler();
 
     NodeModification getSelectedNodeModification();
 public slots:

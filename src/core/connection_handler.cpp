@@ -1,4 +1,10 @@
 #include <connection_handler.h>
+#include <QDebug>
+
+ConnectionHandler::~ConnectionHandler()
+{
+    qDebug() << "Deleted connection handler";
+}
 
 NodeModification ConnectionHandler::getSelectedNodeModification()
 {

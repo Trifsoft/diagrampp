@@ -8,6 +8,8 @@
 
 template <typename Node, typename Connection>
 class Graph {
+public:
+    const QList<Node>& getNodes() const { return nodes; }
 protected:
     QList<Node> nodes;
     QMap<Node, QList<std::pair<Node, Connection>>> nodeMap;

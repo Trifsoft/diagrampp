@@ -1,7 +1,9 @@
 #include <serializers/serializer.h>
 #include <serializers/diagram_json_serializer.h>
 
-void Serializer::serialize(const QString &filePath, Board* board)
+#include <fstream>
+
+void Serializer::serialize(const QString &filePath, Board* board, DiagramGraph* diagram)
 {
     std::ofstream outputStream(filePath.toStdString());
     if (!outputStream.is_open()) {
@@ -9,7 +11,7 @@ void Serializer::serialize(const QString &filePath, Board* board)
         return;
     }
 
-    DiagramJsonSerializer serializer(board);
+    DiagramJsonSerializer serializer(board, diagram);
     serializer.serialize(outputStream);
 
     outputStream.close();

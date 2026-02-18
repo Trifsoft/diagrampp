@@ -8,7 +8,10 @@
 #include <model/elements/composition/composition.h>
 #include <QDebug>
 
-recoveryLog::recoveryLog(const std::string& _file_name) : file_name(_file_name){
+recoveryLog::recoveryLog(QObject* parent, const std::string& _file_name)
+    : QObject(parent)
+    , file_name(_file_name)
+{
     if(std::filesystem::exists(file_name)){
         if(remove(file_name.c_str())){
             qDebug() << "Failed to delete file" << file_name;
@@ -23,6 +26,7 @@ recoveryLog::recoveryLog(const std::string& _file_name) : file_name(_file_name){
 }
 
 recoveryLog::~recoveryLog(){
+    qDebug() << "Deleted recovery log";
     if(log_file.is_open()){
         log_file << "[" << get_current_timestamp() << "] "
                  << "[USER:" << get_username() << "] "

@@ -33,6 +33,11 @@ void DiagramGraph::onRemoveNode(SharedNodePtr node) {
     emit node_removed(node);
 }
 
+DiagramGraph::~DiagramGraph()
+{
+    qDebug() << "Deleted diagram";
+}
+
 std::vector<BranchEdge> DiagramGraph::get_branches_for_node(SharedNodePtr node) const {
     std::vector<BranchEdge> branches;
     if(!node){

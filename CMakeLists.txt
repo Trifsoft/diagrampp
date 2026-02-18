@@ -39,6 +39,7 @@ set(CORE_HEADERS
     include/main_window.h
     include/new_project.h
     include/Board.h
+    include/BoardController.h
     include/graph/diagram_graph.h
     include/model/base/visibility.h
     include/model/base/reference.h
@@ -101,6 +102,7 @@ set(CORE_SOURCES
     src/core/main_window.cpp
     src/core/new_project.cpp
     src/core/Board.cpp
+    src/core/BoardController.cpp
     src/core/validator.cpp
     src/core/graph/diagram_graph.cpp
     src/core/model/base/visibility.cpp
