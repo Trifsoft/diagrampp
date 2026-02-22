@@ -10,7 +10,6 @@
 #include <graph/graph.h>
 
 #include <view/connection.h>
-#include <node_modification.h>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -40,7 +39,6 @@ public:
     void setSelected(SharedNodePtr, bool);
 signals:
     void radioButtonChecked(BranchType);
-    void modeChanged(NodeModification);
     void nodeCreationRequest(NodeType);
 
     void itemCreated(CppClassView*);
@@ -67,14 +65,10 @@ public slots:
     void selectPreviousBranchType();
 private slots:
     void onCheckRadioButtonClicked();
-    void onModeClicked();
 protected:
     void onAddBranch(CppClassView*, CppClassView*, std::shared_ptr<Connection>) override;
     void onRemoveBranch(CppClassView*, CppClassView*, std::shared_ptr<Connection>) override;
     void onAddNode(CppClassView*) override;
     void onRemoveNode(CppClassView*) override;
-private:
-
-    NodeModification oldMode = NodeModification::None;
 };
 #endif // BOARD_H

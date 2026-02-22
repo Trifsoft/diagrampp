@@ -49,7 +49,7 @@ BoardController::BoardController(Board* board, DiagramGraph* graph)
     connect(window, &Board::radioButtonChecked, mConnectionHandler, &ConnectionHandler::updateSelectedBranchType);
 
     // Connect mode selection to command handler
-    connect(window, &Board::modeChanged, mConnectionHandler, &ConnectionHandler::updateSelectedNodeModification);
+    connect(window->ui->modify, &QPushButton::clicked, mConnectionHandler, &ConnectionHandler::updateSelectedNodeModification);
 
     // Connect node creation
     connect(window, &Board::nodeCreationRequest, mDialogFactory, &DialogFactory::openNodeFactory);
@@ -122,8 +122,7 @@ void BoardController::setupActions(){
         }
     });
 
-    addCtrlAltAction("Linkage mode", Qt::Key_L, window->ui->linkageMode, &QCheckBox::click);
-    addCtrlAltAction("Remove mode", Qt::Key_R, window->ui->removeMode, &QCheckBox::click);
+    addCtrlAltAction("Toggle modify", Qt::Key_L, window->ui->modify, &QCheckBox::click);
 
     addAction("Next branch type", Qt::Key_Down, window, &Board::selectNextBranchType);
     addAction("Previous branch type", Qt::Key_Up, window, &Board::selectPreviousBranchType);

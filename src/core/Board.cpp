@@ -36,8 +36,6 @@ Board::Board(const QString& project_name, QWidget *parent)
     ui->side_menu->setStyleSheet("background-color: #252526;");
     ui->back->setStyleSheet("color: #ffffff;");
 
-    ui->linkageMode->setChecked(false);
-
     // Emit upgraded signal - branch selection radio buttons
     connect(ui->Inheritance, &QPushButton::clicked, this, &Board::onCheckRadioButtonClicked);
     connect(ui->Association, &QPushButton::clicked, this, &Board::onCheckRadioButtonClicked);
@@ -45,10 +43,6 @@ Board::Board(const QString& project_name, QWidget *parent)
     connect(ui->Aggregation, &QPushButton::clicked, this, &Board::onCheckRadioButtonClicked);
     connect(ui->Composition, &QPushButton::clicked, this, &Board::onCheckRadioButtonClicked);
     connect(ui->Dependency, &QPushButton::clicked, this, &Board::onCheckRadioButtonClicked);
-
-    // Emit upgraded signal - node modification checkboxes
-    connect(ui->linkageMode, &QPushButton::clicked, this, &Board::onModeClicked);
-    connect(ui->removeMode, &QPushButton::clicked, this, &Board::onModeClicked);
 
     // Emit upgraded signal - node creation
     connect(ui->add_class, &QPushButton::clicked, this, &Board::onClassClicked);
@@ -126,23 +120,6 @@ void Board::onCheckRadioButtonClicked(){
         branchType = BranchType::DEPENDENCY;
     }
     emit radioButtonChecked(branchType);
-}
-
-void Board::onModeClicked(){
-    NodeModification newMode;
-    if(oldMode == NodeModification::None) {
-        newMode = ui->linkageMode->isChecked() ? NodeModification::Link : NodeModification::Remove;
-    }
-    else if(oldMode == NodeModification::Link) {
-        newMode = ui->removeMode->isChecked() ? NodeModification::Remove : NodeModification::None;
-    }
-    else {
-        newMode = ui->linkageMode->isChecked() ? NodeModification::Link : NodeModification::None;
-    }
-    ui->linkageMode->setChecked(newMode == NodeModification::Link);
-    ui->removeMode->setChecked(newMode == NodeModification::Remove);
-    oldMode = newMode;
-    emit modeChanged(newMode);
 }
 
 void Board::onClassClicked()

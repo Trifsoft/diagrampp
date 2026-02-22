@@ -294,16 +294,9 @@
          <number>12</number>
         </property>
         <item>
-         <widget class="QCheckBox" name="removeMode">
+         <widget class="QCheckBox" name="modify">
           <property name="text">
-           <string>Remove Mode</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QCheckBox" name="linkageMode">
-          <property name="text">
-           <string>Linkage Mode</string>
+           <string>Modify</string>
           </property>
          </widget>
         </item>

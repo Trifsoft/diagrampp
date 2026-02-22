@@ -15,9 +15,9 @@ public:
     ConnectionHandler(QObject* parent = nullptr): QObject(parent) {}
     ~ConnectionHandler();
 
-    NodeModification getSelectedNodeModification();
+    bool getSelectedNodeModification();
 public slots:
-    void updateSelectedNodeModification(NodeModification);
+    void updateSelectedNodeModification(bool);
     void updateSelectedBranchType(BranchType);
     void handleClick(ISelectable*);
     void deselectAll();
@@ -32,7 +32,7 @@ signals:
 private:
     ISelectable* selected;
     BranchType selectedBranchType = BranchType::INHERITANCE;
-    NodeModification selectedNodeModification = NodeModification::None;
+    bool selectedNodeModification = false;
 
     void setSelected(ISelectable*);
 };

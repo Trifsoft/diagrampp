@@ -1,10 +1,10 @@
-#ifndef NODE_MODIFICATION_H
-#define NODE_MODIFICATION_H
+// #ifndef NODE_MODIFICATION_H
+// #define NODE_MODIFICATION_H
 
-enum class NodeModification {
-    Link,
-    Remove,
-    None
-};
+// enum class NodeModification {
+//     Link,
+//     Remove,
+//     None
+// };
 
-#endif // NODE_MODIFICATION_H
+// #endif // NODE_MODIFICATION_H
