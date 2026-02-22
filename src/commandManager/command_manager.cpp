@@ -77,3 +77,9 @@ void CommandManager::addRemoveBranchCommand(SharedNodePtr from, SharedNodePtr to
     addCommand(cmd);
     emit removeBranchCommandAdded(cmd);
 }
+
+void CommandManager::addMoveNodeCommand(CppClassView* item, QPointF delta)
+{
+    auto cmd = std::make_shared<MoveNode>(item, delta);
+    addCommand(cmd);
+}

@@ -66,7 +66,9 @@ signals:
     void add_method_request(Composition* node, std::shared_ptr<Method> method);
     void edit_field_request(Composition* node, std::weak_ptr<Field> old_field, std::shared_ptr<Field> new_field);
     void edit_method_request(Composition* node, std::weak_ptr<Method> old_method,std::shared_ptr<Method> new_method);
+
     void objectClicked(Composition* node);
+    void objectMoved(CppClassView* item, QPointF delta);
 
     void height_changed_by(double);
     void moved_by(const QPointF& delta);

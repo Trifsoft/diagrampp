@@ -4,11 +4,13 @@
 #include <QVector>
 #include "command.h"
 #include <shared_node_ptr.h>
+#include <view/cpp_class_view.h>
 
 #include <commandManager/add_node_command.h>
 #include <commandManager/remove_node_command.h>
 #include <commandManager/add_branch_command.h>
 #include <commandManager/remove_branch_command.h>
+#include <commandManager/move_node_command.h>
 
 class CommandManager: public QObject
 {
@@ -33,6 +35,8 @@ public slots:
     void addRemoveNodeCommand(SharedNodePtr, const QList<std::tuple<SharedNodePtr, SharedNodePtr, BranchType>>&);
     void addCreateBranchCommand(SharedNodePtr, SharedNodePtr, BranchType);
     void addRemoveBranchCommand(SharedNodePtr, SharedNodePtr, BranchType);
+
+    void addMoveNodeCommand(CppClassView*, QPointF);
 private:
     QVector<std::shared_ptr<Command>> m_undo_stack;
     QVector<std::shared_ptr<Command>> m_redo_stack;
