@@ -13,7 +13,7 @@
 
 class DiagramGraph;
 
-class CppClassView: public QGraphicsObject {
+class CppClassView: public QGraphicsObject, public ISelectable {
     Q_OBJECT
 public:
     CppClassView(SharedNodePtr composition, QGraphicsObject* parent = nullptr);
@@ -31,7 +31,7 @@ public:
     QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
     SharedNodePtr get_uml_class_diagram_node();
 
-    void setSelected(bool);
+    void select(bool) override;
 
 public slots:
     void composition_changed();
@@ -67,7 +67,7 @@ signals:
     void edit_field_request(Composition* node, std::weak_ptr<Field> old_field, std::shared_ptr<Field> new_field);
     void edit_method_request(Composition* node, std::weak_ptr<Method> old_method,std::shared_ptr<Method> new_method);
 
-    void objectClicked(Composition* node);
+    void objectClicked(CppClassView*);
     void objectMovedByUser(CppClassView* item, QPointF delta);
 
     void height_changed_by(double);

@@ -3,6 +3,8 @@
 
 #include <QObject>
 #include <shared_node_ptr.h>
+#include <view/selectable.h>
+#include <node_view_ptr.h>
 #include <model/base/branches.h>
 
 #include <node_modification.h>
@@ -17,22 +19,22 @@ public:
 public slots:
     void updateSelectedNodeModification(NodeModification);
     void updateSelectedBranchType(BranchType);
-    void handleNodeClick(NodePtr);
+    void handleClick(ISelectable*);
     void deselectAll();
-    void processNodeRemovalRequest();
+    void processRemovalRequest();
 signals:
     void nodeRemovalRequested(NodePtr);
     void branchCreationRequested(NodePtr, NodePtr, BranchType);
     void branchRemovalRequested(NodePtr, NodePtr, BranchType);
 
-    void deselectionRequested(NodePtr);
-    void selectionRequested(NodePtr);
+    void deselectionRequested(ISelectable*);
+    void selectionRequested(ISelectable*);
 private:
-    NodePtr selected;
+    ISelectable* selected;
     BranchType selectedBranchType = BranchType::INHERITANCE;
     NodeModification selectedNodeModification = NodeModification::None;
 
-    void setSelected(NodePtr);
+    void setSelected(ISelectable*);
 };
 
 #endif

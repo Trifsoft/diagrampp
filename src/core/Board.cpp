@@ -7,6 +7,17 @@
 #include "model/elements/type/regular_type.h"
 #include <QMessageBox>
 
+namespace {
+
+void connectArrow(Arrow* newArrow, const QList<std::shared_ptr<Connection>>& incomingConnections) {
+    for(auto& connection : incomingConnections) {
+        QObject::connect(connection.get(), &Connection::hidden, newArrow, &Arrow::move_back);
+        QObject::connect(connection.get(), &Connection::shown, newArrow, &Arrow::move_forward);
+    }
+}
+
+}
+
 Board::Board(const QString& project_name, QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::Board)
@@ -259,16 +270,11 @@ void Board::addLink(SharedNodePtr from, SharedNodePtr to, BranchType branch) {
     auto parent = get_view_from_node(to);
     auto connection = get_connection_from_nodes(child, parent, branch);
     if(child && parent && !connection){
-        Arrow* arrow = get_arrow(parent, branch);
+        auto incomingConnections = getIncomingConnections(parent);
+        connection = std::make_shared<Connection>(child, parent, incomingConnections.size(), branch);
+        connectArrow(connection->arrow, incomingConnections);
 
-        Line* line = new Line(branch, QLineF(child->get_top_center(), arrow->get_bottom_center()));
-        connection = std::make_shared<Connection>(arrow, line);
-
-        connect(arrow, &Arrow::moved_by, line, &Line::move_end);
-        connect(child, &CppClassView::moved_by, line, &Line::move_start);
-
-        connect(child, &QObject::destroyed, connection.get(), &QObject::deleteLater);
-        connect(parent, &QObject::destroyed, connection.get(), &QObject::deleteLater);
+        emit connectionCreated(connection.get());
     }
     mAddBranch(child, parent, connection);
 }
@@ -285,16 +291,16 @@ void Board::removeItem(SharedNodePtr target) {
     mRemoveNode(node);
 }
 
-Arrow* Board::get_arrow(CppClassView* view, BranchType branch) {
-    const auto& incomingConnections = getIncomingConnections(view);
-    Arrow* new_arrow = new Arrow(branch, view->pos(), view->boundingRect().height(), incomingConnections.size());
-    for(auto& connection : incomingConnections) {
-        connect(connection.get(), &QObject::destroyed, new_arrow, &Arrow::move_back);
-    }
-    connect(view, &CppClassView::moved_by, new_arrow, &Arrow::move_by);
-    connect(view, &CppClassView::height_changed_by, new_arrow, &Arrow::move_y);
-    return new_arrow;
-}
+// Arrow* Board::get_arrow(CppClassView* view, BranchType branch) {
+//     const auto& incomingConnections = getIncomingConnections(view);
+//     Arrow* new_arrow = new Arrow(branch, view->pos(), view->boundingRect().height(), incomingConnections.size());
+//     for(auto& connection : incomingConnections) {
+//         connect(connection.get(), &QObject::destroyed, new_arrow, &Arrow::move_back);
+//     }
+//     connect(view, &CppClassView::moved_by, new_arrow, &Arrow::move_by);
+//     connect(view, &CppClassView::height_changed_by, new_arrow, &Arrow::move_y);
+//     return new_arrow;
+// }
 
 void Board::onAddBranch(CppClassView*,
                         CppClassView*,
@@ -302,6 +308,7 @@ void Board::onAddBranch(CppClassView*,
 {
     scene->addItem(connection->arrow);
     scene->addItem(connection->line);
+    emit connection->shown();
 }
 
 void Board::onRemoveBranch(CppClassView*,
@@ -310,6 +317,7 @@ void Board::onRemoveBranch(CppClassView*,
 {
     scene->removeItem(connection->arrow);
     scene->removeItem(connection->line);
+    emit connection->hidden();
 }
 
 void Board::onAddNode(CppClassView* node)

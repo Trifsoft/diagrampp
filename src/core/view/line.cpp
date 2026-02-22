@@ -1,20 +1,45 @@
 #include "view/line.h"
-#include <QPen>
+#include <QGraphicsSceneMouseEvent>
 
 Line::Line(BranchType branchType, const QLineF& line, QGraphicsItem* parent)
     : QGraphicsLineItem(line, parent)
     , m_branch_type(branchType)
+    , mPen(QPen(Qt::gray, 4))
 {
-    QPen pen(Qt::gray, 4);
     if (branchType == BranchType::DEPENDENCY || branchType == BranchType::REALIZATION) {
-        pen.setStyle(Qt::DashLine);
+        mPen.setStyle(Qt::DashLine);
     }
-    setPen(pen);
+    setPen(mPen);
 }
 
 BranchType Line::branchType() const
 {
     return m_branch_type;
+}
+
+void Line::select(bool isSelected)
+{
+    if(isSelected) {
+        mPen.setBrush(Qt::red);
+    }
+    else {
+        mPen.setBrush(Qt::gray);
+    }
+    setPen(mPen);
+}
+
+void Line::mousePressEvent(QGraphicsSceneMouseEvent *event)
+{
+    QGraphicsLineItem::mousePressEvent(event);
+    event->accept();
+}
+
+void Line::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
+{
+    if (boundingRect().contains(event->pos())) {
+        emit objectClicked();
+    }
+    QGraphicsLineItem::mouseReleaseEvent(event);
 }
 
 void Line::move_start(const QPointF& delta) {

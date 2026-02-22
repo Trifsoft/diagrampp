@@ -1,5 +1,6 @@
 #include <connection_handler.h>
 #include <QDebug>
+#include <view/connection.h>
 
 ConnectionHandler::~ConnectionHandler()
 {
@@ -20,38 +21,36 @@ void ConnectionHandler::updateSelectedBranchType(BranchType newBranchType) {
     selectedBranchType = newBranchType;
 }
 
-void ConnectionHandler::handleNodeClick(NodePtr node) {
+void ConnectionHandler::handleClick(ISelectable* newSelected) {
     if(selectedNodeModification == NodeModification::None){
         return;
     }
-    if(!selected){
-        setSelected(node);
-        return;
+    auto selectedNodePtr = dynamic_cast<NodeViewPtr>(selected);
+    auto newSelectedNodePtr = dynamic_cast<NodeViewPtr>(newSelected);
+    if(selectedNodePtr == nullptr || newSelectedNodePtr == nullptr ) {
+        setSelected(newSelected);
     }
-    NodePtr first = selected;
-    NodePtr second = node;
+    else {
+        NodePtr first = selectedNodePtr->get_uml_class_diagram_node().get();
+        NodePtr second = newSelectedNodePtr->get_uml_class_diagram_node().get();
 
-    if((first == second) && selectedNodeModification == NodeModification::Remove){
-        //execute_remove_node_with_branches(first);
-        emit nodeRemovalRequested(first);
-        first = second = nullptr;
-        return;
+        if((first == second) && selectedNodeModification == NodeModification::Remove){
+            //execute_remove_node_with_branches(first);
+            emit nodeRemovalRequested(first);
+            first = second = nullptr;
+            return;
+        }
+
+        if((first && second) && selectedNodeModification == NodeModification::Link){
+            //execute_add_branch(first, second, selectedBranchType);
+            emit branchCreationRequested(first, second, selectedBranchType);
+        } else if((first && second) && selectedNodeModification == NodeModification::Remove){
+            //execute_remove_branch(first, second, selectedBranchType);
+            emit branchRemovalRequested(first, second, selectedBranchType);
+        }
+
+        setSelected(nullptr);
     }
-
-    if((first && second) && selectedNodeModification == NodeModification::Link){
-        //execute_add_branch(first, second, selectedBranchType);
-        emit branchCreationRequested(first, second, selectedBranchType);
-    } else if((first && second) && selectedNodeModification == NodeModification::Remove){
-        //execute_remove_branch(first, second, selectedBranchType);
-        emit branchRemovalRequested(first, second, selectedBranchType);
-    }
-
-    #if DEBUG_MODE>=1
-        qDebug() << "";
-        diagram->show_diagram();
-    #endif
-
-    setSelected(nullptr);
 }
 
 void ConnectionHandler::deselectAll()
@@ -59,15 +58,22 @@ void ConnectionHandler::deselectAll()
     setSelected(nullptr);
 }
 
-void ConnectionHandler::processNodeRemovalRequest()
+void ConnectionHandler::processRemovalRequest()
 {
     if(selected != nullptr) {
-        emit nodeRemovalRequested(selected);
+        auto selectedAsNode = dynamic_cast<NodeViewPtr>(selected);
+        auto selectedAsConnection = dynamic_cast<Connection*>(selected);
+        if(selectedAsNode != nullptr) {
+            emit nodeRemovalRequested(selectedAsNode->get_uml_class_diagram_node().get());
+        }
+        else if(selectedAsConnection != nullptr){
+            emit branchRemovalRequested(selectedAsConnection->from(), selectedAsConnection->to(), selectedAsConnection->branchType());
+        }
         setSelected(nullptr);
     }
 }
 
-void ConnectionHandler::setSelected(NodePtr newSelectedNode)
+void ConnectionHandler::setSelected(ISelectable* newSelectedNode)
 {
     if(selected != nullptr) {
         emit deselectionRequested(selected);

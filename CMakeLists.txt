@@ -94,6 +94,8 @@ set(CORE_HEADERS
     include/connection_handler.h
     include/graph/graph.h
     include/serializers/serializer.h
+    include/view/selectable.h
+    include/node_view_ptr.h
 )
 
 set(CORE_SOURCES
@@ -193,6 +195,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         MANUAL_FINALIZATION
         src/core/main.cpp
         ${PROJECT_SOURCES}
+        include/view/selectable.h
 
     )
     qt_add_executable(DiagramTest

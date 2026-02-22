@@ -16,8 +16,6 @@
 #include <memory>
 #include <node_type.h>
 
-class CppClassView;
-
 class Composition: public QObject {
     Q_OBJECT
 protected:

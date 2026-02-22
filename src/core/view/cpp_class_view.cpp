@@ -247,7 +247,7 @@ void CppClassView::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
         emit objectMovedByUser(this, mAccumulatedChange);
     }
     else {
-        emit objectClicked(mComposition.get());
+        emit objectClicked(this);
     }
     mAccumulatedChange = QPointF(0,0);
 }
@@ -276,7 +276,7 @@ SharedNodePtr CppClassView::get_uml_class_diagram_node() {
     return mComposition;
 }
 
-void CppClassView::setSelected(bool isSelected)
+void CppClassView::select(bool isSelected)
 {
     mSelectedFrame->setVisible(isSelected);
 }

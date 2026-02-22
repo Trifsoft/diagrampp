@@ -4,8 +4,6 @@
 #include <QObject>
 #include <QString>
 
-class CppClassView;
-
 class IUMLClassDiagramNode: public QObject {
 public:
     virtual ~IUMLClassDiagramNode() = default;

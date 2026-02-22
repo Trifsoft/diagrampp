@@ -41,10 +41,9 @@ private slots:
     void connectRemoveNodeCommand(std::shared_ptr<RemoveNodeCommand> command);
     void connectCreateBranchCommand(std::shared_ptr<AddBranchCommand> command);
     void connectRemoveBranchCommand(std::shared_ptr<RemoveBranchCommand> command);
-    void connectNewNodeView(CppClassView*);
 
-    void select(NodePtr);
-    void deselect(NodePtr);
+    void connectNewNodeView(CppClassView*);
+    void connectNewConnection(Connection*);
 
 private:
     DiagramGraph *diagram;
@@ -61,8 +60,6 @@ private:
 
     void setupActions();
     QString getFileName();
-
-    void setSelect(NodePtr, bool);
 
 
     template <typename Func>

@@ -1,9 +1,10 @@
 #include "view/arrow.h"
-#include <QPen>
+#include<QGraphicsSceneMouseEvent>
 
 Arrow::Arrow(BranchType branchType, const QPointF& parentPos, double height, qsizetype offset, QGraphicsItem* parent)
     : QGraphicsPolygonItem(parent)
     , m_branch_type(branchType)
+    , mPen(QPen(Qt::black, 2))
 {
     QPolygonF polygon;
 
@@ -52,7 +53,7 @@ Arrow::Arrow(BranchType branchType, const QPointF& parentPos, double height, qsi
     }
 
     setPolygon(polygon);
-    setPen(QPen(Qt::black, 2));
+    setPen(mPen);
 
     setPos(parentPos + QPointF(offset * m_arrow_size, height));
 }
@@ -63,6 +64,31 @@ QPointF Arrow::get_bottom_center() const {
     return mapToScene(bottomCenter);
 }
 
+void Arrow::select(bool isSelected)
+{
+    if(isSelected) {
+        mPen.setBrush(Qt::red);
+    }
+    else {
+        mPen.setBrush(Qt::transparent);
+    }
+    setPen(mPen);
+}
+
+void Arrow::mousePressEvent(QGraphicsSceneMouseEvent *event)
+{
+    QGraphicsPolygonItem::mousePressEvent(event);
+    event->accept();
+}
+
+void Arrow::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
+{
+    if (boundingRect().contains(event->pos())) {
+        emit objectClicked();
+    }
+    QGraphicsPolygonItem::mouseReleaseEvent(event);
+}
+
 void Arrow::move_by(const QPointF& delta) {
     setPos(pos() + delta);
     emit moved_by(delta);
@@ -70,6 +96,10 @@ void Arrow::move_by(const QPointF& delta) {
 
 void Arrow::move_back() {
     move_by(QPointF(-m_arrow_size, 0));
+}
+
+void Arrow::move_forward() {
+    move_by(QPointF(m_arrow_size, 0));
 }
 
 void Arrow::move_y(double delta_y) {

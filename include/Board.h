@@ -44,6 +44,7 @@ signals:
     void nodeCreationRequest(NodeType);
 
     void itemCreated(CppClassView*);
+    void connectionCreated(Connection*);
 
     void error(const QString&);
 public slots:
@@ -73,8 +74,6 @@ protected:
     void onAddNode(CppClassView*) override;
     void onRemoveNode(CppClassView*) override;
 private:
-
-    Arrow* get_arrow(CppClassView*, BranchType);
 
     NodeModification oldMode = NodeModification::None;
 };
