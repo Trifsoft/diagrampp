@@ -116,6 +116,8 @@ void BoardController::setupActions(){
         }, {
         addCtrlAltAction("New class", Qt::Key_C, window, &Board::onClassClicked),
         addCtrlAltAction("New struct", Qt::Key_S, window, &Board::onClassClicked)
+        }, {
+        addAction("Delete", Qt::Key_Backspace, mConnectionHandler, &ConnectionHandler::processNodeRemovalRequest)
         }
     });
 

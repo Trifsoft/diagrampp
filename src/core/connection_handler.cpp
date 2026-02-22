@@ -59,6 +59,14 @@ void ConnectionHandler::deselectAll()
     setSelected(nullptr);
 }
 
+void ConnectionHandler::processNodeRemovalRequest()
+{
+    if(selected != nullptr) {
+        emit nodeRemovalRequested(selected);
+        setSelected(nullptr);
+    }
+}
+
 void ConnectionHandler::setSelected(NodePtr newSelectedNode)
 {
     if(selected != nullptr) {

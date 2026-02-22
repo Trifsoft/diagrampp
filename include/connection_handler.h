@@ -19,6 +19,7 @@ public slots:
     void updateSelectedBranchType(BranchType);
     void handleNodeClick(NodePtr);
     void deselectAll();
+    void processNodeRemovalRequest();
 signals:
     void nodeRemovalRequested(NodePtr);
     void branchCreationRequested(NodePtr, NodePtr, BranchType);

@@ -81,7 +81,7 @@ private:
 
     template <typename Func>
     QAction* addAction(const QString& label, Qt::Key key, const typename QtPrivate::ContextTypeForFunctor<Func>::ContextType *context, Func &&slot, const QIcon& icon = QIcon()) {
-        addAction(label, QKeySequence(key), context, slot, icon);
+        return addAction(label, QKeySequence(key), context, slot, icon);
     }
 };
 
