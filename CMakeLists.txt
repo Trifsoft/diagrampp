@@ -61,6 +61,7 @@ set(CORE_HEADERS
     include/model/elements/constructor/copy_constructor.h
     include/model/base/uml_class_diagram_node.h
     include/view/cpp_class_view.h
+    include/view/editable_text_item.h
     include/validator.h
     include/commandManager/command_manager.h
     include/commandManager/command.h
@@ -124,6 +125,7 @@ set(CORE_SOURCES
     src/core/model/elements/constructor/copy_constructor.cpp
     src/core/model/base/uml_class_diagram_node.cpp
     src/core/view/cpp_class_view.cpp
+    src/core/view/editable_text_item.cpp
     src/commandManager/command_manager.cpp
     src/commandManager/composite_command.cpp
     src/commandManager/add_node_command.cpp

@@ -1,4 +1,5 @@
 #include "view/cpp_class_view.h"
+#include "view/editable_text_item.h"
 #include "model/elements/composition/composition.h"
 #include "model/elements/composition/cpp_class.h"
 #include "model/elements/composition/cpp_struct.h"
@@ -16,83 +17,10 @@
 #include <methodeditor.h>
 #include <memory>
 
-// EditableTextItem implementation
-EditableTextItem::EditableTextItem(const QString& text, ItemType type, std::weak_ptr<IClassElement> element_weak, QGraphicsItem* parent)
-    : QGraphicsTextItem(text, parent)
-    , m_type(type)
-    , m_element_weak(element_weak)
-{
-    setDefaultTextColor(Qt::white);
-    if (type != TitleType) {
-        setFlag(QGraphicsItem::ItemIsSelectable, true);
-    }
-}
-
-void EditableTextItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
-{
-    Q_UNUSED(event);
-    
-    if (m_type == TitleType) {
-        return; // Can't edit title this way
-    }
-    
-    // Find parent CppClassView
-    CppClassView* parent = dynamic_cast<CppClassView*>(this->parentItem());
-
-    
-    if (parent) {
-        auto base = m_element_weak.lock();
-        if(!base){
-            qDebug() << "No element to edit!";
-            return;
-        }
-
-        if (m_type == FieldType){
-            if(auto field = std::dynamic_pointer_cast<Field>(base)) {
-                parent->edit_field(field);
-            }
-        } else if (m_type == MethodType){
-            if(auto method = std::dynamic_pointer_cast<Method>(base)) {
-                parent->edit_method(method);
-            }
-        }
-    } else {
-        qDebug() << "Parent not found";
-    }
-}
-
-// void EditableTextItem::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
-// {
-//     Q_UNUSED(event);
-
-//     // Find parent CppClassView
-//     CppClassView* parent = dynamic_cast<CppClassView*>(this->parentItem());
-//     if(!parent){
-//         qDebug() << "Parent not found";
-//         return;
-//     }
-
-//     auto base = m_element_weak.lock();
-//     if(!base){
-//         qDebug() << "No element to edit!";
-//         return;
-//     }
-
-//     if(m_type == MethodType){
-//         if(auto method = std::dynamic_pointer_cast<Method>(base)){
-//             auto method_editor = new MethodEditor(method, parent->m_composition->get_name());
-//             method_editor->show();
-//         }
-//     }else{
-//         qDebug() << "Only methods are editable this way";
-//     }
-
-// }
-
 // CppClassView implementation
 CppClassView::CppClassView(SharedNodePtr composition, QGraphicsObject* parent)
     : QGraphicsObject(parent)
-    , m_composition(composition)
+    , mComposition(composition)
     , mSelectedFrame(new QGraphicsRectItem(0,0,0,0,this))
 {
     setFlag(QGraphicsItem::ItemIsSelectable, true);
@@ -109,23 +37,21 @@ CppClassView::CppClassView(SharedNodePtr composition, QGraphicsObject* parent)
     mSelectedFrame->setPen(selectedFramePen);
     mSelectedFrame->setVisible(false);
 
-    //setup button
-    m_add_button = new QPushButton("+");
-    m_button_proxy = new QGraphicsProxyWidget(this);
-    m_button_proxy->setWidget(m_add_button);
-    connect(m_add_button, &QPushButton::clicked, this, &CppClassView::on_add_button_clicked);
+    mAddButton = new EditableTextItem("+", this);
+    mAddButton->document()->setDefaultTextOption(QTextOption(Qt::AlignCenter));
+    connect(mAddButton, &EditableTextItem::clicked, this, &CppClassView::onAddButtonClicked);
 
     setAcceptedMouseButtons(Qt::LeftButton | Qt::RightButton);
     updateBoundingRect();
 }
 
 CppClassView::~CppClassView(){
-    m_textItems.clear();    
+    mTextItems.clear();
 }
 
 QRectF CppClassView::boundingRect() const
 {
-    return QRect(0,0,m_width,m_height);
+    return QRect(0,0,mWidth,mHeight);
 }
 
 void CppClassView::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
@@ -137,22 +63,22 @@ void CppClassView::paint(QPainter* painter, const QStyleOptionGraphicsItem* opti
     painter->fillRect(bounding_rect, QColor("#2b2b2b"));
 
 
-    auto y_offset = m_line_height;
-    if(!m_composition->fields.isEmpty()) {
+    auto y_offset = mLineHeight;
+    if(!mComposition->fields.isEmpty()) {
         painter->setPen(QPen(QColor("#404040"), 1));  // tamna siva
-        painter->drawRect(QRect(0, y_offset, m_width, 1));
+        painter->drawRect(QRect(0, y_offset, mWidth, 1));
 
-        y_offset += 1 + m_line_height * m_composition->fields.count();
+        y_offset += 1 + mLineHeight * mComposition->fields.count();
     }
-    if(!m_composition->methods.isEmpty()) {
+    if(!mComposition->methods.isEmpty()) {
         painter->setPen(QPen(QColor("#404040"), 1));  // tamna siva
-        painter->drawRect(QRect(0, y_offset, m_width, 1));
+        painter->drawRect(QRect(0, y_offset, mWidth, 1));
 
-        y_offset += 1 + m_line_height * m_composition->methods.count();
+        y_offset += 1 + mLineHeight * mComposition->methods.count();
     }
 
     painter->setPen(QPen(QColor("#404040"), 1));  // tamna siva
-    painter->drawRect(QRect(0, y_offset, m_width, 1));
+    painter->drawRect(QRect(0, y_offset, mWidth, 1));
 
 }
 
@@ -168,32 +94,30 @@ void CppClassView::updateBoundingRect()
     QFont font;
     QFontMetrics metrics(font);
 
-    double old_height = m_height;
+    double old_height = mHeight;
 
-    m_line_height = metrics.height() + 10;
-    int fields_separator = !m_composition->fields.isEmpty();
-    int methods_separator = !m_composition->methods.isEmpty();
-    m_height = m_line_height * (1 + m_composition->fields.count() + m_composition->methods.count()) + fields_separator + methods_separator;
-    m_width = metrics.horizontalAdvance(m_composition->get_name());
-    for(auto& field : m_composition->fields) {
+    mLineHeight = metrics.height() + 10;
+    int fields_separator = !mComposition->fields.isEmpty();
+    int methods_separator = !mComposition->methods.isEmpty();
+    mHeight = mLineHeight * (2 + mComposition->fields.count() + mComposition->methods.count()) + fields_separator + methods_separator;
+    mWidth = metrics.horizontalAdvance(mComposition->get_name());
+    for(auto& field : mComposition->fields) {
         auto tmp_width = metrics.horizontalAdvance(field->declaration());
-        if(tmp_width > m_width) {
-            m_width = tmp_width;
+        if(tmp_width > mWidth) {
+            mWidth = tmp_width;
         }
     }
-    for(auto& method : m_composition->methods) {
+    for(auto& method : mComposition->methods) {
         auto tmp_width = metrics.horizontalAdvance(method->declaration());
-        if(tmp_width > m_width) {
-            m_width = tmp_width;
+        if(tmp_width > mWidth) {
+            mWidth = tmp_width;
         }
     }
-    m_width = fmax(m_width+20, 150);
+    mWidth = fmax(mWidth+20, 150);
 
-    m_height += m_add_button->height() + 4;
+    mSelectedFrame->setRect(0,0,mWidth,mHeight);
 
-    mSelectedFrame->setRect(0,0,m_width,m_height);
-
-    emit height_changed_by(m_height - old_height);
+    emit height_changed_by(mHeight - old_height);
 
     updateTextItems();
     update_button();
@@ -201,57 +125,56 @@ void CppClassView::updateBoundingRect()
 
 void CppClassView::update_button()
 {
-    if (m_button_proxy && m_add_button) {
-        const int margin = 0;//2;
-        const int button_height = 24;
-
-        m_add_button->setFixedSize(m_width-margin, button_height-margin);
-        m_button_proxy->setPos(margin, m_height - button_height);
-    }
+    mAddButton->setTextWidth(mWidth);
+    mAddButton->setPos(0, mHeight - mLineHeight);
 }
 
 void CppClassView::updateTextItems()
 {
-    // Clear old items
-    qDeleteAll(m_textItems);
-    m_textItems.clear();
+    qDeleteAll(mTextItems);
+    mTextItems.clear();
 
-    add_text(m_composition->get_name(), 0, EditableTextItem::TitleType, {});
-    int y_offset = m_line_height;
-    if(!m_composition->fields.isEmpty()) {
+    addText(mComposition->get_name(), 0);
+
+    int y_offset = mLineHeight;
+    if(!mComposition->fields.isEmpty()) {
         y_offset += 1;
     }
 
-    for(int i = 0; i < m_composition->fields.count(); ++i) {
-        auto& field = m_composition->fields[i];
-        add_text(field->declaration(), y_offset, EditableTextItem::FieldType, field);
-        y_offset += m_line_height;
+    for(auto& field : mComposition->fields) {
+        auto* item = addText(field->declaration(), y_offset);
+        item->setFlag(QGraphicsItem::ItemIsSelectable, true);
+        connect(item, &EditableTextItem::doubleClicked, this, [this, field]() {
+            editField(field);
+        });
+        y_offset += mLineHeight;
     }
 
-    if(!m_composition->methods.isEmpty()) {
+    if(!mComposition->methods.isEmpty()) {
         y_offset += 1;
     }
 
-    for(int i = 0; i < m_composition->methods.count(); ++i) {
-        auto& method = m_composition->methods[i];
-        add_text(method->declaration(), y_offset, EditableTextItem::MethodType, method);
-        y_offset += m_line_height;
+    for(auto& method : mComposition->methods) {
+        auto* item = addText(method->declaration(), y_offset);
+        item->setFlag(QGraphicsItem::ItemIsSelectable, true);
+        connect(item, &EditableTextItem::doubleClicked, this, [this, method]() {
+            editMethod(method);
+        });
+        y_offset += mLineHeight;
     }
 }
 
-void CppClassView::add_text(const QString text, int y_offset, EditableTextItem::ItemType type, std::weak_ptr<IClassElement> element_weak) {
-    auto* item = new EditableTextItem(text, type, element_weak, this);
+EditableTextItem* CppClassView::addText(const QString& text, int y_offset) {
+    auto* item = new EditableTextItem(text, this);
     item->setPos(0, y_offset);
-    item->setTextWidth(m_width);
+    item->setTextWidth(mWidth);
     item->document()->setDefaultTextOption(QTextOption(Qt::AlignCenter));
-
-    m_textItems.append(item);
+    mTextItems.append(item);
+    return item;
 }
 
-void CppClassView::on_add_button_clicked()
+void CppClassView::onAddButtonClicked()
 {
-    qDebug() << "Button clicked";
-
     QMenu context_menu;
 
     QAction* add_field_action = context_menu.addAction("Add Field");
@@ -261,52 +184,52 @@ void CppClassView::on_add_button_clicked()
     QAction* selected_action = context_menu.exec(global_pos);
 
     if (selected_action == add_field_action) {
-        add_new_field();
+        addNewField();
     } else if (selected_action == add_method_action) {
-        add_new_method();
+        addNewMethod();
     }
 
 }
 
-void CppClassView::add_new_field(){
+void CppClassView::addNewField(){
 
     auto new_field = FieldDialog::create_field(scene()->views().first());
     if (new_field) {
-        emit  add_field_request(m_composition.get(), new_field);
+        emit  add_field_request(mComposition.get(), new_field);
         updateBoundingRect();
         update();
     }
 }
 
-void CppClassView::add_new_method(){
+void CppClassView::addNewMethod(){
     auto new_method = MethodDialog::create_method(scene()->views().first());
     if (new_method) {
-        emit  add_method_request(m_composition.get(), new_method);
+        emit  add_method_request(mComposition.get(), new_method);
         updateBoundingRect();
         update();
     }
 }
 
-void CppClassView::edit_field(std::weak_ptr<Field> old_field_weak)
+void CppClassView::editField(std::weak_ptr<Field> old_field_weak)
 {
     if(auto old_field = old_field_weak.lock()){
 
-        std::shared_ptr<Field> edited_field = FieldDialog::edit_field(*old_field, scene()->views().first());
-        if (edited_field) {
-            emit edit_field_request(m_composition.get(), old_field_weak, edited_field);
+        std::shared_ptr<Field> editedField = FieldDialog::edit_field(*old_field, scene()->views().first());
+        if (editedField) {
+            emit edit_field_request(mComposition.get(), old_field_weak, editedField);
             updateBoundingRect();
             update();
         }
     }
 }
 
-void CppClassView::edit_method(std::weak_ptr<Method> old_method_weak)
+void CppClassView::editMethod(std::weak_ptr<Method> old_method_weak)
 {
      if(auto old_method = old_method_weak.lock()){
 
-        std::shared_ptr<Method> edited_method = MethodDialog::edit_method(*old_method, scene()->views().first());
-        if (edited_method) {
-            emit edit_method_request(m_composition.get(), old_method_weak, edited_method);
+        std::shared_ptr<Method> editedMethod = MethodDialog::edit_method(*old_method, scene()->views().first());
+        if (editedMethod) {
+            emit edit_method_request(mComposition.get(), old_method_weak, editedMethod);
             updateBoundingRect();
             update();
         }
@@ -315,7 +238,7 @@ void CppClassView::edit_method(std::weak_ptr<Method> old_method_weak)
 
 void CppClassView::mousePressEvent(QGraphicsSceneMouseEvent* event){
     QGraphicsItem::mousePressEvent(event);
-    emit objectClicked(m_composition.get());
+    emit objectClicked(mComposition.get());
 }
 
 QPointF CppClassView::get_top_center() const{
@@ -339,12 +262,10 @@ QVariant CppClassView::itemChange(GraphicsItemChange change, const QVariant &val
 }
 
 SharedNodePtr CppClassView::get_uml_class_diagram_node() {
-    return m_composition;
+    return mComposition;
 }
 
 void CppClassView::setSelected(bool isSelected)
 {
     mSelectedFrame->setVisible(isSelected);
 }
-
-

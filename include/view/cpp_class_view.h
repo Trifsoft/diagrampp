@@ -3,35 +3,15 @@
 
 #include <QGraphicsTextItem>
 #include <QVector>
-#include <QPushButton>
-#include <QGraphicsProxyWidget>
 #include <QGraphicsSceneMouseEvent>
 #include <model/elements/composition/composition.h>
 #include "graph/diagram_graph.h"
 #include <model/elements/field.h>
 #include <model/elements/method.h>
 #include <view/arrow.h>
+#include <view/editable_text_item.h>
 
 class DiagramGraph;
-
-// Custom text item to track field/method info
-class EditableTextItem : public QGraphicsTextItem {
-public:
-    enum ItemType { TitleType, FieldType, MethodType };
-    
-    EditableTextItem(const QString& text, ItemType type, std::weak_ptr<IClassElement> element_weak, QGraphicsItem* parent);
-    
-    ItemType get_type() const { return m_type; }
-    // int get_element_id() const { return m_element_id; }
-    std::weak_ptr<IClassElement> get_element() const {return m_element_weak;}
-protected:
-    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
-    //void contextMenuEvent(QGraphicsSceneContextMenuEvent* event) override;
-private:
-    ItemType m_type;
-    // int m_element_id;  // Unique ID
-    std::weak_ptr<IClassElement> m_element_weak;
-};
 
 class CppClassView: public QGraphicsObject {
     Q_OBJECT
@@ -57,30 +37,26 @@ public slots:
 
 private:
 
-    SharedNodePtr m_composition;
-    int m_width;
-    int m_height;
-    int m_line_height;
+    SharedNodePtr mComposition;
+    int mWidth;
+    int mHeight;
+    int mLineHeight;
 
-    // Editable text items for now
-    QVector<QGraphicsTextItem*> m_textItems;
+    QVector<EditableTextItem*> mTextItems;
 
     void updateBoundingRect();
     void updateTextItems();
     void update_button();
 
-    void add_text(const QString text, int y_offset, EditableTextItem::ItemType type, std::weak_ptr<IClassElement> element_weak);
-    void add_new_field();
-    void add_new_method();
-    void edit_field(std::weak_ptr<Field> weak_method);
-    void edit_method(std::weak_ptr<Method> weak_method);
+    EditableTextItem* addText(const QString& text, int y_offset);
+    void addNewField();
+    void addNewMethod();
+    void editField(std::weak_ptr<Field> weak_field);
+    void editMethod(std::weak_ptr<Method> weak_method);
 
-    QPushButton* m_add_button;
-    QGraphicsProxyWidget* m_button_proxy;
+    EditableTextItem* mAddButton;
     QGraphicsRectItem *mSelectedFrame;
-    void on_add_button_clicked();
-
-    friend class EditableTextItem;
+    void onAddButtonClicked();
 
 signals:
     void add_field_request(Composition* node, std::shared_ptr<Field> field);
