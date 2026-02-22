@@ -48,9 +48,6 @@ BoardController::BoardController(Board* board, DiagramGraph* graph)
     // Connect radio buttons to command handler
     connect(window, &Board::radioButtonChecked, mConnectionHandler, &ConnectionHandler::updateSelectedBranchType);
 
-    // Connect mode selection to command handler
-    connect(window->ui->modify, &QPushButton::clicked, mConnectionHandler, &ConnectionHandler::updateSelectedNodeModification);
-
     // Connect node creation
     connect(window, &Board::nodeCreationRequest, mDialogFactory, &DialogFactory::openNodeFactory);
     connect(mDialogFactory, &DialogFactory::createNodeRequest, diagram, &DiagramGraph::processNewNodeRequest);
@@ -83,6 +80,7 @@ BoardController::BoardController(Board* board, DiagramGraph* graph)
 
     // Show messages
     connect(diagram, &DiagramGraph::error, mDialogFactory, &DialogFactory::showError);
+    connect(mConnectionHandler, &ConnectionHandler::error, mDialogFactory, &DialogFactory::showError);
     connect(this, &BoardController::message, mDialogFactory, &DialogFactory::showMessage);
     connect(this, &BoardController::error, mDialogFactory, &DialogFactory::showError);
     connect(this, &BoardController::warning, mDialogFactory, &DialogFactory::showWarning);
@@ -121,8 +119,6 @@ void BoardController::setupActions(){
         addAction("Delete", Qt::Key_Backspace, mConnectionHandler, &ConnectionHandler::processRemovalRequest)
         }
     });
-
-    addCtrlAltAction("Toggle modify", Qt::Key_L, window->ui->modify, &QCheckBox::click);
 
     addAction("Next branch type", Qt::Key_Down, window, &Board::selectNextBranchType);
     addAction("Previous branch type", Qt::Key_Up, window, &Board::selectPreviousBranchType);
@@ -247,7 +243,8 @@ void BoardController::connectRemoveBranchCommand(std::shared_ptr<RemoveBranchCom
 
 void BoardController::connectNewNodeView(CppClassView *item)
 {
-    connect(item, &CppClassView::objectClicked, mConnectionHandler, &ConnectionHandler::handleClick);
+    connect(item, &CppClassView::objectLeftClicked, mConnectionHandler, &ConnectionHandler::setSelected);
+    connect(item, &CppClassView::objectRightClicked, mConnectionHandler, &ConnectionHandler::handleNodeRightClick);
     connect(item, &CppClassView::objectMovedByUser, m_command_manager, &CommandManager::addMoveNodeCommand);
     connect(item, &CppClassView::add_field_request, recovery_log, &recoveryLog::add_field_operation);
     connect(item, &CppClassView::add_method_request, recovery_log, &recoveryLog::add_method_operation);
@@ -255,7 +252,7 @@ void BoardController::connectNewNodeView(CppClassView *item)
 
 void BoardController::connectNewConnection(Connection *connection)
 {
-    auto handleClick = [this, connection](){ mConnectionHandler->handleClick(connection); };
+    auto handleClick = [this, connection](){ mConnectionHandler->setSelected(connection); };
     connect(connection->arrow, &Arrow::objectClicked, mConnectionHandler, handleClick);
     connect(connection->line, &Line::objectClicked, mConnectionHandler, handleClick);
 }

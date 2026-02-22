@@ -39,7 +39,7 @@ CppClassView::CppClassView(SharedNodePtr composition, QGraphicsObject* parent)
     mAddButton->document()->setDefaultTextOption(QTextOption(Qt::AlignCenter));
     connect(mAddButton, &EditableTextItem::clicked, this, &CppClassView::onAddButtonClicked);
 
-    setAcceptedMouseButtons(Qt::LeftButton);
+    setAcceptedMouseButtons(Qt::LeftButton | Qt::RightButton);
     updateBoundingRect();
 }
 
@@ -246,8 +246,12 @@ void CppClassView::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
     if(mAccumulatedChange != QPointF(0,0)) {
         emit objectMovedByUser(this, mAccumulatedChange);
     }
+    else if(event->button() == Qt::LeftButton){
+        emit objectLeftClicked(this);
+    }
     else {
-        emit objectClicked(this);
+        emit objectRightClicked(this);
+        qDebug() << "Right Click!";
     }
     mAccumulatedChange = QPointF(0,0);
 }

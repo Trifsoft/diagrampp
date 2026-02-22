@@ -294,13 +294,6 @@
          <number>12</number>
         </property>
         <item>
-         <widget class="QCheckBox" name="modify">
-          <property name="text">
-           <string>Modify</string>
-          </property>
-         </widget>
-        </item>
-        <item>
          <widget class="QRadioButton" name="Inheritance">
           <property name="enabled">
            <bool>true</bool>

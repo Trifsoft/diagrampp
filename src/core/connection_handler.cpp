@@ -7,41 +7,20 @@ ConnectionHandler::~ConnectionHandler()
     qDebug() << "Deleted connection handler";
 }
 
-bool ConnectionHandler::getSelectedNodeModification()
-{
-    return selectedNodeModification;
-}
-
-void ConnectionHandler::updateSelectedNodeModification(bool newNodeModification) {
-    selectedNodeModification = newNodeModification;
-    setSelected(nullptr);
-}
-
 void ConnectionHandler::updateSelectedBranchType(BranchType newBranchType) {
     selectedBranchType = newBranchType;
 }
 
-void ConnectionHandler::handleClick(ISelectable* newSelected) {
-    if(!selectedNodeModification){
-        return;
-    }
-    auto selectedNodePtr = dynamic_cast<NodeViewPtr>(selected);
-    auto newSelectedNodePtr = dynamic_cast<NodeViewPtr>(newSelected);
-    if(selectedNodePtr == nullptr || newSelectedNodePtr == nullptr ) {
-        setSelected(newSelected);
+void ConnectionHandler::handleNodeRightClick(NodeViewPtr target)
+{
+    auto selectedAsNodeViewPtr = dynamic_cast<NodeViewPtr>(selected);
+    if(!selectedAsNodeViewPtr) {
+        emit error("Select a child node first!");
     }
     else {
-        NodePtr first = selectedNodePtr->get_uml_class_diagram_node().get();
-        NodePtr second = newSelectedNodePtr->get_uml_class_diagram_node().get();
-
-        if((first == second) && selectedNodeModification){
-            //execute_remove_node_with_branches(first);
-            emit nodeRemovalRequested(first);
-        }
-        else {
-            emit branchCreationRequested(first, second, selectedBranchType);
-        }
-
+        emit branchCreationRequested(selectedAsNodeViewPtr->get_uml_class_diagram_node().get(),
+                                     target->get_uml_class_diagram_node().get(),
+                                     selectedBranchType);
         setSelected(nullptr);
     }
 }
@@ -71,8 +50,13 @@ void ConnectionHandler::setSelected(ISelectable* newSelectedNode)
     if(selected != nullptr) {
         emit deselectionRequested(selected);
     }
-    selected = newSelectedNode;
-    if(newSelectedNode != nullptr) {
-        emit selectionRequested(newSelectedNode);
+    if(selected != newSelectedNode) {
+        selected = newSelectedNode;
+        if(newSelectedNode != nullptr) {
+            emit selectionRequested(newSelectedNode);
+        }
+    }
+    else {
+        selected = nullptr;
     }
 }

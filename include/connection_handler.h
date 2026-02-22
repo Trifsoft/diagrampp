@@ -14,12 +14,12 @@ class ConnectionHandler: public QObject {
 public:
     ConnectionHandler(QObject* parent = nullptr): QObject(parent) {}
     ~ConnectionHandler();
-
-    bool getSelectedNodeModification();
 public slots:
-    void updateSelectedNodeModification(bool);
     void updateSelectedBranchType(BranchType);
-    void handleClick(ISelectable*);
+
+    void setSelected(ISelectable*);
+    void handleNodeRightClick(NodeViewPtr);
+
     void deselectAll();
     void processRemovalRequest();
 signals:
@@ -29,12 +29,11 @@ signals:
 
     void deselectionRequested(ISelectable*);
     void selectionRequested(ISelectable*);
+
+    void error(const QString&);
 private:
     ISelectable* selected;
     BranchType selectedBranchType = BranchType::INHERITANCE;
-    bool selectedNodeModification = false;
-
-    void setSelected(ISelectable*);
 };
 
 #endif
