@@ -80,7 +80,7 @@ void DiagramGraph::processNewBranchRequest(NodePtr fromRaw, NodePtr toRaw, Branc
 }
 
 
-SharedNodePtr DiagramGraph::find_pointer_owner(Composition* node_view)
+SharedNodePtr DiagramGraph::find_pointer_owner(NodePtr node_view)
 {
     for(auto& node : nodes) {
         if(node.get() == node_view) {

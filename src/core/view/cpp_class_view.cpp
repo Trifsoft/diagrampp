@@ -61,38 +61,39 @@ void EditableTextItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
     }
 }
 
-void EditableTextItem::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
-{
-    Q_UNUSED(event);
+// void EditableTextItem::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
+// {
+//     Q_UNUSED(event);
 
-    // Find parent CppClassView
-    CppClassView* parent = dynamic_cast<CppClassView*>(this->parentItem());
-    if(!parent){
-        qDebug() << "Parent not found";
-        return;
-    }
+//     // Find parent CppClassView
+//     CppClassView* parent = dynamic_cast<CppClassView*>(this->parentItem());
+//     if(!parent){
+//         qDebug() << "Parent not found";
+//         return;
+//     }
 
-    auto base = m_element_weak.lock();
-    if(!base){
-        qDebug() << "No element to edit!";
-        return;
-    }
+//     auto base = m_element_weak.lock();
+//     if(!base){
+//         qDebug() << "No element to edit!";
+//         return;
+//     }
 
-    if(m_type == MethodType){
-        if(auto method = std::dynamic_pointer_cast<Method>(base)){
-            auto method_editor = new MethodEditor(method, parent->m_composition->get_name());
-            method_editor->show();
-        }
-    }else{
-        qDebug() << "Only methods are editable this way";
-    }
+//     if(m_type == MethodType){
+//         if(auto method = std::dynamic_pointer_cast<Method>(base)){
+//             auto method_editor = new MethodEditor(method, parent->m_composition->get_name());
+//             method_editor->show();
+//         }
+//     }else{
+//         qDebug() << "Only methods are editable this way";
+//     }
 
-}
+// }
 
 // CppClassView implementation
 CppClassView::CppClassView(SharedNodePtr composition, QGraphicsObject* parent)
     : QGraphicsObject(parent)
     , m_composition(composition)
+    , mSelectedFrame(new QGraphicsRectItem(0,0,0,0,this))
 {
     setFlag(QGraphicsItem::ItemIsSelectable, true);
     setFlag(QGraphicsItem::ItemIsMovable, true);
@@ -102,6 +103,11 @@ CppClassView::CppClassView(SharedNodePtr composition, QGraphicsObject* parent)
     setAcceptedMouseButtons(Qt::LeftButton | Qt::RightButton);
 
     connect(composition.get(), &Composition::changed, this, &CppClassView::composition_changed);
+
+    QPen selectedFramePen(Qt::red);
+    selectedFramePen.setWidth(1);
+    mSelectedFrame->setPen(selectedFramePen);
+    mSelectedFrame->setVisible(false);
 
     //setup button
     m_add_button = new QPushButton("+");
@@ -185,6 +191,8 @@ void CppClassView::updateBoundingRect()
 
     m_height += m_add_button->height() + 4;
 
+    mSelectedFrame->setRect(0,0,m_width,m_height);
+
     emit height_changed_by(m_height - old_height);
 
     updateTextItems();
@@ -208,15 +216,7 @@ void CppClassView::updateTextItems()
     qDeleteAll(m_textItems);
     m_textItems.clear();
 
-    // Create title
-
-    auto* titleItem = new EditableTextItem(m_composition->get_name(), EditableTextItem::TitleType, {}, this);
-    titleItem->setPos(0, 0);
-    titleItem->setTextWidth(m_width);
-    titleItem->document()->setDefaultTextOption(QTextOption(Qt::AlignCenter));
-    m_textItems.append(titleItem);
-
-
+    add_text(m_composition->get_name(), 0, EditableTextItem::TitleType, {});
     int y_offset = m_line_height;
     if(!m_composition->fields.isEmpty()) {
         y_offset += 1;
@@ -237,7 +237,6 @@ void CppClassView::updateTextItems()
         add_text(method->declaration(), y_offset, EditableTextItem::MethodType, method);
         y_offset += m_line_height;
     }
-    //update_all_connections();
 }
 
 void CppClassView::add_text(const QString text, int y_offset, EditableTextItem::ItemType type, std::weak_ptr<IClassElement> element_weak) {
@@ -341,6 +340,11 @@ QVariant CppClassView::itemChange(GraphicsItemChange change, const QVariant &val
 
 SharedNodePtr CppClassView::get_uml_class_diagram_node() {
     return m_composition;
+}
+
+void CppClassView::setSelected(bool isSelected)
+{
+    mSelectedFrame->setVisible(isSelected);
 }
 
 

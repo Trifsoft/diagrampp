@@ -26,6 +26,7 @@ public:
     Board(const QString& project_name = "Project name", QWidget *parent = nullptr);
     ~Board();
 
+    QGraphicsScene* scene;
     Ui::Board *ui;
 
     CppClassView* get_view_from_node(SharedNodePtr) const;
@@ -35,6 +36,8 @@ public:
     QList<std::shared_ptr<Connection>> getIncomingConnections(CppClassView*) const;
 
     void set_title(const QString&);
+
+    void setSelected(SharedNodePtr, bool);
 signals:
     void radioButtonChecked(BranchType);
     void modeChanged(NodeModification);
@@ -42,6 +45,7 @@ signals:
 
     void itemCreated(CppClassView*);
 
+    void error(const QString&);
 public slots:
     void on_add_field_requested(Composition* node, std::shared_ptr<Field> field);
     void on_add_method_requested(Composition* node, std::shared_ptr<Method>  method);
@@ -55,11 +59,14 @@ public slots:
 
     void add_item(SharedNodePtr, double, double);
 
+    void onClassClicked();
+    void onStructClicked();
+
+    void selectNextBranchType();
+    void selectPreviousBranchType();
 private slots:
     void onCheckRadioButtonClicked();
     void onModeClicked();
-    void onClassClicked();
-    void onStructClicked();
 protected:
     void onAddBranch(CppClassView*, CppClassView*, std::shared_ptr<Connection>) override;
     void onRemoveBranch(CppClassView*, CppClassView*, std::shared_ptr<Connection>) override;
@@ -67,7 +74,6 @@ protected:
     void onRemoveNode(CppClassView*) override;
 private:
 
-    QGraphicsScene* scene;
     Arrow* get_arrow(CppClassView*, BranchType);
 
     NodeModification oldMode = NodeModification::None;

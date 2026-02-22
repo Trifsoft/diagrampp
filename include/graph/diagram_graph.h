@@ -30,7 +30,7 @@ public:
     std::vector<BranchEdge> get_branches_for_node(SharedNodePtr node) const;
 
 
-    SharedNodePtr find_pointer_owner(Composition *node_view);
+    SharedNodePtr find_pointer_owner(NodePtr node_view);
 
 #if DEBUG_MODE >= 1
     void show_diagram();

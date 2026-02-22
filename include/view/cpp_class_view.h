@@ -26,7 +26,7 @@ public:
     std::weak_ptr<IClassElement> get_element() const {return m_element_weak;}
 protected:
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
-    void contextMenuEvent(QGraphicsSceneContextMenuEvent* event) override;
+    //void contextMenuEvent(QGraphicsSceneContextMenuEvent* event) override;
 private:
     ItemType m_type;
     // int m_element_id;  // Unique ID
@@ -49,6 +49,8 @@ public:
 
     QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
     SharedNodePtr get_uml_class_diagram_node();
+
+    void setSelected(bool);
 
 public slots:
     void composition_changed();
@@ -75,6 +77,7 @@ private:
 
     QPushButton* m_add_button;
     QGraphicsProxyWidget* m_button_proxy;
+    QGraphicsRectItem *mSelectedFrame;
     void on_add_button_clicked();
 
     friend class EditableTextItem;

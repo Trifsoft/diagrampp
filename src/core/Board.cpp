@@ -144,6 +144,36 @@ void Board::onStructClicked()
     emit nodeCreationRequest(NodeType::Struct);
 }
 
+void Board::selectNextBranchType()
+{
+    if(ui->Inheritance->isChecked()){
+        ui->Association->click();
+    }else if(ui->Association->isChecked()){
+        ui->Realization->click();
+    }else if(ui->Realization->isChecked()){
+        ui->Aggregation->click();
+    }else if(ui->Aggregation->isChecked()){
+        ui->Composition->click();
+    }else if(ui->Composition->isChecked()) {
+        ui->Dependency->click();
+    }
+}
+
+void Board::selectPreviousBranchType()
+{
+    if(ui->Association->isChecked()){
+        ui->Inheritance->click();
+    }else if(ui->Realization->isChecked()){
+        ui->Association->click();
+    }else if(ui->Aggregation->isChecked()){
+        ui->Realization->click();
+    }else if(ui->Composition->isChecked()){
+        ui->Aggregation->click();
+    }else if(ui->Dependency->isChecked()) {
+        ui->Composition->click();
+    }
+}
+
 
 void Board::on_add_field_requested(Composition *node, std::shared_ptr<Field> field)
 {
@@ -213,6 +243,15 @@ void Board::addItem(SharedNodePtr node) {
 
 void Board::set_title(const QString& title) {
     ui->title->setText(title);
+}
+
+void Board::setSelected(SharedNodePtr node, bool isSelected)
+{
+    auto item = get_view_from_node(node);
+    if(item == nullptr) {
+        emit error("Fatal error - passed nullptr to select");
+    }
+    item->setSelected(isSelected);
 }
 
 void Board::addLink(SharedNodePtr from, SharedNodePtr to, BranchType branch) {

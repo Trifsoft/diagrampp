@@ -2,6 +2,7 @@
 #define BOARD_CONTROLLER_H
 
 #include <QObject>
+#include <QMenuBar>
 #include "graph/diagram_graph.h"
 #include "recoveyLog.h"
 #include "commandManager/command_manager.h"
@@ -24,7 +25,7 @@ signals:
     void error(const QString&);
     void warning(const QString&);
 
-public slots:
+private slots:
     void exportPNG(const QString&);
     void showSerializationSuccessMessage(const QString&);
 
@@ -42,6 +43,9 @@ public slots:
     void connectRemoveBranchCommand(std::shared_ptr<RemoveBranchCommand> command);
     void connectNewNodeView(CppClassView*);
 
+    void select(NodePtr);
+    void deselect(NodePtr);
+
 private:
     DiagramGraph *diagram;
     CommandManager *m_command_manager;
@@ -50,8 +54,35 @@ private:
     Board *window;
     recoveryLog *recovery_log;
 
+    QMenuBar *menuBar;
+    void addMenuList(const QString &menuName, const QList<QList<QAction *> > &actions);
+    void addMenu(const QString&, const QList<QAction*>&);
+
+
     void setupActions();
     QString getFileName();
+
+    void setSelect(NodePtr, bool);
+
+
+    template <typename Func>
+    QAction* addAction(const QString& label, const QKeySequence& keySequence, const typename QtPrivate::ContextTypeForFunctor<Func>::ContextType *context, Func &&slot, const QIcon& icon = QIcon()) {
+        auto newAction = new QAction(icon, label, this);
+        newAction->setShortcut(keySequence);
+        connect(newAction, &QAction::triggered, context, slot);
+        window->addAction(newAction);
+        return newAction;
+    }
+
+    template <typename Func>
+    QAction* addCtrlAltAction(const QString& label, Qt::Key key, const typename QtPrivate::ContextTypeForFunctor<Func>::ContextType *context, Func &&slot, const QIcon& icon = QIcon()) {
+        return addAction(label, QKeySequence(Qt::CTRL | Qt::ALT | key), context, slot, icon);
+    }
+
+    template <typename Func>
+    QAction* addAction(const QString& label, Qt::Key key, const typename QtPrivate::ContextTypeForFunctor<Func>::ContextType *context, Func &&slot, const QIcon& icon = QIcon()) {
+        addAction(label, QKeySequence(key), context, slot, icon);
+    }
 };
 
 #endif // BOARD_CONTROLLER_H

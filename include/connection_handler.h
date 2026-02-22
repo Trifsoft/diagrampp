@@ -18,15 +18,20 @@ public slots:
     void updateSelectedNodeModification(NodeModification);
     void updateSelectedBranchType(BranchType);
     void handleNodeClick(NodePtr);
+    void deselectAll();
 signals:
     void nodeRemovalRequested(NodePtr);
     void branchCreationRequested(NodePtr, NodePtr, BranchType);
     void branchRemovalRequested(NodePtr, NodePtr, BranchType);
+
+    void deselectionRequested(NodePtr);
+    void selectionRequested(NodePtr);
 private:
-    NodePtr first;
-    NodePtr second;
+    NodePtr selected;
     BranchType selectedBranchType = BranchType::INHERITANCE;
     NodeModification selectedNodeModification = NodeModification::None;
+
+    void setSelected(NodePtr);
 };
 
 #endif

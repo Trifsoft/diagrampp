@@ -8,6 +8,7 @@
 #include <QAction>
 #include <QPainter>
 #include <QObject>
+#include <QIcon>
 
 #include <serializers/serializer.h>
 #include "commandManager/add_node_command.h"
@@ -22,6 +23,7 @@ BoardController::BoardController(Board* board, DiagramGraph* graph)
     , mDialogFactory(new DialogFactory(board))
     , m_command_manager(new CommandManager(this))
     , mConnectionHandler(new ConnectionHandler(this))
+    , menuBar(new QMenuBar(board))
 {
     setParent(board);
     diagram->setParent(this);
@@ -87,6 +89,10 @@ BoardController::BoardController(Board* board, DiagramGraph* graph)
     // Close window -> delete window
     connect(window, &QObject::destroyed, this, &QObject::deleteLater);
 
+    // Connect node selection
+    connect(mConnectionHandler, &ConnectionHandler::selectionRequested, this, &BoardController::select);
+    connect(mConnectionHandler, &ConnectionHandler::deselectionRequested, this, &BoardController::deselect);
+
     setupActions();
 }
 
@@ -99,15 +105,27 @@ BoardController::~BoardController()
 }
 
 void BoardController::setupActions(){
-    auto undoAction = new QAction("Undo", window);
-    undoAction->setShortcut(QKeySequence::Undo);
-    connect(undoAction, &QAction::triggered, m_command_manager, &CommandManager::undo);
-    window->addAction(undoAction);
+    addMenu("File", {
+        addAction("New project", QKeySequence::New, this, [](){}),
+        addAction("Import project", QKeySequence::Open, this, [](){})
+    });
+    addMenuList("Edit", {
+        {
+        addAction("Undo", QKeySequence::Undo, m_command_manager, &CommandManager::undo, QIcon::fromTheme(QIcon::ThemeIcon::EditUndo)),
+        addAction("Redo", QKeySequence::Redo, m_command_manager, &CommandManager::redo, QIcon::fromTheme(QIcon::ThemeIcon::EditRedo)),
+        }, {
+        addCtrlAltAction("New class", Qt::Key_C, window, &Board::onClassClicked),
+        addCtrlAltAction("New struct", Qt::Key_S, window, &Board::onClassClicked)
+        }
+    });
 
-    auto redoAction = new QAction("Redo", window);
-    redoAction->setShortcut(QKeySequence::Redo);
-    connect(redoAction, &QAction::triggered, m_command_manager, &CommandManager::redo);
-    window->addAction(redoAction);
+    addCtrlAltAction("Linkage mode", Qt::Key_L, window->ui->linkageMode, &QCheckBox::click);
+    addCtrlAltAction("Remove mode", Qt::Key_R, window->ui->removeMode, &QCheckBox::click);
+
+    addAction("Next branch type", Qt::Key_Down, window, &Board::selectNextBranchType);
+    addAction("Previous branch type", Qt::Key_Up, window, &Board::selectPreviousBranchType);
+
+    window->layout()->setMenuBar(menuBar);
 }
 
 void BoardController::exportPNG(const QString& filePath){
@@ -202,6 +220,12 @@ QString BoardController::getFileName() {
     return title;
 }
 
+void BoardController::setSelect(NodePtr ptr, bool isSelected)
+{
+    auto node = diagram->find_pointer_owner(ptr);
+    window->setSelected(node, isSelected);
+}
+
 void BoardController::connectCreateNodeCommand(std::shared_ptr<AddNodeCommand> command) {
     connect(command.get(), &AddNodeCommand::addNodeRequested, diagram, &DiagramGraph::addNode);
     connect(command.get(), &AddNodeCommand::removeNodeRequested, diagram, &DiagramGraph::removeNode);
@@ -230,4 +254,33 @@ void BoardController::connectNewNodeView(CppClassView *item)
     connect(item, &CppClassView::objectClicked, mConnectionHandler, &ConnectionHandler::handleNodeClick);
     connect(item, &CppClassView::add_field_request, recovery_log, &recoveryLog::add_field_operation);
     connect(item, &CppClassView::add_method_request, recovery_log, &recoveryLog::add_method_operation);
+}
+
+void BoardController::select(NodePtr nodePtr)
+{
+    setSelect(nodePtr, true);
+}
+
+void BoardController::deselect(NodePtr nodePtr)
+{
+    setSelect(nodePtr, false);
+}
+
+void BoardController::addMenuList(const QString &menuName, const QList<QList<QAction *>> &actions)
+{
+    auto menu = menuBar->addMenu("&" + menuName);
+
+    for(auto it = actions.begin(); it != actions.end(); it++) {
+        if(it != actions.begin()) {
+            menu->addSeparator();
+        }
+        for(auto action : *it) {
+            menu->addAction(action);
+        }
+    }
+}
+
+void BoardController::addMenu(const QString &menuName, const QList<QAction *> &actions)
+{
+    addMenuList(menuName, { actions });
 }
