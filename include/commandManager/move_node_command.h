@@ -2,9 +2,8 @@
 #define MOVE_NODE_COMMAND_H
 
 #include "command.h"
-#include <QObject>
 #include <QPointF>
-#include <QThread>
+#include <QPropertyAnimation>
 
 class CppClassView;
 
@@ -17,22 +16,8 @@ public:
     bool undo() override;
 
 private:
-    CppClassView* mItem;
-    QPointF mDelta;
-};
+    void animate(QPointF from, QPointF to);
 
-class AnimateMove : public QThread {
-    Q_OBJECT
-public:
-    AnimateMove(CppClassView* item, QPointF delta, QObject* parent = nullptr);
-
-protected:
-    void run() override;
-
-signals:
-    void moveStep(QPointF miniDelta);
-
-private:
     CppClassView* mItem;
     QPointF mDelta;
 };
