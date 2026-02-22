@@ -252,7 +252,7 @@ void BoardController::connectRemoveBranchCommand(std::shared_ptr<RemoveBranchCom
 void BoardController::connectNewNodeView(CppClassView *item)
 {
     connect(item, &CppClassView::objectClicked, mConnectionHandler, &ConnectionHandler::handleNodeClick);
-    connect(item, &CppClassView::objectMoved, m_command_manager, &CommandManager::addMoveNodeCommand);
+    connect(item, &CppClassView::objectMovedByUser, m_command_manager, &CommandManager::addMoveNodeCommand);
     connect(item, &CppClassView::add_field_request, recovery_log, &recoveryLog::add_field_operation);
     connect(item, &CppClassView::add_method_request, recovery_log, &recoveryLog::add_method_operation);
 }

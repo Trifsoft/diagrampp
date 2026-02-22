@@ -244,7 +244,7 @@ void CppClassView::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
     QGraphicsItem::mouseReleaseEvent(event);
     if(mAccumulatedChange != QPointF(0,0)) {
-        emit objectMoved(this, mAccumulatedChange);
+        emit objectMovedByUser(this, mAccumulatedChange);
     }
     else {
         emit objectClicked(mComposition.get());

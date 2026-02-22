@@ -68,7 +68,7 @@ signals:
     void edit_method_request(Composition* node, std::weak_ptr<Method> old_method,std::shared_ptr<Method> new_method);
 
     void objectClicked(Composition* node);
-    void objectMoved(CppClassView* item, QPointF delta);
+    void objectMovedByUser(CppClassView* item, QPointF delta);
 
     void height_changed_by(double);
     void moved_by(const QPointF& delta);
