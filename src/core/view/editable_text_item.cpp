@@ -1,7 +1,7 @@
 #include "view/editable_text_item.h"
 
-EditableTextItem::EditableTextItem(const QString& text, QGraphicsItem* parent)
-    : QGraphicsTextItem(text, parent)
+EditableTextItem::EditableTextItem(const QString& text, bool clickable, QGraphicsItem* parent)
+    : QGraphicsTextItem(text, parent), mClickable(clickable)
 {
     setDefaultTextColor(Qt::white);
 }
@@ -9,7 +9,9 @@ EditableTextItem::EditableTextItem(const QString& text, QGraphicsItem* parent)
 void EditableTextItem::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsTextItem::mousePressEvent(event);
-    event->accept();
+    if(mClickable) {
+        event->accept();
+    }
 }
 
 void EditableTextItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)

@@ -22,7 +22,7 @@ public:
     QRectF boundingRect() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
 
-    void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
+    void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override;
 
     QPointF get_top_center() const;
     QPointF get_bottom_center() const;
@@ -48,7 +48,7 @@ private:
     void updateTextItems();
     void update_button();
 
-    EditableTextItem* addText(const QString& text, int y_offset);
+    EditableTextItem* addText(const QString& text, int y_offset, bool clickable = true);
     void addNewField();
     void addNewMethod();
     void editField(std::weak_ptr<Field> weak_field);

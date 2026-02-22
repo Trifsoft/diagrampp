@@ -7,7 +7,7 @@
 class EditableTextItem : public QGraphicsTextItem {
     Q_OBJECT
 public:
-    explicit EditableTextItem(const QString& text, QGraphicsItem* parent = nullptr);
+    explicit EditableTextItem(const QString& text, bool clickable = true, QGraphicsItem* parent = nullptr);
 
 protected:
     void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
@@ -17,6 +17,8 @@ protected:
 signals:
     void clicked();
     void doubleClicked();
+private:
+    bool mClickable;
 };
 
 #endif // EDITABLE_TEXT_ITEM_H

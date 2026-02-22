@@ -28,8 +28,6 @@ CppClassView::CppClassView(SharedNodePtr composition, QGraphicsObject* parent)
     setFlag(QGraphicsItem::ItemIsFocusable, true);
     setFlag(QGraphicsItem::ItemSendsGeometryChanges, true);
 
-    setAcceptedMouseButtons(Qt::LeftButton | Qt::RightButton);
-
     connect(composition.get(), &Composition::changed, this, &CppClassView::composition_changed);
 
     QPen selectedFramePen(Qt::red);
@@ -37,11 +35,11 @@ CppClassView::CppClassView(SharedNodePtr composition, QGraphicsObject* parent)
     mSelectedFrame->setPen(selectedFramePen);
     mSelectedFrame->setVisible(false);
 
-    mAddButton = new EditableTextItem("+", this);
+    mAddButton = new EditableTextItem("+", true, this);
     mAddButton->document()->setDefaultTextOption(QTextOption(Qt::AlignCenter));
     connect(mAddButton, &EditableTextItem::clicked, this, &CppClassView::onAddButtonClicked);
 
-    setAcceptedMouseButtons(Qt::LeftButton | Qt::RightButton);
+    setAcceptedMouseButtons(Qt::LeftButton);
     updateBoundingRect();
 }
 
@@ -134,7 +132,7 @@ void CppClassView::updateTextItems()
     qDeleteAll(mTextItems);
     mTextItems.clear();
 
-    addText(mComposition->get_name(), 0);
+    addText(mComposition->get_name(), 0, false);
 
     int y_offset = mLineHeight;
     if(!mComposition->fields.isEmpty()) {
@@ -164,8 +162,8 @@ void CppClassView::updateTextItems()
     }
 }
 
-EditableTextItem* CppClassView::addText(const QString& text, int y_offset) {
-    auto* item = new EditableTextItem(text, this);
+EditableTextItem* CppClassView::addText(const QString& text, int y_offset, bool clickable) {
+    auto* item = new EditableTextItem(text, clickable, this);
     item->setPos(0, y_offset);
     item->setTextWidth(mWidth);
     item->document()->setDefaultTextOption(QTextOption(Qt::AlignCenter));
@@ -236,8 +234,9 @@ void CppClassView::editMethod(std::weak_ptr<Method> old_method_weak)
     }
 }
 
-void CppClassView::mousePressEvent(QGraphicsSceneMouseEvent* event){
-    QGraphicsItem::mousePressEvent(event);
+void CppClassView::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
+{
+    QGraphicsItem::mouseReleaseEvent(event);
     emit objectClicked(mComposition.get());
 }
 
