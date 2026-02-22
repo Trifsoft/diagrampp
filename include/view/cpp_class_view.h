@@ -22,6 +22,7 @@ public:
     QRectF boundingRect() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
 
+    void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
     void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override;
 
     QPointF get_top_center() const;
@@ -57,6 +58,8 @@ private:
     EditableTextItem* mAddButton;
     QGraphicsRectItem *mSelectedFrame;
     void onAddButtonClicked();
+
+    QPointF mAccumulatedChange = QPointF(0,0);
 
 signals:
     void add_field_request(Composition* node, std::shared_ptr<Field> field);

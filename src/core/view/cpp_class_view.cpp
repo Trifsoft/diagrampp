@@ -234,10 +234,22 @@ void CppClassView::editMethod(std::weak_ptr<Method> old_method_weak)
     }
 }
 
+void CppClassView::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
+{
+    QGraphicsItem::mouseMoveEvent(event);
+    mAccumulatedChange += event->scenePos() - event->lastScenePos();
+}
+
 void CppClassView::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
     QGraphicsItem::mouseReleaseEvent(event);
-    emit objectClicked(mComposition.get());
+    if(mAccumulatedChange != QPointF(0,0)) {
+        // TODO
+    }
+    else {
+        emit objectClicked(mComposition.get());
+    }
+    mAccumulatedChange = QPointF(0,0);
 }
 
 QPointF CppClassView::get_top_center() const{
