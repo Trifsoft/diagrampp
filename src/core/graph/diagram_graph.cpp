@@ -98,7 +98,7 @@ SharedNodePtr DiagramGraph::find_pointer_owner(NodePtr node_view)
 
 void DiagramGraph::removeBranch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type){
     if(!mRemoveBranch(from, to, branch_type)) {
-        emit error("Branch not found");
+        emit error("Branch not found: " + QString::number(static_cast<int>(branch_type)));
     }
 }
 
@@ -119,10 +119,6 @@ void DiagramGraph::processRemoveBranchRequest(NodePtr fromRaw, NodePtr toRaw, Br
 
     if(branch_type == BranchType::INHERITANCE){
         from->break_inheritance();
-    }
-
-    if(branch_type == BranchType::ASSOCIATION){
-        removeBranch(to, from, branch_type);
     }
 
     removeBranch(from, to, branch_type);

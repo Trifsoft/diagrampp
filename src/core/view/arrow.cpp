@@ -42,14 +42,7 @@ Arrow::Arrow(BranchType branchType, const QPointF& parentPos, double height, qsi
         setBrush(Qt::white);
         break;
     case BranchType::ASSOCIATION:
-        polygon << QPointF(-m_arrow_size / 2, m_arrow_size)
-                << QPointF(m_arrow_size / 2, m_arrow_size)
-                << QPointF(0, 0);
-        setBrush(Qt::white);
-        setPolygon(polygon);
-        setPen(QPen(Qt::white, 2));
-        setVisible(false);
-        return;
+        break;
     }
 
     setPolygon(polygon);

@@ -5,6 +5,7 @@ Connection::Connection(NodeViewPtr child, NodeViewPtr parent, int arrowOffset, B
     , line(new Line(branch, QLineF(child->get_top_center(), arrow->get_bottom_center())))
     , mFrom(child->get_uml_class_diagram_node().get())
     , mTo(parent->get_uml_class_diagram_node().get())
+    , mBranchType(branch)
 {
     arrow->setParent(this);
     line->setParent(this);
