@@ -101,28 +101,28 @@ BoardController::~BoardController()
 void BoardController::setupActions(){
     addMenuList("File", {
         {
-        addAction("New project", QKeySequence::New, this, [](){}),
-        addAction("Import project", QKeySequence::Open, this, [](){})
+        addAction("New project", this, [](){}, QKeySequence::New),
+        addAction("Import project", this, [](){}, QKeySequence::Open)
         }, {
-        addAction("Export as PNG", QKeySequence::NoMatch, this, &BoardController::requestPNGPath),
-        addAction("Export as JSON", QKeySequence::NoMatch, this, &BoardController::requestJSONPath),
-        addAction("Generate project", QKeySequence::NoMatch, mDialogFactory->generateDialog, &QDialog::exec),
+        addAction("Export as PNG", this, &BoardController::requestPNGPath),
+        addAction("Export as JSON", this, &BoardController::requestJSONPath),
+        addAction("Generate project", mDialogFactory->generateDialog, &QDialog::exec),
         }
     });
     addMenuList("Edit", {
         {
-        addAction("Undo", QKeySequence::Undo, m_command_manager, &CommandManager::undo, QIcon::fromTheme(QIcon::ThemeIcon::EditUndo)),
-        addAction("Redo", QKeySequence::Redo, m_command_manager, &CommandManager::redo, QIcon::fromTheme(QIcon::ThemeIcon::EditRedo)),
+        addAction("Undo", m_command_manager, &CommandManager::undo, QKeySequence::Undo, QIcon::fromTheme(QIcon::ThemeIcon::EditUndo)),
+        addAction("Redo", m_command_manager, &CommandManager::redo, QKeySequence::Redo, QIcon::fromTheme(QIcon::ThemeIcon::EditRedo)),
         }, {
-        addCtrlAltAction("New class", Qt::Key_C, window, &Board::onClassClicked),
-        addCtrlAltAction("New struct", Qt::Key_S, window, &Board::onClassClicked)
+        addCtrlAltAction("New class", window, &Board::onClassClicked, Qt::Key_C),
+        addCtrlAltAction("New struct", window, &Board::onClassClicked, Qt::Key_S)
         }, {
-        addAction("Delete", Qt::Key_Backspace, mConnectionHandler, &ConnectionHandler::processRemovalRequest)
+        addAction("Delete", mConnectionHandler, &ConnectionHandler::processRemovalRequest, Qt::Key_Backspace)
         }
     });
 
-    addAction("Next branch type", Qt::Key_Down, window, &Board::selectNextBranchType);
-    addAction("Previous branch type", Qt::Key_Up, window, &Board::selectPreviousBranchType);
+    addAction("Next branch type", window, &Board::selectNextBranchType, Qt::Key_Down);
+    addAction("Previous branch type", window, &Board::selectPreviousBranchType, Qt::Key_Up);
 
     window->layout()->setMenuBar(menuBar);
 }

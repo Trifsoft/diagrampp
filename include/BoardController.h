@@ -63,7 +63,7 @@ private:
 
 
     template <typename Func>
-    QAction* addAction(const QString& label, const QKeySequence& keySequence, const typename QtPrivate::ContextTypeForFunctor<Func>::ContextType *context, Func &&slot, const QIcon& icon = QIcon()) {
+    QAction* addAction(const QString& label, const typename QtPrivate::ContextTypeForFunctor<Func>::ContextType *context, Func &&slot, const QKeySequence& keySequence = QKeySequence(), const QIcon& icon = QIcon()) {
         auto newAction = new QAction(icon, label, this);
         newAction->setShortcut(keySequence);
         connect(newAction, &QAction::triggered, context, slot);
@@ -72,13 +72,13 @@ private:
     }
 
     template <typename Func>
-    QAction* addCtrlAltAction(const QString& label, Qt::Key key, const typename QtPrivate::ContextTypeForFunctor<Func>::ContextType *context, Func &&slot, const QIcon& icon = QIcon()) {
-        return addAction(label, QKeySequence(Qt::CTRL | Qt::ALT | key), context, slot, icon);
+    QAction* addCtrlAltAction(const QString& label, const typename QtPrivate::ContextTypeForFunctor<Func>::ContextType *context, Func &&slot, Qt::Key key, const QIcon& icon = QIcon()) {
+        return addAction(label, context, slot, QKeySequence(Qt::CTRL | Qt::ALT | key), icon);
     }
 
     template <typename Func>
-    QAction* addAction(const QString& label, Qt::Key key, const typename QtPrivate::ContextTypeForFunctor<Func>::ContextType *context, Func &&slot, const QIcon& icon = QIcon()) {
-        return addAction(label, QKeySequence(key), context, slot, icon);
+    QAction* addAction(const QString& label, const typename QtPrivate::ContextTypeForFunctor<Func>::ContextType *context, Func &&slot, Qt::Key key, const QIcon& icon = QIcon()) {
+        return addAction(label, context, slot, QKeySequence(key), icon);
     }
 };
 
