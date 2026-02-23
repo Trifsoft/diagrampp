@@ -212,7 +212,7 @@ void BoardController::generateProject(const QString& path,
 }
 
 QString BoardController::getFileName() {
-    QString title = window->ui->title->text().trimmed();
+    QString title = window->windowTitle().trimmed();
     title = title.toLower();
     title.replace(QRegularExpression("\\s+"), "_");
     title.remove(QRegularExpression("^_+|_+$"));

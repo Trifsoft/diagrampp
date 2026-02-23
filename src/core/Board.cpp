@@ -27,14 +27,12 @@ Board::Board(const QString& project_name, QWidget *parent)
 
     setAttribute(Qt::WA_DeleteOnClose);
 
-    ui->title->setText(project_name);
+    setWindowTitle(project_name);
 
     scene = new QGraphicsScene();
     ui->board->setScene(scene);
     ui->board->setStyleSheet("background-color: #1a1a1a;");
-    ui->top_bar->setStyleSheet("background-color: #252526;");
     ui->side_menu->setStyleSheet("background-color: #252526;");
-    ui->back->setStyleSheet("color: #ffffff;");
 
     // Emit upgraded signal - branch selection radio buttons
     connect(ui->Inheritance, &QPushButton::clicked, this, &Board::onCheckRadioButtonClicked);
@@ -230,7 +228,7 @@ void Board::addItem(SharedNodePtr node) {
 }
 
 void Board::set_title(const QString& title) {
-    ui->title->setText(title);
+    setWindowTitle(title);
 }
 
 void Board::setSelected(SharedNodePtr node, bool isSelected)
