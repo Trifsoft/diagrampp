@@ -34,15 +34,10 @@ BoardController::BoardController(Board* board, DiagramGraph* graph)
     }
 
     // Connect export json
-    connect(board->ui->exportJSON, &QPushButton::clicked, this, &BoardController::requestJSONPath);
     connect(&Serializer::instance(), &Serializer::serializationSuccess, this, &BoardController::showSerializationSuccessMessage);
     connect(&Serializer::instance(), &Serializer::serializationFailure, mDialogFactory, &DialogFactory::showError);
 
-    // Connect export png
-    connect(board->ui->exportPNG, &QPushButton::clicked, this, &BoardController::requestPNGPath);
-
     // Connect generate project
-    connect(board->ui->generate_project, &QPushButton::clicked, mDialogFactory->generateDialog, &QDialog::exec);
     connect(mDialogFactory, &DialogFactory::projectGenerationRequested, this, &BoardController::generateProject);
 
     // Connect radio buttons to command handler
@@ -104,9 +99,15 @@ BoardController::~BoardController()
 }
 
 void BoardController::setupActions(){
-    addMenu("File", {
+    addMenuList("File", {
+        {
         addAction("New project", QKeySequence::New, this, [](){}),
         addAction("Import project", QKeySequence::Open, this, [](){})
+        }, {
+        addAction("Export as PNG", QKeySequence::NoMatch, this, &BoardController::requestPNGPath),
+        addAction("Export as JSON", QKeySequence::NoMatch, this, &BoardController::requestJSONPath),
+        addAction("Generate project", QKeySequence::NoMatch, mDialogFactory->generateDialog, &QDialog::exec),
+        }
     });
     addMenuList("Edit", {
         {
