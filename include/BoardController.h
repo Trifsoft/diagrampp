@@ -26,7 +26,6 @@ signals:
     void warning(const QString&);
 
 private slots:
-    void exportPNG(const QString&);
     void showSerializationSuccessMessage(const QString&);
 
     void generateProject(const QString&,

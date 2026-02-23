@@ -6,6 +6,7 @@
 #include "src/ui/ui_Board.h"
 #include "model/elements/type/regular_type.h"
 #include <QMessageBox>
+#include <QPainter>
 
 namespace {
 
@@ -229,6 +230,37 @@ void Board::addItem(SharedNodePtr node) {
 
 void Board::set_title(const QString& title) {
     setWindowTitle(title);
+}
+
+void Board::exportPNG(const QString& filePath)
+{
+    QRectF items_rect = scene->itemsBoundingRect();
+    if(items_rect.isEmpty()){
+        emit error("No items to export!");
+        return;
+    }
+
+    // margins [item] -> [  item  ]
+    const qreal margin = 50;
+    items_rect.adjust(-margin, -margin, margin, margin);
+
+    QImage image(items_rect.size().toSize(), QImage::Format_ARGB32);
+    image.fill(Qt::white);
+
+    QPainter painter(&image);
+    painter.setRenderHint(QPainter::Antialiasing);
+    painter.setRenderHint(QPainter::TextAntialiasing);
+    painter.setRenderHint(QPainter::SmoothPixmapTransform);
+
+    scene->render(&painter, QRectF(0, 0, image.width(), image.height()), items_rect);
+    painter.end();
+
+    if(image.save(filePath, "PNG", 100)){
+        emit message("Success", QString("Diagram exported to:\n%1\n\nSize: %2x%3 pixels")
+                                        .arg(filePath).arg(image.width()).arg(image.height()));
+    } else {
+        emit error("Failed to save image. Check write permissions.");
+    }
 }
 
 void Board::setSelected(SharedNodePtr node, bool isSelected)

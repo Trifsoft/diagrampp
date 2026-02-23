@@ -45,6 +45,7 @@ signals:
     void connectionCreated(Connection*);
 
     void error(const QString&);
+    void message(const QString&, const QString&);
 public slots:
     void on_add_field_requested(Composition* node, std::shared_ptr<Field> field);
     void on_add_method_requested(Composition* node, std::shared_ptr<Method>  method);
@@ -57,6 +58,8 @@ public slots:
     void addItem(SharedNodePtr);
 
     void add_item(SharedNodePtr, double, double);
+
+    void exportPNG(const QString& filePath);
 
     void onClassClicked();
     void onStructClicked();

@@ -3,10 +3,8 @@
 #include "src/ui/ui_Board.h"
 
 #include <QGraphicsScene>
-#include <QMessageBox>
 #include <QRegularExpression>
 #include <QAction>
-#include <QPainter>
 #include <QObject>
 #include <QIcon>
 
@@ -80,6 +78,9 @@ BoardController::BoardController(Board* board, DiagramGraph* graph)
     connect(this, &BoardController::error, mDialogFactory, &DialogFactory::showError);
     connect(this, &BoardController::warning, mDialogFactory, &DialogFactory::showWarning);
 
+    // Connect board messages
+    connect(window, &Board::message, mDialogFactory, &DialogFactory::showMessage);
+
     // Close window -> delete window
     connect(window, &QObject::destroyed, this, &QObject::deleteLater);
 
@@ -131,37 +132,6 @@ void BoardController::setupActions(){
     window->layout()->setMenuBar(menuBar);
 }
 
-void BoardController::exportPNG(const QString& filePath){
-    QGraphicsScene* scene = window->ui->board->scene();
-    QRectF items_rect = scene->itemsBoundingRect();
-    if(items_rect.isEmpty()){
-        QMessageBox::warning(window, "Export", "No items to export!");
-        return;
-    }
-
-    // margins [item] -> [  item  ]
-    const qreal margin = 50;
-    items_rect.adjust(-margin, -margin, margin, margin);
-
-    QImage image(items_rect.size().toSize(), QImage::Format_ARGB32);
-    image.fill(Qt::white);
-
-    QPainter painter(&image);
-    painter.setRenderHint(QPainter::Antialiasing);
-    painter.setRenderHint(QPainter::TextAntialiasing);
-    painter.setRenderHint(QPainter::SmoothPixmapTransform);
-
-    scene->render(&painter, QRectF(0, 0, image.width(), image.height()),  items_rect);
-    painter.end();
-
-    if(image.save(filePath, "PNG", 100)){
-        emit message("Success", QString("Diagram exported to:\n%1\n\nSize: %2x%3 pixels")
-                                        .arg(filePath).arg(image.width()).arg(image.height()));
-    } else{
-        emit error("Failed to save image. Check write permissions.");
-    }
-}
-
 void BoardController::requestJSONPath()
 {
     QString path = mDialogFactory->selectJSON(getFileName());
@@ -171,7 +141,7 @@ void BoardController::requestJSONPath()
 void BoardController::requestPNGPath()
 {
     QString path = mDialogFactory->selectPNG(getFileName());
-    exportPNG(path);
+    window->exportPNG(path);
 }
 
 void BoardController::showSerializationSuccessMessage(const QString& filePath)
