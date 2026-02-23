@@ -63,7 +63,12 @@ private:
 
 
     template <typename Func>
-    QAction* addAction(const QString& label, const typename QtPrivate::ContextTypeForFunctor<Func>::ContextType *context, Func &&slot, const QKeySequence& keySequence = QKeySequence(), const QIcon& icon = QIcon()) {
+    QAction* addAction(const QString& label,
+                       const typename QtPrivate::ContextTypeForFunctor<Func>::ContextType *context,
+                       Func &&slot,
+                       const QKeySequence& keySequence = QKeySequence(),
+                       const QIcon& icon = QIcon())
+    {
         auto newAction = new QAction(icon, label, this);
         newAction->setShortcut(keySequence);
         connect(newAction, &QAction::triggered, context, slot);
@@ -72,13 +77,37 @@ private:
     }
 
     template <typename Func>
-    QAction* addCtrlAltAction(const QString& label, const typename QtPrivate::ContextTypeForFunctor<Func>::ContextType *context, Func &&slot, Qt::Key key, const QIcon& icon = QIcon()) {
+    QAction* addCtrlAltAction(const QString& label,
+                              const typename QtPrivate::ContextTypeForFunctor<Func>::ContextType *context,
+                              Func &&slot,
+                              Qt::Key key,
+                              const QIcon& icon = QIcon())
+    {
         return addAction(label, context, slot, QKeySequence(Qt::CTRL | Qt::ALT | key), icon);
     }
 
     template <typename Func>
-    QAction* addAction(const QString& label, const typename QtPrivate::ContextTypeForFunctor<Func>::ContextType *context, Func &&slot, Qt::Key key, const QIcon& icon = QIcon()) {
+    QAction* addAction(const QString& label,
+                       const typename QtPrivate::ContextTypeForFunctor<Func>::ContextType *context,
+                       Func &&slot,
+                       Qt::Key key,
+                       const QIcon& icon = QIcon())
+    {
         return addAction(label, context, slot, QKeySequence(key), icon);
+    }
+
+    template <typename Func>
+    QAction* addCheckableAction(const QString& label,
+                                bool defaultValue,
+                                const typename QtPrivate::ContextTypeForFunctor<Func>::ContextType *context,
+                                Func &&slot,
+                                const QKeySequence& keySequence = QKeySequence(),
+                                const QIcon& icon = QIcon())
+    {
+        auto newAction = addAction(label, context, slot, keySequence, icon);
+        newAction->setCheckable(true);
+        newAction->setChecked(defaultValue);
+        return newAction;
     }
 };
 

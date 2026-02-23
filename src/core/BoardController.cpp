@@ -120,9 +120,13 @@ void BoardController::setupActions(){
         addAction("Delete", mConnectionHandler, &ConnectionHandler::processRemovalRequest, Qt::Key_Backspace)
         }
     });
+    addMenu("View", {
+        addCheckableAction("Side bar", true, window->ui->side_menu, &QWidget::setVisible)
+    });
 
     addAction("Next branch type", window, &Board::selectNextBranchType, Qt::Key_Down);
     addAction("Previous branch type", window, &Board::selectPreviousBranchType, Qt::Key_Up);
+
 
     window->layout()->setMenuBar(menuBar);
 }
