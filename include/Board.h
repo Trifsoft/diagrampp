@@ -38,7 +38,6 @@ public:
 
     void setSelected(SharedNodePtr, bool);
 signals:
-    void radioButtonChecked(BranchType);
     void nodeCreationRequest(NodeType);
 
     void itemCreated(CppClassView*);
@@ -64,10 +63,7 @@ public slots:
     void onClassClicked();
     void onStructClicked();
 
-    void selectNextBranchType();
-    void selectPreviousBranchType();
 private slots:
-    void onCheckRadioButtonClicked();
 protected:
     void onAddBranch(CppClassView*, CppClassView*, std::shared_ptr<Connection>) override;
     void onRemoveBranch(CppClassView*, CppClassView*, std::shared_ptr<Connection>) override;

@@ -7,21 +7,14 @@ ConnectionHandler::~ConnectionHandler()
     qDebug() << "Deleted connection handler";
 }
 
-void ConnectionHandler::updateSelectedBranchType(BranchType newBranchType) {
-    selectedBranchType = newBranchType;
-}
-
 void ConnectionHandler::handleNodeRightClick(NodeViewPtr target)
 {
     auto selectedAsNodeViewPtr = dynamic_cast<NodeViewPtr>(selected);
     if(!selectedAsNodeViewPtr) {
-        emit error("Select a child node first!");
+        emit error("Select a source node first!");
     }
     else {
-        emit branchCreationRequested(selectedAsNodeViewPtr->get_uml_class_diagram_node().get(),
-                                     target->get_uml_class_diagram_node().get(),
-                                     selectedBranchType);
-        setSelected(nullptr);
+        emit branchMenuRequested(selectedAsNodeViewPtr, target);
     }
 }
 

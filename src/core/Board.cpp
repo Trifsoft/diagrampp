@@ -35,14 +35,6 @@ Board::Board(const QString& project_name, QWidget *parent)
     ui->board->setStyleSheet("background-color: #1a1a1a;");
     ui->side_menu->setStyleSheet("background-color: #252526;");
 
-    // Emit upgraded signal - branch selection radio buttons
-    connect(ui->Inheritance, &QPushButton::clicked, this, &Board::onCheckRadioButtonClicked);
-    connect(ui->Association, &QPushButton::clicked, this, &Board::onCheckRadioButtonClicked);
-    connect(ui->Realization, &QPushButton::clicked, this, &Board::onCheckRadioButtonClicked);
-    connect(ui->Aggregation, &QPushButton::clicked, this, &Board::onCheckRadioButtonClicked);
-    connect(ui->Composition, &QPushButton::clicked, this, &Board::onCheckRadioButtonClicked);
-    connect(ui->Dependency, &QPushButton::clicked, this, &Board::onCheckRadioButtonClicked);
-
     // Emit upgraded signal - node creation
     connect(ui->add_class, &QPushButton::clicked, this, &Board::onClassClicked);
     connect(ui->add_struct, &QPushButton::clicked, this, &Board::onStructClicked);
@@ -103,24 +95,6 @@ Board::~Board()
     delete ui;
 }
 
-void Board::onCheckRadioButtonClicked(){
-    BranchType branchType;
-    if(ui->Inheritance->isChecked()){
-        branchType = BranchType::INHERITANCE;
-    }else if(ui->Association->isChecked()){
-        branchType = BranchType::ASSOCIATION;
-    }else if(ui->Realization->isChecked()){
-        branchType = BranchType::REALIZATION;
-    }else if(ui->Aggregation->isChecked()){
-        branchType = BranchType::AGGREGATION;
-    }else if(ui->Composition->isChecked()){
-        branchType = BranchType::COMPOSITION;
-    }else{
-        branchType = BranchType::DEPENDENCY;
-    }
-    emit radioButtonChecked(branchType);
-}
-
 void Board::onClassClicked()
 {
     emit nodeCreationRequest(NodeType::Class);
@@ -130,37 +104,6 @@ void Board::onStructClicked()
 {
     emit nodeCreationRequest(NodeType::Struct);
 }
-
-void Board::selectNextBranchType()
-{
-    if(ui->Inheritance->isChecked()){
-        ui->Association->click();
-    }else if(ui->Association->isChecked()){
-        ui->Realization->click();
-    }else if(ui->Realization->isChecked()){
-        ui->Aggregation->click();
-    }else if(ui->Aggregation->isChecked()){
-        ui->Composition->click();
-    }else if(ui->Composition->isChecked()) {
-        ui->Dependency->click();
-    }
-}
-
-void Board::selectPreviousBranchType()
-{
-    if(ui->Association->isChecked()){
-        ui->Inheritance->click();
-    }else if(ui->Realization->isChecked()){
-        ui->Association->click();
-    }else if(ui->Aggregation->isChecked()){
-        ui->Realization->click();
-    }else if(ui->Composition->isChecked()){
-        ui->Aggregation->click();
-    }else if(ui->Dependency->isChecked()) {
-        ui->Composition->click();
-    }
-}
-
 
 void Board::on_add_field_requested(Composition *node, std::shared_ptr<Field> field)
 {

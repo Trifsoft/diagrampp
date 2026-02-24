@@ -3,6 +3,11 @@
 
 #include <QObject>
 #include <QWidget>
+#include <QMenu>
+#include <QCursor>
+#include <QList>
+#include <optional>
+#include <functional>
 
 #include <node_type.h>
 #include <generate_project_dialog.h>
@@ -21,6 +26,22 @@ public:
     generateProjectDialog* generateDialog;
     QString selectJSON(const QString&);
     QString selectPNG(const QString&);
+
+    template <typename T>
+    std::optional<T> showSelectionMenu(const QList<T>& items,
+                                       std::function<QString(const T&)> toLabel)
+    {
+        QMenu menu(mWidget);
+        std::optional<T> result;
+        for(const auto& item : items) {
+            auto action = menu.addAction(toLabel(item));
+            connect(action, &QAction::triggered, [&result, item]() {
+                result = item;
+            });
+        }
+        menu.exec(QCursor::pos());
+        return result;
+    }
 signals:
     void createNodeRequest(const QString&, NodeType);
     void projectGenerationRequested(const QString&,

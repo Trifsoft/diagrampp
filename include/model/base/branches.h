@@ -16,34 +16,34 @@ enum class BranchType{
 inline std::string get_string_from_branch_type(BranchType branch_type){
     switch(branch_type){
     case BranchType::INHERITANCE:
-        return "inheritance";
+        return "Inheritance";
     case BranchType::ASSOCIATION:
-        return "association";
+        return "Association";
     case BranchType::REALIZATION:
-            return "realization";
+            return "Realization";
     case BranchType::AGGREGATION:
-        return "aggregation";
+        return "Aggregation";
     case BranchType::COMPOSITION:
-        return "composition";
+        return "Composition";
     default: // BranchType::DEPENDENCY
-        return "dependency";
+        return "Dependency";
     }
 }
 
 inline BranchType get_branch_type_from_string(const std::string& s){
-    if(s == "inheritance"){
+    if(s == "Inheritance"){
         return BranchType::INHERITANCE;
-    }else if(s == "association"){
+    }else if(s == "Association"){
         return BranchType::ASSOCIATION;
-    }else if(s == "realization"){
+    }else if(s == "Realization"){
         return BranchType::REALIZATION;
-    }else if(s == "aggregation"){
+    }else if(s == "Aggregation"){
         return BranchType::AGGREGATION;
-    }else if(s == "composition"){
+    }else if(s == "Composition"){
         return BranchType::COMPOSITION;
     }
 
-    // s == "dependency"
+    // s == "Dependency"
     return BranchType::DEPENDENCY;
 }
 

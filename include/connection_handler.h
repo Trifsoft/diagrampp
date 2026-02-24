@@ -15,8 +15,6 @@ public:
     ConnectionHandler(QObject* parent = nullptr): QObject(parent) {}
     ~ConnectionHandler();
 public slots:
-    void updateSelectedBranchType(BranchType);
-
     void setSelected(ISelectable*);
     void handleNodeRightClick(NodeViewPtr);
 
@@ -24,7 +22,7 @@ public slots:
     void processRemovalRequest();
 signals:
     void nodeRemovalRequested(NodePtr);
-    void branchCreationRequested(NodePtr, NodePtr, BranchType);
+    void branchMenuRequested(NodeViewPtr from, NodeViewPtr to);
     void branchRemovalRequested(NodePtr, NodePtr, BranchType);
 
     void deselectionRequested(ISelectable*);
@@ -32,8 +30,7 @@ signals:
 
     void error(const QString&);
 private:
-    ISelectable* selected;
-    BranchType selectedBranchType = BranchType::INHERITANCE;
+    ISelectable* selected = nullptr;
 };
 
 #endif

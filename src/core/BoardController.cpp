@@ -7,6 +7,7 @@
 #include <QAction>
 #include <QObject>
 #include <QIcon>
+#include <model/base/branches.h>
 
 #include <serializers/serializer.h>
 #include "commandManager/add_node_command.h"
@@ -38,9 +39,6 @@ BoardController::BoardController(Board* board, DiagramGraph* graph)
     // Connect generate project
     connect(mDialogFactory, &DialogFactory::projectGenerationRequested, this, &BoardController::generateProject);
 
-    // Connect radio buttons to command handler
-    connect(window, &Board::radioButtonChecked, mConnectionHandler, &ConnectionHandler::updateSelectedBranchType);
-
     // Connect node creation
     connect(window, &Board::nodeCreationRequest, mDialogFactory, &DialogFactory::openNodeFactory);
     connect(mDialogFactory, &DialogFactory::createNodeRequest, diagram, &DiagramGraph::processNewNodeRequest);
@@ -57,7 +55,7 @@ BoardController::BoardController(Board* board, DiagramGraph* graph)
     connect(diagram, &DiagramGraph::node_removed, recovery_log, &recoveryLog::remove_node_operation);
 
     // Connect branch creation
-    connect(mConnectionHandler, &ConnectionHandler::branchCreationRequested, diagram, &DiagramGraph::processNewBranchRequest);
+    connect(mConnectionHandler, &ConnectionHandler::branchMenuRequested, this, &BoardController::showBranchTypeMenu);
     connect(diagram, &DiagramGraph::addBranchRequestApproved, m_command_manager, &CommandManager::addCreateBranchCommand);
     connect(m_command_manager, &CommandManager::createBranchCommandAdded, this, &BoardController::connectCreateBranchCommand);
     connect(diagram, &DiagramGraph::link_added, window, &Board::addLink);
@@ -124,10 +122,6 @@ void BoardController::setupActions(){
     addMenu("View", {
         addCheckableAction("Side bar", true, window->ui->side_menu, &QWidget::setVisible)
     });
-
-    addAction("Next branch type", window, &Board::selectNextBranchType, Qt::Key_Down);
-    addAction("Previous branch type", window, &Board::selectPreviousBranchType, Qt::Key_Up);
-
 
     window->layout()->setMenuBar(menuBar);
 }
@@ -249,4 +243,27 @@ void BoardController::addMenuList(const QString &menuName, const QList<QList<QAc
 void BoardController::addMenu(const QString &menuName, const QList<QAction *> &actions)
 {
     addMenuList(menuName, { actions });
+}
+
+void BoardController::showBranchTypeMenu(NodeViewPtr from, NodeViewPtr to)
+{
+    auto fromNode = from->get_uml_class_diagram_node();
+    auto toNode = to->get_uml_class_diagram_node();
+    auto available = diagram->getAvailableBranchTypes(fromNode, toNode);
+
+    auto selected = mDialogFactory->showSelectionMenu<BranchType>(
+        available,
+        [](const BranchType& t) {
+            return QString::fromStdString(get_string_from_branch_type(t));
+        }
+    );
+
+    if(selected) {
+        diagram->processNewBranchRequest(
+            fromNode.get(),
+            toNode.get(),
+            *selected
+        );
+        mConnectionHandler->deselectAll();
+    }
 }

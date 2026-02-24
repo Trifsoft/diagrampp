@@ -165,54 +165,6 @@
          <number>12</number>
         </property>
         <item>
-         <widget class="QRadioButton" name="Inheritance">
-          <property name="enabled">
-           <bool>true</bool>
-          </property>
-          <property name="text">
-           <string>Inheritance</string>
-          </property>
-          <property name="checked">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QRadioButton" name="Association">
-          <property name="text">
-           <string>Association</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QRadioButton" name="Realization">
-          <property name="text">
-           <string>Realization</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QRadioButton" name="Aggregation">
-          <property name="text">
-           <string>Aggregation</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QRadioButton" name="Composition">
-          <property name="text">
-           <string>Composition</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QRadioButton" name="Dependency">
-          <property name="text">
-           <string>Dependency</string>
-          </property>
-         </widget>
-        </item>
-        <item>
          <spacer name="top_spacer">
           <property name="orientation">
            <enum>Qt::Orientation::Vertical</enum>

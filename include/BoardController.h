@@ -44,6 +44,8 @@ private slots:
     void connectNewNodeView(CppClassView*);
     void connectNewConnection(Connection*);
 
+    void showBranchTypeMenu(NodeViewPtr from, NodeViewPtr to);
+
 private:
     DiagramGraph *diagram;
     CommandManager *m_command_manager;

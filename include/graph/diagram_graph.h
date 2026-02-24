@@ -28,6 +28,7 @@ public:
     ~DiagramGraph();
 
     std::vector<BranchEdge> get_branches_for_node(SharedNodePtr node) const;
+    QList<BranchType> getAvailableBranchTypes(SharedNodePtr from, SharedNodePtr to) const;
 
 
     SharedNodePtr find_pointer_owner(NodePtr node_view);

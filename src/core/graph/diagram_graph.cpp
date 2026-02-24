@@ -59,6 +59,24 @@ std::vector<BranchEdge> DiagramGraph::get_branches_for_node(SharedNodePtr node) 
 }
 
 
+QList<BranchType> DiagramGraph::getAvailableBranchTypes(SharedNodePtr from, SharedNodePtr to) const {
+    static const QList<BranchType> all = {
+        BranchType::INHERITANCE,
+        BranchType::ASSOCIATION,
+        BranchType::REALIZATION,
+        BranchType::AGGREGATION,
+        BranchType::COMPOSITION,
+        BranchType::DEPENDENCY
+    };
+    QList<BranchType> available;
+    for(auto type : all) {
+        if(!connection_exists(from, to, type)) {
+            available.append(type);
+        }
+    }
+    return available;
+}
+
 void DiagramGraph::processNewBranchRequest(NodePtr fromRaw, NodePtr toRaw, BranchType branch_type) {
     auto from = find_pointer_owner(fromRaw);
     auto to = find_pointer_owner(toRaw);
@@ -169,30 +187,18 @@ void DiagramGraph::processRemoveNodeRequest(NodePtr node) {
 }
 
 bool DiagramGraph::connection_exists(SharedNodePtr start_node, SharedNodePtr end_node, BranchType branch_type) const {
-    auto start_node_it = nodeMap.find(start_node);
-    if(start_node_it == nodeMap.end() && branch_type != BranchType::ASSOCIATION){
+    auto fromConnections = nodeMap.find(start_node);
+    if(fromConnections == nodeMap.end()) {
         return false;
     }
-
-    auto start_node_neighbours = start_node_it.value();
-    for(auto const& [start_node_neighbour, start_end_branch_type] : start_node_neighbours){
-        if(start_node_neighbour == end_node){
+    for(auto const& [start_node_neighbour, start_end_branch_type] : nodeMap[start_node]){
+        if(start_node_neighbour == end_node && start_end_branch_type == branch_type){
             return true;
         }
     }
 
-    if(branch_type == BranchType::ASSOCIATION){
-        auto end_node_it = nodeMap.find(end_node);
-        auto neighbours = end_node_it.value();
-        for(auto const& [end_node_neighbour, end_start_branch_type] : neighbours){
-            if(end_node_neighbour == start_node && end_start_branch_type == BranchType::ASSOCIATION){
-                return true;
-            }
-        }
-    }
-
     return false;
-    }
+}
 
 #if DEBUG_MODE >=1
 void DiagramGraph::show_diagram(){
