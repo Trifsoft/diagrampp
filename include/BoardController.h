@@ -45,6 +45,7 @@ private slots:
     void connectNewConnection(Connection*);
 
     void showBranchTypeMenu(NodeViewPtr from, NodeViewPtr to);
+    void showChangeNodeMenu(NodeViewPtr node);
 
 private:
     DiagramGraph *diagram;

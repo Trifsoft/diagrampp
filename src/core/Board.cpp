@@ -105,26 +105,6 @@ void Board::onStructClicked()
     emit nodeCreationRequest(NodeType::Struct);
 }
 
-void Board::on_add_field_requested(Composition *node, std::shared_ptr<Field> field)
-{
-    if(node)
-    {
-        node->add_field(field);
-    }
-
-    qDebug() << "Recieved signal add field from: " << node->get_label();
-}
-
-void Board::on_add_method_requested(Composition *node, std::shared_ptr<Method> method)
-{
-    if(node)
-    {
-        node->add_method(method);
-    }
-
-    qDebug() << "Recieved signal add method from: " << node->get_label();
-}
-
 void Board::on_edit_field_requested(Composition *node, std::weak_ptr<Field> old_field_weak,  std::shared_ptr<Field> new_field)
 {
     if(node){
@@ -153,8 +133,6 @@ void Board::add_item(SharedNodePtr node, double x, double y) {
     if(!item) {
         item = new CppClassView(node);
 
-        connect(item, &CppClassView::add_field_request, this, &Board::on_add_field_requested);
-        connect(item, &CppClassView::add_method_request, this, &Board::on_add_method_requested);
         connect(item, &CppClassView::edit_field_request, this, &Board::on_edit_field_requested);
         connect(item, &CppClassView::edit_method_request, this, &Board::on_edit_method_requested);
 

@@ -23,6 +23,7 @@ public slots:
 signals:
     void nodeRemovalRequested(NodePtr);
     void branchMenuRequested(NodeViewPtr from, NodeViewPtr to);
+    void changeNodeRequested(NodeViewPtr);
     void branchRemovalRequested(NodePtr, NodePtr, BranchType);
 
     void deselectionRequested(ISelectable*);

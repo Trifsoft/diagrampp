@@ -47,23 +47,16 @@ private:
 
     void updateBoundingRect();
     void updateTextItems();
-    void update_button();
 
     EditableTextItem* addText(const QString& text, int y_offset, bool clickable = true);
-    void addNewField();
-    void addNewMethod();
     void editField(std::weak_ptr<Field> weak_field);
     void editMethod(std::weak_ptr<Method> weak_method);
 
-    EditableTextItem* mAddButton;
     QGraphicsRectItem *mSelectedFrame;
-    void onAddButtonClicked();
 
     QPointF mAccumulatedChange = QPointF(0,0);
 
 signals:
-    void add_field_request(Composition* node, std::shared_ptr<Field> field);
-    void add_method_request(Composition* node, std::shared_ptr<Method> method);
     void edit_field_request(Composition* node, std::weak_ptr<Field> old_field, std::shared_ptr<Field> new_field);
     void edit_method_request(Composition* node, std::weak_ptr<Method> old_method,std::shared_ptr<Method> new_method);
 

@@ -11,6 +11,8 @@
 
 #include <node_type.h>
 #include <generate_project_dialog.h>
+#include <view/field_dialog.h>
+#include <view/method_dialog.h>
 
 enum class ProjectFileType {
     JSON,
@@ -26,6 +28,9 @@ public:
     generateProjectDialog* generateDialog;
     QString selectJSON(const QString&);
     QString selectPNG(const QString&);
+
+    std::shared_ptr<Field> createField();
+    std::shared_ptr<Method> createMethod();
 
     template <typename T>
     std::optional<T> showSelectionMenu(const QList<T>& items,

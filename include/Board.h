@@ -46,8 +46,6 @@ signals:
     void error(const QString&);
     void message(const QString&, const QString&);
 public slots:
-    void on_add_field_requested(Composition* node, std::shared_ptr<Field> field);
-    void on_add_method_requested(Composition* node, std::shared_ptr<Method>  method);
     void on_edit_field_requested(Composition* node, std::weak_ptr<Field> old_field_weak, std::shared_ptr<Field>  new_field);
     void on_edit_method_requested(Composition* node, std::weak_ptr<Method> old_method_weak, std::shared_ptr<Method>  new_method);
 

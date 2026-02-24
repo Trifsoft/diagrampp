@@ -3,19 +3,17 @@
 #include "model/elements/composition/composition.h"
 #include "model/elements/composition/cpp_class.h"
 #include "model/elements/composition/cpp_struct.h"
-#include "view/field_dialog.h"
-#include "view/method_dialog.h"
 #include <QPainter>
 #include <QGraphicsScene>
 #include <QFontMetrics>
 #include <widget/class_element_text.h>
 #include <QGraphicsPixmapItem>
 #include <QTextDocument>
-#include <QMenu>
-#include <QInputDialog>
 #include <qgraphicsview.h>
 #include <methodeditor.h>
 #include <memory>
+#include <view/field_dialog.h>
+#include <view/method_dialog.h>
 
 // CppClassView implementation
 CppClassView::CppClassView(SharedNodePtr composition, QGraphicsObject* parent)
@@ -34,10 +32,6 @@ CppClassView::CppClassView(SharedNodePtr composition, QGraphicsObject* parent)
     selectedFramePen.setWidth(1);
     mSelectedFrame->setPen(selectedFramePen);
     mSelectedFrame->setVisible(false);
-
-    mAddButton = new EditableTextItem("+", true, this);
-    mAddButton->document()->setDefaultTextOption(QTextOption(Qt::AlignCenter));
-    connect(mAddButton, &EditableTextItem::clicked, this, &CppClassView::onAddButtonClicked);
 
     setAcceptedMouseButtons(Qt::LeftButton | Qt::RightButton);
     updateBoundingRect();
@@ -72,11 +66,8 @@ void CppClassView::paint(QPainter* painter, const QStyleOptionGraphicsItem* opti
         painter->setPen(QPen(QColor("#404040"), 1));  // tamna siva
         painter->drawRect(QRect(0, y_offset, mWidth, 1));
 
-        y_offset += 1 + mLineHeight * mComposition->methods.count();
+        //y_offset += 1 + mLineHeight * mComposition->methods.count();
     }
-
-    painter->setPen(QPen(QColor("#404040"), 1));  // tamna siva
-    painter->drawRect(QRect(0, y_offset, mWidth, 1));
 
 }
 
@@ -97,7 +88,7 @@ void CppClassView::updateBoundingRect()
     mLineHeight = metrics.height() + 10;
     int fields_separator = !mComposition->fields.isEmpty();
     int methods_separator = !mComposition->methods.isEmpty();
-    mHeight = mLineHeight * (2 + mComposition->fields.count() + mComposition->methods.count()) + fields_separator + methods_separator;
+    mHeight = mLineHeight * (1 + mComposition->fields.count() + mComposition->methods.count()) + fields_separator + methods_separator;
     mWidth = metrics.horizontalAdvance(mComposition->get_name());
     for(auto& field : mComposition->fields) {
         auto tmp_width = metrics.horizontalAdvance(field->declaration());
@@ -118,13 +109,6 @@ void CppClassView::updateBoundingRect()
     emit height_changed_by(mHeight - old_height);
 
     updateTextItems();
-    update_button();
-}
-
-void CppClassView::update_button()
-{
-    mAddButton->setTextWidth(mWidth);
-    mAddButton->setPos(0, mHeight - mLineHeight);
 }
 
 void CppClassView::updateTextItems()
@@ -169,43 +153,6 @@ EditableTextItem* CppClassView::addText(const QString& text, int y_offset, bool 
     item->document()->setDefaultTextOption(QTextOption(Qt::AlignCenter));
     mTextItems.append(item);
     return item;
-}
-
-void CppClassView::onAddButtonClicked()
-{
-    QMenu context_menu;
-
-    QAction* add_field_action = context_menu.addAction("Add Field");
-    QAction* add_method_action = context_menu.addAction("Add Method");
-
-    QPoint global_pos = QCursor::pos();
-    QAction* selected_action = context_menu.exec(global_pos);
-
-    if (selected_action == add_field_action) {
-        addNewField();
-    } else if (selected_action == add_method_action) {
-        addNewMethod();
-    }
-
-}
-
-void CppClassView::addNewField(){
-
-    auto new_field = FieldDialog::create_field(scene()->views().first());
-    if (new_field) {
-        emit  add_field_request(mComposition.get(), new_field);
-        updateBoundingRect();
-        update();
-    }
-}
-
-void CppClassView::addNewMethod(){
-    auto new_method = MethodDialog::create_method(scene()->views().first());
-    if (new_method) {
-        emit  add_method_request(mComposition.get(), new_method);
-        updateBoundingRect();
-        update();
-    }
 }
 
 void CppClassView::editField(std::weak_ptr<Field> old_field_weak)

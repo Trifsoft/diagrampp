@@ -9,7 +9,7 @@ EditableTextItem::EditableTextItem(const QString& text, bool clickable, QGraphic
 void EditableTextItem::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsTextItem::mousePressEvent(event);
-    if(mClickable) {
+    if(mClickable && event->button() == Qt::LeftButton) {
         event->accept();
     }
 }

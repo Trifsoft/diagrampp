@@ -1,4 +1,6 @@
 #include <dialog_factory.h>
+#include <view/field_dialog.h>
+#include <view/method_dialog.h>
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QDir>
@@ -78,6 +80,16 @@ void DialogFactory::requestProjectGeneration()
     ProjectGenerator::ReplaceToggle toggle = generateDialog->get_selected_toggle();
     QString project_dir_name = generateDialog->get_project_dir_name();
     emit projectGenerationRequested(path, notation, toggle, project_dir_name);
+}
+
+std::shared_ptr<Field> DialogFactory::createField()
+{
+    return FieldDialog::create_field(mWidget);
+}
+
+std::shared_ptr<Method> DialogFactory::createMethod()
+{
+    return MethodDialog::create_method(mWidget);
 }
 
 void DialogFactory::openNodeFactory(NodeType nodeType) {

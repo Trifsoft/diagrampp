@@ -56,6 +56,7 @@ BoardController::BoardController(Board* board, DiagramGraph* graph)
 
     // Connect branch creation
     connect(mConnectionHandler, &ConnectionHandler::branchMenuRequested, this, &BoardController::showBranchTypeMenu);
+    connect(mConnectionHandler, &ConnectionHandler::changeNodeRequested, this, &BoardController::showChangeNodeMenu);
     connect(diagram, &DiagramGraph::addBranchRequestApproved, m_command_manager, &CommandManager::addCreateBranchCommand);
     connect(m_command_manager, &CommandManager::createBranchCommandAdded, this, &BoardController::connectCreateBranchCommand);
     connect(diagram, &DiagramGraph::link_added, window, &Board::addLink);
@@ -215,8 +216,6 @@ void BoardController::connectNewNodeView(CppClassView *item)
     connect(item, &CppClassView::objectLeftClicked, mConnectionHandler, &ConnectionHandler::setSelected);
     connect(item, &CppClassView::objectRightClicked, mConnectionHandler, &ConnectionHandler::handleNodeRightClick);
     connect(item, &CppClassView::objectMovedByUser, m_command_manager, &CommandManager::addMoveNodeCommand);
-    connect(item, &CppClassView::add_field_request, recovery_log, &recoveryLog::add_field_operation);
-    connect(item, &CppClassView::add_method_request, recovery_log, &recoveryLog::add_method_operation);
 }
 
 void BoardController::connectNewConnection(Connection *connection)
@@ -243,6 +242,31 @@ void BoardController::addMenuList(const QString &menuName, const QList<QList<QAc
 void BoardController::addMenu(const QString &menuName, const QList<QAction *> &actions)
 {
     addMenuList(menuName, { actions });
+}
+
+void BoardController::showChangeNodeMenu(NodeViewPtr node)
+{
+    QList<QString> options = {"Add Field", "Add Method"};
+    auto selected = mDialogFactory->showSelectionMenu<QString>(
+        options,
+        [](const QString& s) { return s; }
+    );
+
+    auto composition = node->get_uml_class_diagram_node();
+
+    if(selected == std::optional<QString>{"Add Field"}) {
+        auto field = mDialogFactory->createField();
+        if(field) {
+            composition->add_field(field);
+            recovery_log->add_field_operation(composition.get(), field);
+        }
+    } else if(selected == std::optional<QString>{"Add Method"}) {
+        auto method = mDialogFactory->createMethod();
+        if(method) {
+            composition->add_method(method);
+            recovery_log->add_method_operation(composition.get(), method);
+        }
+    }
 }
 
 void BoardController::showBranchTypeMenu(NodeViewPtr from, NodeViewPtr to)

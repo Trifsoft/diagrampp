@@ -10,11 +10,11 @@ ConnectionHandler::~ConnectionHandler()
 void ConnectionHandler::handleNodeRightClick(NodeViewPtr target)
 {
     auto selectedAsNodeViewPtr = dynamic_cast<NodeViewPtr>(selected);
-    if(!selectedAsNodeViewPtr) {
-        emit error("Select a source node first!");
+    if(selectedAsNodeViewPtr && selectedAsNodeViewPtr != target) {
+        emit branchMenuRequested(selectedAsNodeViewPtr, target);
     }
     else {
-        emit branchMenuRequested(selectedAsNodeViewPtr, target);
+        emit changeNodeRequested(target);
     }
 }
 
