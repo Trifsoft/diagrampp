@@ -11,15 +11,15 @@ class AddNodeCommand : public QObject, public Command
 {
     Q_OBJECT
 public:
-    AddNodeCommand(SharedNodePtr);
+    AddNodeCommand(NodePtr);
     
     bool execute() override;
     bool undo() override;
 signals:
-    void addNodeRequested(SharedNodePtr);
-    void removeNodeRequested(SharedNodePtr);
+    void addNodeRequested(NodePtr);
+    void removeNodeRequested(NodePtr);
 private:
-    SharedNodePtr mNode;
+    NodePtr mNode;
     bool m_node_added;
 };
 

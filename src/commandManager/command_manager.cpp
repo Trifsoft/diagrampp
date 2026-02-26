@@ -49,34 +49,42 @@ void CommandManager::addCommand(std::shared_ptr<Command> command) {
     m_undo_stack.push_back(command);
     m_redo_stack.clear();
 }
-void CommandManager::addCreateNodeCommand(SharedNodePtr node)
+void CommandManager::addCreateNodeCommand(NodePtr node)
 {
     auto cmd = std::make_shared<AddNodeCommand>(node);
     addCommand(cmd);
     emit createNodeCommandAdded(cmd);
 }
 
-void CommandManager::addRemoveNodeCommand(SharedNodePtr node,
-                                          const QList<std::tuple<SharedNodePtr, SharedNodePtr, BranchType>>& branches)
-{
-    auto cmd = std::make_shared<RemoveNodeCommand>(node, branches);
-    addCommand(cmd);
-    emit removeNodeCommandAdded(cmd);
-}
+// void CommandManager::addRemoveNodeCommand(SharedNodePtr node,
+//                                           const QList<std::tuple<SharedNodePtr, SharedNodePtr, BranchType>>& branches)
+// {
+//     auto cmd = std::make_shared<RemoveNodeCommand>(node, branches);
+//     addCommand(cmd);
+//     emit removeNodeCommandAdded(cmd);
+// }
 
-void CommandManager::addCreateBranchCommand(SharedNodePtr from, SharedNodePtr to, BranchType branchType)
+void CommandManager::addCreateBranchCommand(NodePtr from, NodePtr to, BranchType branchType)
 {
     auto cmd = std::make_shared<AddBranchCommand>(from, to, branchType);
     addCommand(cmd);
     emit createBranchCommandAdded(cmd);
 }
 
-void CommandManager::addRemoveBranchCommand(SharedNodePtr from, SharedNodePtr to, BranchType branchType)
+void CommandManager::addRemoveCommand(const QList<NodePtr> &nodes,
+                                      const QList<std::tuple<NodePtr, NodePtr, BranchType> > &branches)
 {
-    auto cmd = std::make_shared<RemoveBranchCommand>(from, to, branchType);
+    auto cmd = std::make_shared<RemoveCommand>(nodes, branches);
     addCommand(cmd);
-    emit removeBranchCommandAdded(cmd);
+    emit removeCommandAdded(cmd);
 }
+
+// void CommandManager::addRemoveBranchCommand(SharedNodePtr from, SharedNodePtr to, BranchType branchType)
+// {
+//     auto cmd = std::make_shared<RemoveBranchCommand>(from, to, branchType);
+//     addCommand(cmd);
+//     emit removeBranchCommandAdded(cmd);
+// }
 
 void CommandManager::addMoveNodeCommand(CppClassView* item, QPointF delta)
 {

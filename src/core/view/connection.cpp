@@ -7,6 +7,11 @@ Connection::Connection(NodeViewPtr child, NodeViewPtr parent, int arrowOffset, B
     , mTo(parent->get_uml_class_diagram_node().get())
     , mBranchType(branch)
 {
+    setFlag(QGraphicsItem::ItemIsSelectable, true);
+
+    addToGroup(arrow);
+    addToGroup(line);
+
     arrow->setParent(this);
     line->setParent(this);
 
@@ -24,11 +29,27 @@ BranchType Connection::branchType() const {
     return mBranchType;
 }
 
-void Connection::select(bool isSelected)
+QVariant Connection::itemChange(GraphicsItemChange change, const QVariant &value)
 {
-    arrow->select(isSelected);
-    line->select(isSelected);
+    if(change == ItemSelectedChange) {
+        auto isSelected = value.toBool();
+        arrow->select(isSelected);
+        line->select(isSelected);
+    }
+    return QGraphicsItem::itemChange(change, value);
 }
+
+QRectF Connection::boundingRect() const
+{
+    return line->boundingRect();
+}
+
+QPainterPath Connection::shape() const
+{
+    return line->shape();
+}
+
+void Connection::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget){}
 
 Connection::~Connection() {}
 

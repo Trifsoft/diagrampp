@@ -142,10 +142,10 @@ void DiagramJsonSerializer::deserialize(QJsonArray json_array){
     for(const auto& json_value : json_array){
         QJsonObject json_object = json_value.toObject();
         const auto [x,y] = deserialize_coords(json_object["coords"].toObject());
-        std::shared_ptr<Composition> node = NodeSerializers::deserialize_composition_node(json_object["node"].toObject());
+        SharedNodePtr node = NodeSerializers::deserialize_composition_node(json_object["node"].toObject());
         if(!node_created[{node.get()->get_name(), x, y}]){
             node_created[std::make_tuple(node.get()->get_name(), x, y)] = node;
-            mDiagram->addNode(node);
+            mDiagram->addNode(node.get());
             m_board->add_item(node, x, y);
         }else{
             node = node_created[{node->get_name(), x, y}];
@@ -160,14 +160,14 @@ void DiagramJsonSerializer::deserialize(QJsonArray json_array){
             auto neighbour_node = NodeSerializers::deserialize_composition_node(json_neighbour_object["node"].toObject());
             if(!node_created[{neighbour_node.get()->get_name(), neighbour_x, neighbour_y}]){
                 node_created[{neighbour_node.get()->get_name(), neighbour_x, neighbour_y}] = neighbour_node;
-                mDiagram->addNode(neighbour_node);
+                mDiagram->addNode(neighbour_node.get());
                 m_board->add_item(neighbour_node, neighbour_x, neighbour_y);
             }else{
                 neighbour_node = node_created[{neighbour_node.get()->get_name(), neighbour_x, neighbour_y}];
             }
 
             const auto branch_type = get_branch_type_from_string(json_neighbour_object["branch_type"].toString().toStdString());
-            mDiagram->addBranch(node, neighbour_node, branch_type);
+            mDiagram->addBranch(node.get(), neighbour_node.get(), branch_type);
         }
     }
 }

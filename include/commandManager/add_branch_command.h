@@ -9,18 +9,18 @@ class AddBranchCommand : public QObject, public Command
 {
     Q_OBJECT
 public:
-    AddBranchCommand(SharedNodePtr from,
-                   SharedNodePtr to,
+    AddBranchCommand(NodePtr from,
+                   NodePtr to,
                    BranchType branch_type);
     
     bool execute() override;
     bool undo() override;
 signals:
-    void addBranchRequested(SharedNodePtr, SharedNodePtr, BranchType);
-    void removeBranchRequested(SharedNodePtr, SharedNodePtr, BranchType);
+    void addBranchRequested(NodePtr, NodePtr, BranchType);
+    void removeBranchRequested(NodePtr, NodePtr, BranchType);
 private:
-    SharedNodePtr m_from;
-    SharedNodePtr m_to;
+    NodePtr m_from;
+    NodePtr m_to;
     BranchType m_branch_type;
 };
 

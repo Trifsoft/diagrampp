@@ -2,8 +2,8 @@
 #include <QDebug>
 
 
-AddBranchCommand::AddBranchCommand(SharedNodePtr from,
-                               SharedNodePtr to,
+AddBranchCommand::AddBranchCommand(NodePtr from,
+                               NodePtr to,
                                BranchType branch_type)
     : QObject(nullptr), m_from(from), m_to(to),
       m_branch_type(branch_type)

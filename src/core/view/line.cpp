@@ -28,20 +28,6 @@ void Line::select(bool isSelected)
     setPen(mPen);
 }
 
-void Line::mousePressEvent(QGraphicsSceneMouseEvent *event)
-{
-    QGraphicsLineItem::mousePressEvent(event);
-    event->accept();
-}
-
-void Line::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
-{
-    if (boundingRect().contains(event->pos())) {
-        emit objectClicked();
-    }
-    QGraphicsLineItem::mouseReleaseEvent(event);
-}
-
 void Line::move_start(const QPointF& delta) {
     QLineF l = line();
     l.setP1(l.p1() + delta);

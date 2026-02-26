@@ -17,7 +17,7 @@ class Board;
 }
 QT_END_NAMESPACE
 
-class Board : public QWidget, public Graph<CppClassView*, std::shared_ptr<Connection>>
+class Board : public QWidget, public Graph<CppClassView*, Connection*>
 {
     Q_OBJECT
 
@@ -29,10 +29,10 @@ public:
     Ui::Board *ui;
 
     CppClassView* get_view_from_node(SharedNodePtr) const;
-    std::shared_ptr<Connection> get_connection_from_nodes(CppClassView*,
-                                                          CppClassView*,
-                                                          BranchType) const;
-    QList<std::shared_ptr<Connection>> getIncomingConnections(CppClassView*) const;
+    Connection* get_connection_from_nodes(CppClassView*,
+                                          CppClassView*,
+                                          BranchType) const;
+    QList<Connection*> getIncomingConnections(CppClassView*) const;
 
     void set_title(const QString&);
 
@@ -41,10 +41,15 @@ signals:
     void nodeCreationRequest(NodeType);
 
     void itemCreated(CppClassView*);
-    void connectionCreated(Connection*);
 
     void error(const QString&);
     void message(const QString&, const QString&);
+
+    //---
+    void removalRequested(const QList<NodePtr>&, const QList<std::tuple<NodePtr, NodePtr, BranchType>>&);
+
+    void branchMenuRequested(NodeViewPtr, NodeViewPtr);
+    void changeNodeRequested(NodeViewPtr);
 public slots:
     void on_edit_field_requested(Composition* node, std::weak_ptr<Field> old_field_weak, std::shared_ptr<Field>  new_field);
     void on_edit_method_requested(Composition* node, std::weak_ptr<Method> old_method_weak, std::shared_ptr<Method>  new_method);
@@ -61,10 +66,14 @@ public slots:
     void onClassClicked();
     void onStructClicked();
 
+    //------
+    void processRemovalRequest();
+    void handleNodeRightClick(NodeViewPtr);
+
 private slots:
 protected:
-    void onAddBranch(CppClassView*, CppClassView*, std::shared_ptr<Connection>) override;
-    void onRemoveBranch(CppClassView*, CppClassView*, std::shared_ptr<Connection>) override;
+    void onAddBranch(CppClassView*, CppClassView*, Connection*) override;
+    void onRemoveBranch(CppClassView*, CppClassView*, Connection*) override;
     void onAddNode(CppClassView*) override;
     void onRemoveNode(CppClassView*) override;
 };

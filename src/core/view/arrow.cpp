@@ -67,21 +67,6 @@ void Arrow::select(bool isSelected)
     }
     setPen(mPen);
 }
-
-void Arrow::mousePressEvent(QGraphicsSceneMouseEvent *event)
-{
-    QGraphicsPolygonItem::mousePressEvent(event);
-    event->accept();
-}
-
-void Arrow::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
-{
-    if (boundingRect().contains(event->pos())) {
-        emit objectClicked();
-    }
-    QGraphicsPolygonItem::mouseReleaseEvent(event);
-}
-
 void Arrow::move_by(const QPointF& delta) {
     setPos(pos() + delta);
     emit moved_by(delta);

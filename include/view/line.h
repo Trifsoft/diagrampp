@@ -4,22 +4,16 @@
 #include <QGraphicsLineItem>
 #include <QObject>
 #include <QPen>
-#include <view/selectable.h>
 #include "model/base/branches.h"
 
-class Line : public QObject, public QGraphicsLineItem, public ISelectable {
+class Line : public QObject, public QGraphicsLineItem {
     Q_OBJECT
 public:
     Line(BranchType branchType, const QLineF& line, QGraphicsItem* parent = nullptr);
 
     BranchType branchType() const;
 
-    void select(bool) override;
-
-    void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
-    void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
-signals:
-    void objectClicked();
+    void select(bool);
 public slots:
     void move_start(const QPointF& delta);
     void move_end(const QPointF& delta);

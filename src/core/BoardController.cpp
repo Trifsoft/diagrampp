@@ -12,7 +12,6 @@
 #include <serializers/serializer.h>
 #include "commandManager/add_node_command.h"
 #include "commandManager/add_branch_command.h"
-#include "commandManager/remove_branch_command.h"
 
 BoardController::BoardController(Board* board, DiagramGraph* graph)
     : QObject(board)
@@ -21,7 +20,7 @@ BoardController::BoardController(Board* board, DiagramGraph* graph)
     , recovery_log(new recoveryLog(this))
     , mDialogFactory(new DialogFactory(board))
     , m_command_manager(new CommandManager(this))
-    , mConnectionHandler(new ConnectionHandler(this))
+    //, mConnectionHandler(new ConnectionHandler(this))
     , menuBar(new QMenuBar(board))
 {
     setParent(board);
@@ -48,31 +47,31 @@ BoardController::BoardController(Board* board, DiagramGraph* graph)
     connect(window, &Board::itemCreated, this, &BoardController::connectNewNodeView);
 
     // Connect node removal
-    connect(mConnectionHandler, &ConnectionHandler::nodeRemovalRequested, diagram, &DiagramGraph::processRemoveNodeRequest);
-    connect(diagram, &DiagramGraph::removeNodeRequestApproved, m_command_manager, &CommandManager::addRemoveNodeCommand);
-    connect(m_command_manager, &CommandManager::removeNodeCommandAdded, this, &BoardController::connectRemoveNodeCommand);
+    //connect(window, &Board::nodeRemovalRequested, diagram, &DiagramGraph::processRemoveNodeRequest);
+    //connect(diagram, &DiagramGraph::removeNodeRequestApproved, m_command_manager, &CommandManager::addRemoveNodeCommand);
+    //connect(m_command_manager, &CommandManager::removeNodeCommandAdded, this, &BoardController::connectRemoveNodeCommand);
     connect(diagram, &DiagramGraph::node_removed, window, &Board::removeItem);
     connect(diagram, &DiagramGraph::node_removed, recovery_log, &recoveryLog::remove_node_operation);
 
     // Connect branch creation
-    connect(mConnectionHandler, &ConnectionHandler::branchMenuRequested, this, &BoardController::showBranchTypeMenu);
-    connect(mConnectionHandler, &ConnectionHandler::changeNodeRequested, this, &BoardController::showChangeNodeMenu);
+    connect(window, &Board::branchMenuRequested, this, &BoardController::showBranchTypeMenu);
+    connect(window, &Board::changeNodeRequested, this, &BoardController::showChangeNodeMenu);
     connect(diagram, &DiagramGraph::addBranchRequestApproved, m_command_manager, &CommandManager::addCreateBranchCommand);
     connect(m_command_manager, &CommandManager::createBranchCommandAdded, this, &BoardController::connectCreateBranchCommand);
     connect(diagram, &DiagramGraph::link_added, window, &Board::addLink);
     connect(diagram, &DiagramGraph::link_added, recovery_log, &recoveryLog::add_link_operation);
-    connect(window, &Board::connectionCreated, this, &BoardController::connectNewConnection);
+    //connect(window, &Board::connectionCreated, this, &BoardController::connectNewConnection);
 
     // Connect branch removal
-    connect(mConnectionHandler, &ConnectionHandler::branchRemovalRequested, diagram, &DiagramGraph::processRemoveBranchRequest);
-    connect(diagram, &DiagramGraph::removeBranchRequestApproved, m_command_manager, &CommandManager::addRemoveBranchCommand);
-    connect(m_command_manager, &CommandManager::removeBranchCommandAdded, this, &BoardController::connectRemoveBranchCommand);
+    //connect(window, &Board::branchRemovalRequested, diagram, &DiagramGraph::processRemoveBranchRequest);
+    //connect(diagram, &DiagramGraph::removeBranchRequestApproved, m_command_manager, &CommandManager::addRemoveBranchCommand);
+    //connect(m_command_manager, &CommandManager::removeBranchCommandAdded, this, &BoardController::connectRemoveBranchCommand);
     connect(diagram, &DiagramGraph::link_removed, window, &Board::removeLink);
     connect(diagram, &DiagramGraph::link_removed, recovery_log, &recoveryLog::remove_link_operation);
 
     // Show messages
     connect(diagram, &DiagramGraph::error, mDialogFactory, &DialogFactory::showError);
-    connect(mConnectionHandler, &ConnectionHandler::error, mDialogFactory, &DialogFactory::showError);
+    connect(window, &Board::error, mDialogFactory, &DialogFactory::showError);
     connect(this, &BoardController::message, mDialogFactory, &DialogFactory::showMessage);
     connect(this, &BoardController::error, mDialogFactory, &DialogFactory::showError);
     connect(this, &BoardController::warning, mDialogFactory, &DialogFactory::showWarning);
@@ -83,9 +82,14 @@ BoardController::BoardController(Board* board, DiagramGraph* graph)
     // Close window -> delete window
     connect(window, &QObject::destroyed, this, &QObject::deleteLater);
 
+    // Connect removal
+    connect(window, &Board::removalRequested, diagram, &DiagramGraph::procesRemoveRequest);
+    connect(diagram, &DiagramGraph::removeRequestApproved, m_command_manager, &CommandManager::addRemoveCommand);
+    connect(m_command_manager, &CommandManager::removeCommandAdded, this, &BoardController::connectRemoveCommand);
+
     // Connect node selection
-    connect(mConnectionHandler, &ConnectionHandler::selectionRequested, this, [this](ISelectable* selectable){ selectable->select(true);});
-    connect(mConnectionHandler, &ConnectionHandler::deselectionRequested, this, [this](ISelectable* selectable){ selectable->select(false);});
+    // connect(mConnectionHandler, &ConnectionHandler::selectionRequested, this, [this](ISelectable* selectable){ selectable->select(true);});
+    // connect(mConnectionHandler, &ConnectionHandler::deselectionRequested, this, [this](ISelectable* selectable){ selectable->select(false);});
 
     setupActions();
 }
@@ -117,7 +121,7 @@ void BoardController::setupActions(){
         addCtrlAltAction("New class", window, &Board::onClassClicked, Qt::Key_C),
         addCtrlAltAction("New struct", window, &Board::onClassClicked, Qt::Key_S)
         }, {
-        addAction("Delete", mConnectionHandler, &ConnectionHandler::processRemovalRequest, Qt::Key_Backspace)
+        addAction("Delete", window, &Board::processRemovalRequest, Qt::Key_Backspace)
         }
     });
     addMenu("View", {
@@ -193,37 +197,46 @@ void BoardController::connectCreateNodeCommand(std::shared_ptr<AddNodeCommand> c
     connect(command.get(), &AddNodeCommand::removeNodeRequested, diagram, &DiagramGraph::removeNode);
 }
 
-void BoardController::connectRemoveNodeCommand(std::shared_ptr<RemoveNodeCommand> command)
-{
-    connect(command.get(), &RemoveNodeCommand::addNodeRequested, diagram, &DiagramGraph::addNode);
-    connect(command.get(), &RemoveNodeCommand::removeNodeRequested, diagram, &DiagramGraph::removeNode);
-    connect(command.get(), &RemoveNodeCommand::addBranchRequested, diagram, &DiagramGraph::addBranch);
-    connect(command.get(), &RemoveNodeCommand::removeBranchRequested, diagram, &DiagramGraph::removeBranch);
-}
+// void BoardController::connectRemoveNodeCommand(std::shared_ptr<RemoveNodeCommand> command)
+// {
+//     connect(command.get(), &RemoveNodeCommand::addNodeRequested, diagram, &DiagramGraph::addNode);
+//     connect(command.get(), &RemoveNodeCommand::removeNodeRequested, diagram, &DiagramGraph::removeNode);
+//     connect(command.get(), &RemoveNodeCommand::addBranchRequested, diagram, &DiagramGraph::addBranch);
+//     connect(command.get(), &RemoveNodeCommand::removeBranchRequested, diagram, &DiagramGraph::removeBranch);
+// }
 
 void BoardController::connectCreateBranchCommand(std::shared_ptr<AddBranchCommand> command) {
     connect(command.get(), &AddBranchCommand::addBranchRequested, diagram, &DiagramGraph::addBranch);
     connect(command.get(), &AddBranchCommand::removeBranchRequested, diagram, &DiagramGraph::removeBranch);
 }
 
-void BoardController::connectRemoveBranchCommand(std::shared_ptr<RemoveBranchCommand> command) {
-    connect(command.get(), &RemoveBranchCommand::addBranchRequested, diagram, &DiagramGraph::addBranch);
-    connect(command.get(), &RemoveBranchCommand::removeBranchRequested, diagram, &DiagramGraph::removeBranch);
+void BoardController::connectRemoveCommand(std::shared_ptr<RemoveCommand> command)
+{
+    qDebug() << "Added remove command";
+    connect(command.get(), &RemoveCommand::addNodeRequested, diagram, &DiagramGraph::addNode);
+    connect(command.get(), &RemoveCommand::removeNodeRequested, diagram, &DiagramGraph::removeNode);
+    connect(command.get(), &RemoveCommand::addBranchRequested, diagram, &DiagramGraph::addBranch);
+    connect(command.get(), &RemoveCommand::removeBranchRequested, diagram, &DiagramGraph::removeBranch);
 }
+
+// void BoardController::connectRemoveBranchCommand(std::shared_ptr<RemoveBranchCommand> command) {
+//     connect(command.get(), &RemoveBranchCommand::addBranchRequested, diagram, &DiagramGraph::addBranch);
+//     connect(command.get(), &RemoveBranchCommand::removeBranchRequested, diagram, &DiagramGraph::removeBranch);
+// }
 
 void BoardController::connectNewNodeView(CppClassView *item)
 {
-    connect(item, &CppClassView::objectLeftClicked, mConnectionHandler, &ConnectionHandler::setSelected);
-    connect(item, &CppClassView::objectRightClicked, mConnectionHandler, &ConnectionHandler::handleNodeRightClick);
+    //connect(item, &CppClassView::objectLeftClicked, mConnectionHandler, &ConnectionHandler::setSelected);
+    //connect(item, &CppClassView::objectRightClicked, mConnectionHandler, &ConnectionHandler::handleNodeRightClick);
     connect(item, &CppClassView::objectMovedByUser, m_command_manager, &CommandManager::addMoveNodeCommand);
 }
 
-void BoardController::connectNewConnection(Connection *connection)
-{
-    auto handleClick = [this, connection](){ mConnectionHandler->setSelected(connection); };
-    connect(connection->arrow, &Arrow::objectClicked, mConnectionHandler, handleClick);
-    connect(connection->line, &Line::objectClicked, mConnectionHandler, handleClick);
-}
+// void BoardController::connectNewConnection(Connection *connection)
+// {
+//     auto handleClick = [this, connection](){ mConnectionHandler->setSelected(connection); };
+//     connect(connection->arrow, &Arrow::objectClicked, mConnectionHandler, handleClick);
+//     connect(connection->line, &Line::objectClicked, mConnectionHandler, handleClick);
+// }
 
 void BoardController::addMenuList(const QString &menuName, const QList<QList<QAction *>> &actions)
 {
@@ -288,6 +301,6 @@ void BoardController::showBranchTypeMenu(NodeViewPtr from, NodeViewPtr to)
             toNode.get(),
             *selected
         );
-        mConnectionHandler->deselectAll();
+        window->scene->clearSelection();
     }
 }

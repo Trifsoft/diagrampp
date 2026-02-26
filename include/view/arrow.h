@@ -4,21 +4,17 @@
 #include <QGraphicsPolygonItem>
 #include <QObject>
 #include <QPen>
-#include <view/selectable.h>
 #include "model/base/branches.h"
 
-class Arrow : public QObject, public QGraphicsPolygonItem, public ISelectable {
+class Arrow : public QObject, public QGraphicsPolygonItem {
     Q_OBJECT
 public:
     explicit Arrow(BranchType branchType, const QPointF& parentPos, double height, qsizetype offset, QGraphicsItem* parent = nullptr);
 
     QPointF get_bottom_center() const;
 
-    void select(bool) override;
-    void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
-    void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
+    void select(bool);
 signals:
-    void objectClicked();
     void moved_by(const QPointF&);
 public slots:
     void move_by(const QPointF&);

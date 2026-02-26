@@ -8,12 +8,11 @@
 #include "graph/diagram_graph.h"
 #include <model/elements/field.h>
 #include <model/elements/method.h>
-#include <view/arrow.h>
 #include <view/editable_text_item.h>
 
 class DiagramGraph;
 
-class CppClassView: public QGraphicsObject, public ISelectable {
+class CppClassView: public QGraphicsObject {
     Q_OBJECT
 public:
     CppClassView(SharedNodePtr composition, QGraphicsObject* parent = nullptr);
@@ -30,8 +29,6 @@ public:
 
     QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
     SharedNodePtr get_uml_class_diagram_node();
-
-    void select(bool) override;
 
 public slots:
     void composition_changed();

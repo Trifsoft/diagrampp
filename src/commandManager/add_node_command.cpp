@@ -1,7 +1,7 @@
 #include "commandManager/add_node_command.h"
 #include <QDebug>
 
-AddNodeCommand::AddNodeCommand(SharedNodePtr node)
+AddNodeCommand::AddNodeCommand(NodePtr node)
     : QObject(nullptr), mNode(node) {}
 
 bool AddNodeCommand::execute()

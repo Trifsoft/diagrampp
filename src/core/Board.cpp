@@ -7,13 +7,14 @@
 #include "model/elements/type/regular_type.h"
 #include <QMessageBox>
 #include <QPainter>
+#include <set>
 
 namespace {
 
-void connectArrow(Arrow* newArrow, const QList<std::shared_ptr<Connection>>& incomingConnections) {
+void connectArrow(Arrow* newArrow, const QList<Connection*>& incomingConnections) {
     for(auto& connection : incomingConnections) {
-        QObject::connect(connection.get(), &Connection::hidden, newArrow, &Arrow::move_back);
-        QObject::connect(connection.get(), &Connection::shown, newArrow, &Arrow::move_forward);
+        QObject::connect(connection, &Connection::hidden, newArrow, &Arrow::move_back);
+        QObject::connect(connection, &Connection::shown, newArrow, &Arrow::move_forward);
     }
 }
 
@@ -33,6 +34,8 @@ Board::Board(const QString& project_name, QWidget *parent)
     scene = new QGraphicsScene();
     ui->board->setScene(scene);
     ui->board->setStyleSheet("background-color: #1a1a1a;");
+    ui->board->setDragMode(QGraphicsView::RubberBandDrag);
+
     ui->side_menu->setStyleSheet("background-color: #252526;");
 
     // Emit upgraded signal - node creation
@@ -54,7 +57,7 @@ CppClassView* Board::get_view_from_node(SharedNodePtr node) const {
     return nullptr;
 }
 
-std::shared_ptr<Connection> Board::get_connection_from_nodes(CppClassView* from,
+Connection* Board::get_connection_from_nodes(CppClassView* from,
                                                              CppClassView* to,
                                                              BranchType branchType) const
 {
@@ -72,9 +75,9 @@ std::shared_ptr<Connection> Board::get_connection_from_nodes(CppClassView* from,
     return nullptr;
 }
 
-QList<std::shared_ptr<Connection>> Board::getIncomingConnections(CppClassView* node) const
+QList<Connection*> Board::getIncomingConnections(CppClassView* node) const
 {
-    QList<std::shared_ptr<Connection>> result;
+    QList<Connection*> result;
     for(auto it = nodeMap.begin(); it != nodeMap.end(); it++) {
         if(it.key() == node) {
             continue;
@@ -103,6 +106,61 @@ void Board::onClassClicked()
 void Board::onStructClicked()
 {
     emit nodeCreationRequest(NodeType::Struct);
+}
+
+void Board::processRemovalRequest()
+{
+    if(!scene->selectedItems().isEmpty()) {
+        QList<NodePtr> nodesToRemove;
+        std::set<std::tuple<NodePtr, NodePtr, BranchType>> branchesToRemove;
+        for(auto it : scene->selectedItems()) {
+            auto itAsNodeView = dynamic_cast<NodeViewPtr>(it);
+            auto itAsConnection = dynamic_cast<Connection*>(it);
+            if(itAsNodeView) {
+                nodesToRemove.append(itAsNodeView->get_uml_class_diagram_node().get());
+                for(auto mapIt = nodeMap.begin(); mapIt != nodeMap.end(); mapIt++) {
+                    for(auto& [iTo, iConn] : mapIt.value()) {
+                        if(mapIt.key() == itAsNodeView || iTo == itAsNodeView) {
+                            branchesToRemove.insert({
+                                iConn->from(),
+                                iConn->to(),
+                                iConn->branchType()
+                            });
+                        }
+                    }
+                }
+            }
+            else if(itAsConnection) {
+                branchesToRemove.insert({
+                    itAsConnection->from(),
+                    itAsConnection->to(),
+                    itAsConnection->branchType()
+                });
+            }
+            else {
+                emit error("Unknown selected item type");
+                return;
+            }
+        }
+        QList<std::tuple<NodePtr, NodePtr, BranchType>> resultBranches;
+        for(auto it = branchesToRemove.begin(); it != branchesToRemove.end(); it++) {
+            resultBranches.append(*it);
+        }
+        scene->clearSelection();
+        emit removalRequested(nodesToRemove, resultBranches);
+    }
+}
+
+void Board::handleNodeRightClick(NodeViewPtr item)
+{
+    if(scene->selectedItems().size() == 1) {
+        auto selectedAsNode = dynamic_cast<NodeViewPtr>(scene->selectedItems().first());
+        if(selectedAsNode) {
+            emit branchMenuRequested(selectedAsNode, item);
+            return;
+        }
+    }
+    emit changeNodeRequested(item);
 }
 
 void Board::on_edit_field_requested(Composition *node, std::weak_ptr<Field> old_field_weak,  std::shared_ptr<Field> new_field)
@@ -135,6 +193,7 @@ void Board::add_item(SharedNodePtr node, double x, double y) {
 
         connect(item, &CppClassView::edit_field_request, this, &Board::on_edit_field_requested);
         connect(item, &CppClassView::edit_method_request, this, &Board::on_edit_method_requested);
+        connect(item, &CppClassView::objectRightClicked, this, &Board::handleNodeRightClick);
 
         item->setX(x);
         item->setY(y);
@@ -199,10 +258,8 @@ void Board::addLink(SharedNodePtr from, SharedNodePtr to, BranchType branch) {
     auto connection = get_connection_from_nodes(child, parent, branch);
     if(child && parent && !connection){
         auto incomingConnections = getIncomingConnections(parent);
-        connection = std::make_shared<Connection>(child, parent, incomingConnections.size(), branch);
+        connection = new Connection(child, parent, incomingConnections.size(), branch);
         connectArrow(connection->arrow, incomingConnections);
-
-        emit connectionCreated(connection.get());
     }
     mAddBranch(child, parent, connection);
 }
@@ -219,32 +276,19 @@ void Board::removeItem(SharedNodePtr target) {
     mRemoveNode(node);
 }
 
-// Arrow* Board::get_arrow(CppClassView* view, BranchType branch) {
-//     const auto& incomingConnections = getIncomingConnections(view);
-//     Arrow* new_arrow = new Arrow(branch, view->pos(), view->boundingRect().height(), incomingConnections.size());
-//     for(auto& connection : incomingConnections) {
-//         connect(connection.get(), &QObject::destroyed, new_arrow, &Arrow::move_back);
-//     }
-//     connect(view, &CppClassView::moved_by, new_arrow, &Arrow::move_by);
-//     connect(view, &CppClassView::height_changed_by, new_arrow, &Arrow::move_y);
-//     return new_arrow;
-// }
-
 void Board::onAddBranch(CppClassView*,
                         CppClassView*,
-                        std::shared_ptr<Connection> connection)
+                        Connection* connection)
 {
-    scene->addItem(connection->arrow);
-    scene->addItem(connection->line);
+    scene->addItem(connection);
     emit connection->shown();
 }
 
 void Board::onRemoveBranch(CppClassView*,
                            CppClassView*,
-                           std::shared_ptr<Connection> connection)
+                           Connection* connection)
 {
-    scene->removeItem(connection->arrow);
-    scene->removeItem(connection->line);
+    scene->removeItem(connection);
     emit connection->hidden();
 }
 

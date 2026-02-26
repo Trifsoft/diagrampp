@@ -71,6 +71,7 @@ set(CORE_HEADERS
     include/commandManager/add_branch_command.h
     include/commandManager/remove_branch_command.h
     include/commandManager/move_node_command.h
+    include/commandManager/remove_command.h
     include/project_generator.h
     include/model/base/branches.h
     include/model/base/branches.h
@@ -91,10 +92,8 @@ set(CORE_HEADERS
     include/dialog_factory.h
     include/node_type.h
     include/shared_node_ptr.h
-    include/connection_handler.h
     include/graph/graph.h
     include/serializers/serializer.h
-    include/view/selectable.h
     include/node_view_ptr.h
 )
 
@@ -136,6 +135,7 @@ set(CORE_SOURCES
     src/commandManager/add_branch_command.cpp
     src/commandManager/remove_branch_command.cpp
     src/commandManager/move_node_command.cpp
+    src/commandManager/remove_command.cpp
     src/core/project_generator.cpp
     src/core/model/base/branchs.cpp
     src/commandManager/command_manager.cpp
@@ -155,7 +155,6 @@ set(CORE_SOURCES
     src/core/recoveryLog.cpp
     src/core/generate_project_dialog.cpp
     src/core/dialog_factory.cpp
-    src/core/connection_handler.cpp
     src/serializers/serializer.cpp
 )
 
@@ -195,7 +194,6 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         MANUAL_FINALIZATION
         src/core/main.cpp
         ${PROJECT_SOURCES}
-        include/view/selectable.h
 
     )
     qt_add_executable(DiagramTest

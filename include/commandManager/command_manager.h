@@ -7,9 +7,8 @@
 #include <view/cpp_class_view.h>
 
 #include <commandManager/add_node_command.h>
-#include <commandManager/remove_node_command.h>
+#include <commandManager/remove_command.h>
 #include <commandManager/add_branch_command.h>
-#include <commandManager/remove_branch_command.h>
 #include <commandManager/move_node_command.h>
 
 class CommandManager: public QObject
@@ -27,14 +26,17 @@ public:
     bool can_redo() const;
 signals:
     void createNodeCommandAdded(std::shared_ptr<AddNodeCommand>);
-    void removeNodeCommandAdded(std::shared_ptr<RemoveNodeCommand>);
+    //void removeNodeCommandAdded(std::shared_ptr<RemoveNodeCommand>);
     void createBranchCommandAdded(std::shared_ptr<AddBranchCommand>);
-    void removeBranchCommandAdded(std::shared_ptr<RemoveBranchCommand>);
+    //void removeBranchCommandAdded(std::shared_ptr<RemoveBranchCommand>);
+    void removeCommandAdded(std::shared_ptr<RemoveCommand>);
 public slots:
-    void addCreateNodeCommand(SharedNodePtr);
-    void addRemoveNodeCommand(SharedNodePtr, const QList<std::tuple<SharedNodePtr, SharedNodePtr, BranchType>>&);
-    void addCreateBranchCommand(SharedNodePtr, SharedNodePtr, BranchType);
-    void addRemoveBranchCommand(SharedNodePtr, SharedNodePtr, BranchType);
+    void addCreateNodeCommand(NodePtr);
+    //void addRemoveNodeCommand(SharedNodePtr, const QList<std::tuple<SharedNodePtr, SharedNodePtr, BranchType>>&);
+    void addCreateBranchCommand(NodePtr, NodePtr, BranchType);
+    //void addRemoveBranchCommand(SharedNodePtr, SharedNodePtr, BranchType);
+    void addRemoveCommand(const QList<NodePtr>&,
+                          const QList<std::tuple<NodePtr, NodePtr, BranchType>>&);
 
     void addMoveNodeCommand(CppClassView*, QPointF);
 private:

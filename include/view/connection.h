@@ -3,10 +3,9 @@
 
 #include <view/arrow.h>
 #include <view/line.h>
-#include <view/selectable.h>
 #include <node_view_ptr.h>
 
-class Connection: public QObject, public ISelectable {
+class Connection: public QObject, public QGraphicsItemGroup {
     Q_OBJECT
 public:
     Arrow* arrow;
@@ -18,7 +17,11 @@ public:
     NodePtr to() const;
     BranchType branchType() const;
 
-    void select(bool) override;
+    QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
+    QRectF boundingRect() const override;
+    QPainterPath shape() const override;
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = nullptr) override;
+
 signals:
     void shown();
     void hidden();

@@ -220,14 +220,12 @@ QVariant CppClassView::itemChange(GraphicsItemChange change, const QVariant &val
         QPointF delta = value.toPointF() - pos();
         emit moved_by(delta);
     }
+    else if(change == ItemSelectedChange) {
+        mSelectedFrame->setVisible(value.toBool());
+    }
     return QGraphicsObject::itemChange(change, value);
 }
 
 SharedNodePtr CppClassView::get_uml_class_diagram_node() {
     return mComposition;
-}
-
-void CppClassView::select(bool isSelected)
-{
-    mSelectedFrame->setVisible(isSelected);
 }

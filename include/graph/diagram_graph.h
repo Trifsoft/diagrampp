@@ -41,27 +41,32 @@ public:
 
 public slots:
     void processNewNodeRequest(const QString&, NodeType);
-    void processRemoveNodeRequest(NodePtr);
+    //void processRemoveNodeRequest(NodePtr);
     void processNewBranchRequest(NodePtr, NodePtr, BranchType);
-    void processRemoveBranchRequest(NodePtr, NodePtr, BranchType);
+    bool processRemoveBranchRequest(NodePtr, NodePtr, BranchType);
+    void procesRemoveRequest(const QList<NodePtr>&,
+                             const QList<std::tuple<NodePtr, NodePtr, BranchType>>&);
 
-    void addBranch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type);
-    void removeBranch(SharedNodePtr from, SharedNodePtr to, BranchType branch_type);
-    void addNode(SharedNodePtr);
-    void removeNode(SharedNodePtr);
+    void addBranch(NodePtr from, NodePtr to, BranchType branch_type);
+    void removeBranch(NodePtr from, NodePtr to, BranchType branch_type);
+    void addNode(NodePtr);
+    void removeNode(NodePtr);
 
 signals:
     void link_added(SharedNodePtr from, SharedNodePtr to, BranchType branch);
-    void addBranchRequestApproved(SharedNodePtr from, SharedNodePtr to, BranchType branch);
+    void addBranchRequestApproved(NodePtr from, NodePtr to, BranchType branch);
 
     void link_removed(SharedNodePtr from, SharedNodePtr to, BranchType branch);
-    void removeBranchRequestApproved(SharedNodePtr from, SharedNodePtr to, BranchType branch);
+    //void removeBranchRequestApproved(SharedNodePtr from, SharedNodePtr to, BranchType branch);
 
     void node_removed(SharedNodePtr node);
-    void removeNodeRequestApproved(SharedNodePtr, const QList<BranchEdge>&);
+    //void removeNodeRequestApproved(SharedNodePtr, const QList<BranchEdge>&);
+
+    void removeRequestApproved(const QList<NodePtr>&,
+                               const QList<std::tuple<NodePtr, NodePtr, BranchType>>&);
 
     void node_added(SharedNodePtr node);
-    void addNodeRequestApproved(SharedNodePtr);
+    void addNodeRequestApproved(NodePtr);
 
     void error(const QString&);
 protected:

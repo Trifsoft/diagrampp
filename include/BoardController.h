@@ -6,7 +6,7 @@
 #include "graph/diagram_graph.h"
 #include "recoveyLog.h"
 #include "commandManager/command_manager.h"
-#include "connection_handler.h"
+//#include "connection_handler.h"
 #include "dialog_factory.h"
 #include <Board.h>
 #include <view/cpp_class_view.h>
@@ -37,12 +37,13 @@ private slots:
     void requestPNGPath();
 
     void connectCreateNodeCommand(std::shared_ptr<AddNodeCommand> command);
-    void connectRemoveNodeCommand(std::shared_ptr<RemoveNodeCommand> command);
+    //void connectRemoveNodeCommand(std::shared_ptr<RemoveNodeCommand> command);
     void connectCreateBranchCommand(std::shared_ptr<AddBranchCommand> command);
-    void connectRemoveBranchCommand(std::shared_ptr<RemoveBranchCommand> command);
+    //void connectRemoveBranchCommand(std::shared_ptr<RemoveBranchCommand> command);
+    void connectRemoveCommand(std::shared_ptr<RemoveCommand> command);
 
     void connectNewNodeView(CppClassView*);
-    void connectNewConnection(Connection*);
+    //void connectNewConnection(Connection*);
 
     void showBranchTypeMenu(NodeViewPtr from, NodeViewPtr to);
     void showChangeNodeMenu(NodeViewPtr node);
@@ -51,7 +52,7 @@ private:
     DiagramGraph *diagram;
     CommandManager *m_command_manager;
     DialogFactory *mDialogFactory;
-    ConnectionHandler *mConnectionHandler;
+    //ConnectionHandler *mConnectionHandler;
     Board *window;
     recoveryLog *recovery_log;
 
