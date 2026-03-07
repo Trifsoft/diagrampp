@@ -181,22 +181,32 @@ void CppClassView::editMethod(std::weak_ptr<Method> old_method_weak)
     }
 }
 
+void CppClassView::mousePressEvent(QGraphicsSceneMouseEvent *event)
+{
+    bool selected = isSelected();
+    QGraphicsObject::mousePressEvent(event);
+    // Prevent auto-selection on press; selection is deferred to mouse release
+    setSelected(selected);
+}
+
 void CppClassView::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
+    bool selected = isSelected();
     QGraphicsItem::mouseMoveEvent(event);
     mAccumulatedChange += event->scenePos() - event->lastScenePos();
+    setSelected(selected);
 }
 
 void CppClassView::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
+    bool selected = isSelected();
     QGraphicsItem::mouseReleaseEvent(event);
     if(mAccumulatedChange != QPointF(0,0)) {
+        // Restore pre-drag selection; don't select just because something was dragged
+        setSelected(selected);
         emit objectMovedByUser(this, mAccumulatedChange);
     }
-    else if(event->button() == Qt::LeftButton){
-        emit objectLeftClicked(this);
-    }
-    else {
+    else if(event->button() == Qt::RightButton){
         emit objectRightClicked(this);
         qDebug() << "Right Click!";
     }
